@@ -1,5 +1,5 @@
 // 经验与单层三选一卡池。
-// 正式局只使用 6 个直接技能：开局强制主技能，最多持有 4 个；每张成长卡直接应用模块并升级。
+// 正式局使用直接技能：开局强制主技能，最多持有 4 个；每张成长卡直接应用模块并升级。
 import {
   SKILLS, ACTIVE_SKILL_KEYS, SKILL_MODULE_KEYS, SKILL_MODULE_MAX_RANK,
   SKILL_POWER_PER_RANK, PASSIVES, xpToNext, MAX_WEAPONS, MAX_PASSIVES, MAXED_BONUS,
@@ -21,6 +21,11 @@ function weightedPick(candidates) {
 
 function localizedText(text) {
   return getLocale() === 'zh-CN' ? text.zh : text.en;
+}
+
+function powerRankText() {
+  const pct = SKILL_POWER_PER_RANK * 100;
+  return Number.isInteger(pct) ? `${pct}` : pct.toFixed(1).replace(/\.0$/, '');
 }
 
 export class LevelSystem {
@@ -78,8 +83,8 @@ export class LevelSystem {
       description: effect
         ? localizedText(effect.text)
         : (getLocale() === 'zh-CN'
-          ? `该技能全部伤害 +${Math.round(SKILL_POWER_PER_RANK * 100)}%`
-          : `All damage from this skill +${Math.round(SKILL_POWER_PER_RANK * 100)}%`),
+          ? `该技能全部伤害 +${powerRankText()}%`
+          : `All damage from this skill +${powerRankText()}%`),
       weight: 1 + rank * 0.5,
     };
   }

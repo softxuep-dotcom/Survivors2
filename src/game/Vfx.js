@@ -26,7 +26,7 @@ const ELEMENT_STYLE = Object.freeze({
   }),
   blizzard: Object.freeze({
     variant: 1, colorA: [0.035, 0.13, 0.24, 1], colorB: [0.62, 0.94, 1, 1],
-    opacity: 0.72, depth: 1.34, aspect: 0.9, life: 0.82,
+    opacity: 0.46, depth: 1.34, aspect: 0.9, life: 0.64,
   }),
   frostpulse: Object.freeze({
     variant: 2, colorA: [0.08, 0.3, 0.58, 1], colorB: [0.78, 0.97, 1, 1],
@@ -472,18 +472,19 @@ export class Vfx {
 
   blizzardField(x, y, radius) {
     const shader = this.spawnElementBurst('blizzard', x, y, radius, { followPlayer: true });
-    const count = this.runtime.quality.key === 'low' ? 5 : 8;
+    const count = this.runtime.quality.key === 'low' ? 3 : 5;
     let emitted = 0;
     for (let i = 0; i < count; i++) {
       const a = Math.random() * Math.PI * 2;
-      const r = Math.sqrt(Math.random()) * radius * 0.78;
+      // 雪花只勾勒技能外缘，避免持续技能在玩家脚下形成高亮遮罩。
+      const r = radius * (0.62 + Math.random() * 0.28);
       const sx = x + Math.cos(a) * r;
-      const sy = y + Math.sin(a) * r * 0.68 - radius * 0.12;
+      const sy = y + Math.sin(a) * r * 0.7;
       emitted += this.emitNative('snow', sx, sy, 1);
       if (emitted === 0) this.spawnParticle(sx, sy, -45 - Math.random() * 55, 26 + Math.random() * 48,
-        0.65, 0.26 + Math.random() * 0.24, i % 3 ? 0xb9efff : 0xffffff, 'snowflake', {
+        0.52, 0.2 + Math.random() * 0.18, i % 3 ? 0xb9efff : 0xffffff, 'snowflake', {
           kind: 'ice', kindLimit: PERF.maxIceParticles, spin: (Math.random() - 0.5) * 5,
-          endScale: 0.06, startAlpha: 0.82, depth: 3.3,
+          endScale: 0.04, startAlpha: 0.58, depth: 1.9,
         });
     }
     if (!shader) this.areaPulse(x, y, radius, 0x72d8ff);

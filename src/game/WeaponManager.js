@@ -1,7 +1,7 @@
 // 武器系统：正式局使用直接技能制；旧基础/进阶定义保留给镜像 Boss 与 VFX Lab。
 // 场景只负责调度；投射物/持续区域均池化，伤害与状态统一交给 EnemyManager 结算。
 import {
-  WEAPONS, EVOLUTIONS, SKILLS, skillParamsFor, PERF,
+  WEAPONS, EVOLUTIONS, SKILLS, SKILL_MODULE_MAX_RANK, skillParamsFor, PERF,
 } from '../config.js';
 import { Pool } from '../core/Pool.js';
 import { Sfx } from '../audio.js';
@@ -25,6 +25,7 @@ const BEHAVIORS = {
     Sfx.weaponCast(weapon.def.key);
   },
   chain(ctx) { ctx.wm.fireChain(ctx.weapon, ctx.params); },
+  judgment(ctx) { ctx.wm.fireJudgment(ctx.weapon, ctx.params); },
   pool(ctx) { ctx.wm.throwPool(ctx.weapon, ctx.params); },
   bounce(ctx) { ctx.wm.fireBounce(ctx.weapon, ctx.params); },
   orbit(ctx) {
@@ -142,7 +143,8 @@ export class WeaponManager {
   upgradeSkill(key, moduleKey) {
     const weapon = this.getWeapon(key);
     if (!weapon?.skillKey || weapon.lv >= weapon.def.maxLv) return false;
-    if (!Object.hasOwn(weapon.modules, moduleKey) || weapon.modules[moduleKey] >= 3) return false;
+    if (!Object.hasOwn(weapon.modules, moduleKey)
+      || weapon.modules[moduleKey] >= SKILL_MODULE_MAX_RANK) return false;
     weapon.modules[moduleKey]++;
     weapon.lv++;
     weapon.cd = Math.min(weapon.cd, 0.15);
@@ -194,9 +196,11 @@ export class WeaponManager {
     for (let i = 0; i < count; i++) {
       const angle = baseAngle + (i - (count - 1) / 2) * spread;
       const totalFragments = params.fragments || 0;
-      const shotFragments = totalFragments > 0
-        ? Math.floor(totalFragments / count) + (i < totalFragments % count ? 1 : 0)
-        : 0;
+      const shotFragments = weapon.def.fragmentsPerProjectile
+        ? totalFragments
+        : totalFragments > 0
+          ? Math.floor(totalFragments / count) + (i < totalFragments % count ? 1 : 0)
+          : 0;
       this.queueShot(i * stagger, () => {
         this.fireProjectile(weapon.def, player.x, player.y - 14, angle, params,
           totalFragments > 0 ? { ...overrides, fragments: shotFragments } : overrides);
@@ -348,23 +352,57 @@ export class WeaponManager {
     }
   }
 
-  fireStorm(weapon, params) {
-    const props = this.scene.props?.active || [];
-    const candidates = this.scene.enemies.active.concat(props)
-      .filter(e => e.hp > 0)
-      .sort((a, b) => {
-        const p = this.scene.player;
-        return (a.x - p.x) ** 2 + (a.y - p.y) ** 2 - ((b.x - p.x) ** 2 + (b.y - p.y) ** 2);
+  fireJudgment(weapon, params) {
+    const player = this.scene.player;
+    const used = new Set();
+    const status = { stunChance: params.stunChance, stunDur: params.stunDur };
+    let x = player.x, y = player.y;
+    const totalTargets = 1 + (params.bounces || 0);
+
+    for (let hop = 0; hop < totalTargets; hop++) {
+      const searchRadius = hop === 0 ? params.radius : params.jump;
+      const target = this.scene.enemies.grid.nearestInCircle(
+        x, y, searchRadius, e => e.hp > 0 && !used.has(e),
+      );
+      if (!target) break;
+      this.scene.vfx.lightning(x, y, target.x, target.y, weapon.def.color, {
+        profile: hop === 0 ? 'judgment' : 'chain',
       });
-    for (let i = 0; i < Math.min(params.bolts, candidates.length); i++) {
-      const e = candidates[i];
-      this.scene.vfx.lightning(e.x, e.y - 260, e.x, e.y, weapon.def.color, { profile: 'vertical' });
-      this.areaDamage(e.x, e.y, params.splash, params.dmg, weapon.def.key);
+      this.scene.enemies.damage(target, params.dmg * (hop === 0 ? 1 : params.bounceMult)
+        * player.dmgMult, {
+        source: weapon.def.key, status, hitX: x, hitY: y,
+      });
+      used.add(target);
+      x = target.x;
+      y = target.y;
     }
-    if (candidates.length) {
-      Sfx.weaponCast(weapon.def.key);
-      Sfx.weaponImpact(weapon.def.key, candidates.length >= 2 ? 'heavy' : 'light');
+
+    if (!used.size) return;
+    Sfx.weaponCast(weapon.def.key);
+    Sfx.weaponImpact(weapon.def.key, used.size >= 3 ? 'heavy' : 'light');
+  }
+
+  fireStorm(weapon, params) {
+    const player = this.scene.player;
+    const used = new Set();
+    for (let i = 0; i < params.bolts; i++) {
+      const target = this.scene.enemies.grid.nearestInCircle(
+        player.x, player.y, params.radius, e => e.hp > 0 && !used.has(e),
+      );
+      if (!target) break;
+      used.add(target);
+      const hitX = target.x;
+      const hitY = target.y;
+      this.scene.vfx.lightning(hitX, hitY - 260, hitX, hitY, weapon.def.color, { profile: 'vertical' });
+      this.scene.enemies.damage(target, params.dmg * player.dmgMult, {
+        source: weapon.def.key, hitX, hitY: hitY - 260, aoe: true,
+      });
+      this.areaDamage(hitX, hitY, params.splash, params.dmg * (params.splashMult ?? 1) * player.dmgMult,
+        weapon.def.key, null, target);
     }
+    if (!used.size) return;
+    Sfx.weaponCast(weapon.def.key);
+    Sfx.weaponImpact(weapon.def.key, used.size >= 2 ? 'heavy' : 'light');
   }
 
   createZone(x, y, params, def, overrides = {}) {
