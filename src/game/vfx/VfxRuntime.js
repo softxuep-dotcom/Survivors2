@@ -185,11 +185,11 @@ const EMITTER_LANES = Object.freeze({
     },
   }),
   snow: Object.freeze({
-    texture: 'snowflake', budget: 48, depth: 3.3, blendMode: Phaser.BlendModes.ADD,
+    texture: 'snowflake', budget: 30, depth: 1.9, blendMode: Phaser.BlendModes.ADD,
     config: {
-      lifespan: { min: 520, max: 920 }, speedX: { min: -105, max: -42 }, speedY: { min: 28, max: 86 },
+      lifespan: { min: 380, max: 660 }, speedX: { min: -95, max: -42 }, speedY: { min: 24, max: 64 },
       rotate: { min: -150, max: 150 }, tint: [0xb9efff, 0xe8fbff, 0xffffff],
-      scale: { start: 0.82, end: 0.18 }, alpha: { start: 0.88, end: 0 },
+      scale: { start: 0.56, end: 0.1 }, alpha: { start: 0.62, end: 0 },
     },
   }),
   iceShards: Object.freeze({

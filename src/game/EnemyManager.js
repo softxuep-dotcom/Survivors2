@@ -2,7 +2,7 @@
 import Phaser from 'phaser';
 import {
   ENEMY_TYPES, ENEMY_VARIANTS, PERF, SPAWN_TIMELINE, SPAWN_EVENTS, SPAWN_RING,
-  BOSS_HP_MULT, ELITE_HP_MULT, BOSS_SKILL, FINAL_BOSS, PLAYER, WEAPONS, EVOLUTIONS,
+  BOSS_HP_MULT, ELITE_HP_MULT, BOSS_SKILL, FINAL_BOSS, PLAYER, WEAPONS, EVOLUTIONS, SKILLS,
   ELEMENT_SYNERGY, ENEMY_BEHAVIOR, ENEMY_HIT_FX,
   hpGrowth, specialHpGrowth,
 } from '../config.js';
@@ -680,7 +680,10 @@ export class EnemyManager {
       const e = this.active[i];
 
       // 持续状态统一在敌人系统结算，武器只提交状态参数。
-      if (e.slowT > 0) e.slowT -= dt;
+      if (e.slowT > 0) {
+        e.slowT = Math.max(0, e.slowT - dt);
+        if (e.slowT === 0) e.slow = 0;
+      }
       if (e.freezeT > 0) e.freezeT -= dt;
       if (e.stunT > 0) e.stunT -= dt;
       if (e.vulnT > 0) {
@@ -1122,7 +1125,7 @@ export class EnemyManager {
 
   sourceElement(source) {
     const baseKey = EVOLUTIONS[source]?.baseKey || source;
-    return WEAPONS[baseKey]?.element || '';
+    return SKILLS[source]?.element || WEAPONS[baseKey]?.element || '';
   }
 
   triggerPoisonFire(e, amount) {

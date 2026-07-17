@@ -654,41 +654,45 @@ export const EVOLUTIONS = {
   },
 };
 
-// ---------- 直接技能制（第一批 6 个；不再走 Lv4 二选一进阶） ----------
-// 每个技能从 Lv1 就拥有完整行为，Lv1→Lv7 共选择 6 次模块。
-// 模块分为规模 / 威力 / 特性，每类最多 3 级；威力每级统一增加该技能 15% 伤害。
+// ---------- 直接技能制（当前 8 个；不再走 Lv4 二选一进阶） ----------
+// 每个技能从 Lv1 就拥有完整行为，Lv1→Lv8 共选择 7 次模块。
+// 模块分为规模 / 威力 / 特性，每类最多 4 级；技能在 Lv8 封顶，因此每局只能取得 7 次模块成长。
+// 威力以刃风暴 8 → 11 → 14 → 17 → 20 为标尺，每级增加基础伤害的 37.5%。
 export const ACTIVE_SKILL_KEYS = Object.freeze([
   'bladestorm', 'headhunter', 'lavatrail', 'cluster', 'blizzard', 'icecage',
+  'stormeye', 'thunderjudgment',
 ]);
 export const SKILL_MODULE_KEYS = Object.freeze(['scale', 'power', 'trait']);
-export const SKILL_POWER_PER_RANK = 0.15;
-export const SKILL_MODULE_MAX_RANK = 3;
+export const SKILL_POWER_PER_RANK = 0.375;
+export const SKILL_MODULE_MAX_RANK = 4;
 
 export const SKILLS = Object.freeze({
   bladestorm: {
     key: 'bladestorm', nameKey: 'evo.bladestorm', descKey: 'evo.bladestormDesc',
     element: 'physical', icon: 'icon_blade', color: 0x9ddcff,
-    behavior: 'orbit', maxLv: 7,
+    behavior: 'orbit', maxLv: 8,
     baseParams: {
       dmg: 8, count: 3, cd: 0.75, orbitRadius: 105, speed: 2.4,
     },
     modules: {
       scale: [
-        { add: { count: 1 }, text: { en: 'Orbiting blade +1', zh: '环绕飞刃 +1' } },
-        { basePct: { orbitRadius: 15 }, text: { en: 'Orbit radius +15%', zh: '环绕半径 +15%' } },
-        { add: { count: 1 }, text: { en: 'Orbiting blade +1', zh: '环绕飞刃 +1' } },
+        { add: { count: 2 }, text: { en: 'Orbiting blades +2', zh: '环绕飞刃 +2' } },
+        { add: { count: 2 }, text: { en: 'Orbiting blades +2', zh: '环绕飞刃 +2' } },
+        { add: { count: 2 }, text: { en: 'Orbiting blades +2', zh: '环绕飞刃 +2' } },
+        { add: { count: 2 }, text: { en: 'Orbiting blades +2', zh: '环绕飞刃 +2' } },
       ],
       trait: [
-        { basePct: { speed: 15 }, text: { en: 'Rotation speed +15%', zh: '旋转速度 +15%' } },
-        { set: { cd: 0.65 }, text: { en: 'Repeat-hit interval: 0.65s', zh: '复击间隔降至 0.65 秒' } },
-        { basePct: { speed: 20 }, text: { en: 'Rotation speed +20%', zh: '旋转速度 +20%' } },
+        { basePct: { speed: 20, orbitRadius: 10 }, text: { en: 'Rotation speed +20%, orbit radius +10%', zh: '旋转速度 +20%，环绕半径 +10%' } },
+        { basePct: { speed: 20, orbitRadius: 10 }, text: { en: 'Rotation speed +20%, orbit radius +10%', zh: '旋转速度 +20%，环绕半径 +10%' } },
+        { basePct: { speed: 20, orbitRadius: 10 }, set: { cd: 0.70 }, text: { en: 'Speed +20%, radius +10%, repeat-hit interval: 0.70s', zh: '旋转速度 +20%，环绕半径 +10%，复击降至 0.70 秒' } },
+        { basePct: { speed: 20, orbitRadius: 10 }, set: { cd: 0.65 }, text: { en: 'Speed +20%, radius +10%, repeat-hit interval: 0.65s', zh: '旋转速度 +20%，环绕半径 +10%，复击降至 0.65 秒' } },
       ],
     },
   },
   headhunter: {
     key: 'headhunter', nameKey: 'evo.headhunter', descKey: 'evo.headhunterDesc',
     element: 'physical', icon: 'icon_blade', color: 0xffd36d,
-    behavior: 'homing', projTexture: 'blade', projRadius: 12, maxLv: 7,
+    behavior: 'homing', projTexture: 'blade', projRadius: 12, maxLv: 8,
     volleySpreadDeg: 9, volleyStaggerMs: 70,
     baseParams: {
       dmg: 18, count: 1, pierce: 0, cd: 1.35, speed: 600, range: 900,
@@ -697,20 +701,22 @@ export const SKILLS = Object.freeze({
     modules: {
       scale: [
         { add: { count: 1 }, text: { en: 'Homing blade +1', zh: '追踪飞镖 +1' } },
-        { add: { pierce: 1 }, text: { en: 'Pierce +1', zh: '穿透 +1' } },
+        { add: { count: 1 }, text: { en: 'Homing blade +1', zh: '追踪飞镖 +1' } },
+        { add: { count: 1 }, text: { en: 'Homing blade +1', zh: '追踪飞镖 +1' } },
         { add: { count: 1 }, text: { en: 'Homing blade +1', zh: '追踪飞镖 +1' } },
       ],
       trait: [
-        { add: { crit: 0.06 }, text: { en: 'Critical chance +6%', zh: '暴击率 +6%' } },
-        { add: { crit: 0.06, execute: 0.03 }, text: { en: 'Crit +6%, execute threshold +3%', zh: '暴击率 +6%，处决线 +3%' } },
-        { add: { crit: 0.08, execute: 0.02 }, text: { en: 'Crit +8%, execute threshold +2%', zh: '暴击率 +8%，处决线 +2%' } },
+        { add: { crit: 0.10 }, text: { en: 'Critical chance +10%', zh: '暴击率 +10%' } },
+        { add: { crit: 0.10, execute: 0.03, pierce: 1 }, text: { en: 'Crit +10%, execute +3%, pierce +1', zh: '暴击率 +10%，处决线 +3%，穿透 +1' } },
+        { add: { crit: 0.10, execute: 0.03 }, text: { en: 'Crit +10%, execute threshold +3%', zh: '暴击率 +10%，处决线 +3%' } },
+        { add: { crit: 0.10, execute: 0.04, pierce: 1 }, text: { en: 'Crit +10%, execute +4%, pierce +1', zh: '暴击率 +10%，处决线 +4%，穿透 +1' } },
       ],
     },
   },
   lavatrail: {
     key: 'lavatrail', nameKey: 'evo.lavatrail', descKey: 'evo.lavatrailDesc',
     element: 'fire', icon: 'icon_fireball', color: 0xff5d2e,
-    behavior: 'lava', projTexture: 'fireball_blazing', projRadius: 16, maxLv: 7,
+    behavior: 'lava', projTexture: 'fireball_blazing', projRadius: 16, maxLv: 8,
     volleySpreadDeg: 14, volleyStaggerMs: 90,
     baseParams: {
       dmg: 16, count: 1, pierce: 0, cd: 1.70, speed: 460, range: 720,
@@ -720,77 +726,133 @@ export const SKILLS = Object.freeze({
     modules: {
       scale: [
         { add: { count: 1 }, text: { en: 'Fireball +1', zh: '火球 +1' } },
-        { basePct: { trailRadius: 18 }, text: { en: 'Flame path width +18%', zh: '火焰路径宽度 +18%' } },
+        { add: { count: 1 }, text: { en: 'Fireball +1', zh: '火球 +1' } },
+        { add: { count: 1 }, text: { en: 'Fireball +1', zh: '火球 +1' } },
         { add: { count: 1 }, text: { en: 'Fireball +1', zh: '火球 +1' } },
       ],
       trait: [
-        { add: { trailLife: 0.6 }, text: { en: 'Flame duration +0.6s', zh: '火区持续 +0.6 秒' } },
-        { add: { trailLife: 0.8 }, text: { en: 'Flame duration +0.8s', zh: '火区持续 +0.8 秒' } },
-        { basePct: { trailRadius: 15 }, text: { en: 'Flame path width +15%', zh: '火焰路径宽度 +15%' } },
+        { add: { trailLife: 0.8 }, basePct: { trailRadius: 20 }, text: { en: 'Path width +20%, duration +0.8s', zh: '路径宽度 +20%，火区持续 +0.8 秒' } },
+        { add: { trailLife: 0.8 }, basePct: { trailRadius: 20 }, text: { en: 'Path width +20%, duration +0.8s', zh: '路径宽度 +20%，火区持续 +0.8 秒' } },
+        { add: { trailLife: 0.8 }, basePct: { trailRadius: 20 }, text: { en: 'Path width +20%, duration +0.8s', zh: '路径宽度 +20%，火区持续 +0.8 秒' } },
+        { add: { trailLife: 0.8 }, basePct: { trailRadius: 20 }, set: { trailTick: 0.4 }, text: { en: 'Width +20%, duration +0.8s, damage interval: 0.40s', zh: '路径宽度 +20%，持续 +0.8 秒，跳伤间隔降至 0.40 秒' } },
       ],
     },
   },
   cluster: {
     key: 'cluster', nameKey: 'evo.cluster', descKey: 'evo.clusterDesc',
     element: 'fire', icon: 'icon_fireball', color: 0xffb23f,
-    behavior: 'cluster', projTexture: 'fireball_cluster', projRadius: 17, maxLv: 7,
+    behavior: 'cluster', projTexture: 'fireball_cluster', projRadius: 17, maxLv: 8,
+    fragmentsPerProjectile: true,
     volleySpreadDeg: 14, volleyStaggerMs: 90,
     baseParams: {
       dmg: 20, count: 1, pierce: 0, cd: 1.80, speed: 470, range: 720,
-      aoe: 88, aoeMult: 0.65, fragments: 3, fragmentDmg: 6,
+      aoe: 88, aoeMult: 0.65, fragments: 3, fragmentDmg: 10,
       fragmentAoe: 44, fragmentRange: 270,
     },
     modules: {
       scale: [
-        { add: { fragments: 2 }, text: { en: 'Fragments +2', zh: '爆裂碎片 +2' } },
-        { add: { fragments: 2 }, text: { en: 'Fragments +2', zh: '爆裂碎片 +2' } },
+        { add: { fragments: 2 }, text: { en: 'Fragments per fireball +2', zh: '每颗火球的爆裂碎片 +2' } },
+        { add: { fragments: 2 }, text: { en: 'Fragments per fireball +2', zh: '每颗火球的爆裂碎片 +2' } },
         { add: { count: 1 }, text: { en: 'Main fireball +1', zh: '主火球 +1' } },
+        { add: { fragments: 4 }, text: { en: 'Fragments per fireball +4', zh: '每颗火球的爆裂碎片 +4' } },
       ],
       trait: [
-        { basePct: { aoe: 12 }, text: { en: 'Explosion radius +12%', zh: '爆炸范围 +12%' } },
+        { basePct: { aoe: 20 }, text: { en: 'Explosion radius +20%', zh: '爆炸范围 +20%' } },
         { set: { fragmentRange: 216 }, text: { en: 'Fragment spread tightened by 20%', zh: '碎片散布收紧 20%' } },
-        { basePct: { aoe: 15 }, text: { en: 'Explosion radius +15%', zh: '爆炸范围 +15%' } },
+        { basePct: { aoe: 20 }, text: { en: 'Explosion radius +20%', zh: '爆炸范围 +20%' } },
+        { basePct: { fragmentAoe: 30 }, text: { en: 'Fragment explosion radius +30%', zh: '碎片爆炸范围 +30%' } },
       ],
     },
   },
   blizzard: {
     key: 'blizzard', nameKey: 'evo.blizzard', descKey: 'evo.blizzardDesc',
     element: 'ice', icon: 'icon_frostpulse', color: 0x7adfff,
-    behavior: 'field', maxLv: 7,
+    behavior: 'field', maxLv: 8,
     baseParams: {
       dmg: 5, cd: 0.8, radius: 220, slow: 0.25, slowDur: 1,
     },
     modules: {
       scale: [
-        { basePct: { radius: 15 }, text: { en: 'Blizzard radius +15%', zh: '暴风雪范围 +15%' } },
-        { basePct: { radius: 15 }, text: { en: 'Blizzard radius +15%', zh: '暴风雪范围 +15%' } },
+        { basePct: { radius: 20 }, text: { en: 'Blizzard radius +20%', zh: '暴风雪范围 +20%' } },
+        { basePct: { radius: 20 }, text: { en: 'Blizzard radius +20%', zh: '暴风雪范围 +20%' } },
+        { basePct: { radius: 20 }, text: { en: 'Blizzard radius +20%', zh: '暴风雪范围 +20%' } },
         { basePct: { radius: 20 }, text: { en: 'Blizzard radius +20%', zh: '暴风雪范围 +20%' } },
       ],
       trait: [
-        { add: { slow: 0.06 }, text: { en: 'Slow strength +6%', zh: '减速强度 +6%' } },
-        { set: { cd: 0.7 }, text: { en: 'Damage interval: 0.70s', zh: '伤害间隔降至 0.70 秒' } },
         { add: { slow: 0.08 }, text: { en: 'Slow strength +8%', zh: '减速强度 +8%' } },
+        { add: { slow: 0.08 }, set: { cd: 0.72 }, text: { en: 'Slow +8%, damage interval: 0.72s', zh: '减速强度 +8%，伤害间隔降至 0.72 秒' } },
+        { add: { slow: 0.08 }, text: { en: 'Slow strength +8%', zh: '减速强度 +8%' } },
+        { add: { slow: 0.08 }, set: { cd: 0.60 }, text: { en: 'Slow +8%, damage interval: 0.60s', zh: '减速强度 +8%，伤害间隔降至 0.60 秒' } },
       ],
     },
   },
   icecage: {
     key: 'icecage', nameKey: 'evo.icecage', descKey: 'evo.icecageDesc',
     element: 'ice', icon: 'icon_frostpulse', color: 0xb9f1ff,
-    behavior: 'pulse', maxLv: 7,
+    behavior: 'pulse', maxLv: 8,
     baseParams: {
-      dmg: 12, cd: 2.1, radius: 190, slow: 0.30, slowDur: 1.5,
-      freezeChance: 0.10, freezeDur: 1,
+      dmg: 24, cd: 3.0, radius: 160,
+      freezeChance: 0.25, freezeDur: 1.1,
     },
     modules: {
       scale: [
-        { basePct: { radius: 15 }, text: { en: 'Pulse radius +15%', zh: '寒冰脉冲范围 +15%' } },
-        { basePct: { radius: 15 }, text: { en: 'Pulse radius +15%', zh: '寒冰脉冲范围 +15%' } },
-        { basePct: { radius: 20 }, text: { en: 'Pulse radius +20%', zh: '寒冰脉冲范围 +20%' } },
+        { basePct: { radius: 15 }, text: { en: 'Cage radius +15%', zh: '牢笼范围 +15%' } },
+        { basePct: { radius: 15 }, text: { en: 'Cage radius +15%', zh: '牢笼范围 +15%' } },
+        { basePct: { radius: 15 }, text: { en: 'Cage radius +15%', zh: '牢笼范围 +15%' } },
+        { basePct: { radius: 15 }, text: { en: 'Cage radius +15%', zh: '牢笼范围 +15%' } },
       ],
       trait: [
-        { add: { freezeChance: 0.08 }, text: { en: 'Freeze chance +8%', zh: '冻结概率 +8%' } },
+        { add: { freezeChance: 0.15 }, text: { en: 'Freeze chance +15%', zh: '冻结概率 +15%' } },
         { add: { freezeDur: 0.3 }, text: { en: 'Freeze duration +0.3s', zh: '冻结时间 +0.3 秒' } },
-        { add: { freezeChance: 0.10 }, text: { en: 'Freeze chance +10%', zh: '冻结概率 +10%' } },
+        { add: { freezeChance: 0.15 }, set: { cd: 2.7 }, text: { en: 'Freeze chance +15%, cooldown: 2.7s', zh: '冻结概率 +15%，冷却降至 2.7 秒' } },
+        { add: { freezeChance: 0.15, freezeDur: 0.4 }, set: { cd: 2.4 }, text: { en: 'Cooldown: 2.4s, freeze +15% for +0.4s', zh: '冷却降至 2.4 秒，冻结概率 +15%、时间 +0.4 秒' } },
+      ],
+    },
+  },
+  stormeye: {
+    key: 'stormeye', nameKey: 'evo.stormeye', descKey: 'evo.stormeyeDesc',
+    element: 'lightning', icon: 'icon_chainlightning', color: 0xa897ff,
+    behavior: 'storm', maxLv: 8,
+    baseParams: {
+      dmg: 18, cd: 1.1, bolts: 1, radius: 450,
+      splash: 48, splashMult: 0.60,
+    },
+    modules: {
+      scale: [
+        { add: { bolts: 1 }, text: { en: 'Lightning strike +1 per volley', zh: '每轮雷击 +1' } },
+        { add: { bolts: 1 }, text: { en: 'Lightning strike +1 per volley', zh: '每轮雷击 +1' } },
+        { add: { bolts: 1 }, text: { en: 'Lightning strike +1 per volley', zh: '每轮雷击 +1' } },
+        { add: { bolts: 1 }, text: { en: 'Lightning strike +1 per volley', zh: '每轮雷击 +1' } },
+      ],
+      trait: [
+        { basePct: { cd: -10, splash: 10 }, text: { en: 'Cooldown -10%, splash radius +10%', zh: '冷却 -10%，溅射范围 +10%' } },
+        { basePct: { radius: 25, splash: 10 }, text: { en: 'Targeting +25%, splash radius +10%', zh: '索敌范围 +25%，溅射范围 +10%' } },
+        { basePct: { cd: -12, splash: 10 }, text: { en: 'Cooldown -12%, splash radius +10%', zh: '冷却 -12%，溅射范围 +10%' } },
+        { basePct: { cd: -13, radius: 25, splash: 10 }, text: { en: 'Cooldown -13%, targeting +25%, splash +10%', zh: '冷却 -13%，索敌 +25%，溅射 +10%' } },
+      ],
+    },
+  },
+  thunderjudgment: {
+    key: 'thunderjudgment', nameKey: 'evo.thunderjudgment', descKey: 'evo.thunderjudgmentDesc',
+    element: 'lightning', icon: 'icon_chainlightning', color: 0xe2d7ff,
+    behavior: 'judgment', maxLv: 8,
+    baseParams: {
+      dmg: 32, cd: 1.8, radius: 900,
+      bounces: 1, jump: 280, bounceMult: 0.70,
+      stunChance: 0.14, stunDur: 0.5,
+    },
+    modules: {
+      scale: [
+        { add: { bounces: 1 }, text: { en: 'Bounce target +1', zh: '弹射目标 +1' } },
+        { add: { bounces: 1 }, text: { en: 'Bounce target +1', zh: '弹射目标 +1' } },
+        { add: { bounces: 1 }, text: { en: 'Bounce target +1', zh: '弹射目标 +1' } },
+        { add: { bounces: 1 }, text: { en: 'Bounce target +1', zh: '弹射目标 +1' } },
+      ],
+      trait: [
+        { add: { stunChance: 0.10 }, set: { bounceMult: 0.775 }, text: { en: 'Stun +10%, bounce damage: 77.5%', zh: '眩晕率 +10%，弹射伤害升至 77.5%' } },
+        { add: { stunDur: 0.2 }, set: { bounceMult: 0.85 }, text: { en: 'Stun duration +0.2s, bounce damage: 85%', zh: '眩晕时间 +0.2 秒，弹射伤害升至 85%' } },
+        { add: { stunChance: 0.12 }, set: { bounceMult: 0.925 }, text: { en: 'Stun +12%, bounce damage: 92.5%', zh: '眩晕率 +12%，弹射伤害升至 92.5%' } },
+        { add: { stunChance: 0.14, stunDur: 0.2 }, set: { bounceMult: 1 }, text: { en: 'Stun +14%/+0.2s, bounce damage: 100%', zh: '眩晕率 +14%、时间 +0.2 秒，弹射伤害升至 100%' } },
       ],
     },
   },

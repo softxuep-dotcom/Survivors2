@@ -6,6 +6,7 @@ from zipfile import ZIP_DEFLATED, ZipFile
 
 ROOT = Path(__file__).resolve().parents[1]
 DIST = ROOT / "dist"
+CLIENT_DIST = DIST / "client"
 PACKAGE_JSON = ROOT / "package.json"
 
 with PACKAGE_JSON.open(encoding="utf-8") as package_file:
@@ -18,13 +19,13 @@ if not safe_version or safe_version != version:
 OUTPUT = ROOT / f"horde-breaker-poki-v{safe_version}.zip"
 LEGACY_OUTPUT = ROOT / "horde-breaker-poki.zip"
 
-if not (DIST / "index.html").is_file():
+if not (CLIENT_DIST / "index.html").is_file():
     raise SystemExit("dist/index.html is missing; run npm run build first")
 
 with ZipFile(OUTPUT, "w", compression=ZIP_DEFLATED, compresslevel=9) as archive:
-    for path in sorted(DIST.rglob("*")):
+    for path in sorted(CLIENT_DIST.rglob("*")):
         if path.is_file():
-            archive.write(path, path.relative_to(DIST).as_posix())
+            archive.write(path, path.relative_to(CLIENT_DIST).as_posix())
 
 with ZipFile(OUTPUT) as archive:
     bad_file = archive.testzip()

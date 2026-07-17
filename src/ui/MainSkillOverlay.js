@@ -1,4 +1,4 @@
-// 开局主技能选择：6 个直接技能一次点击进入战斗，无确认层。
+// 开局主技能选择：全部正式直接技能一次点击进入战斗，无确认层。
 import { ACTIVE_SKILL_KEYS, SKILLS, THEME } from '../config.js';
 import { getLocale, t } from '../i18n.js';
 import { Sfx } from '../audio.js';
@@ -84,13 +84,14 @@ export class MainSkillOverlay {
     this.subtitle.setPosition(w / 2, this.safe.top + (this.portrait ? 82 : 96));
     if (this.portrait) {
       const columns = 2;
+      const rows = Math.ceil(this.cards.length / columns);
       const gap = 10;
       const cardW = Math.min(CARD_W, (w - this.safe.side * 2 - gap) / columns);
       const availableH = h - this.safe.top - this.safe.bottom - 122;
-      const cardH = Math.min(CARD_H, (availableH - gap * 2) / 3);
+      const cardH = Math.min(CARD_H, (availableH - gap * (rows - 1)) / rows);
       const scale = Math.min(cardW / CARD_W, cardH / CARD_H);
-      const gridW = CARD_W * scale * columns + gap;
-      const gridH = CARD_H * scale * 3 + gap * 2;
+      const gridW = CARD_W * scale * columns + gap * (columns - 1);
+      const gridH = CARD_H * scale * rows + gap * (rows - 1);
       const left = (w - gridW) / 2 + CARD_W * scale / 2;
       const top = this.safe.top + 106 + Math.max(0, (availableH - gridH) / 2);
       this.cards.forEach((card, index) => {
@@ -99,11 +100,14 @@ export class MainSkillOverlay {
       });
       return;
     }
-    const columns = 3;
+    const columns = Math.min(4, Math.ceil(this.cards.length / 2));
+    const rows = Math.ceil(this.cards.length / columns);
     const gap = 16;
-    const scale = Math.min(1, (w - 36) / (CARD_W * columns + gap * 2), (h - 160) / (CARD_H * 2 + gap));
-    const gridW = CARD_W * scale * columns + gap * 2;
-    const gridH = CARD_H * scale * 2 + gap;
+    const scale = Math.min(1,
+      (w - 36) / (CARD_W * columns + gap * (columns - 1)),
+      (h - 160) / (CARD_H * rows + gap * (rows - 1)));
+    const gridW = CARD_W * scale * columns + gap * (columns - 1);
+    const gridH = CARD_H * scale * rows + gap * (rows - 1);
     const left = (w - gridW) / 2 + CARD_W * scale / 2;
     const top = 126 + Math.max(0, (h - 126 - gridH) / 2);
     this.cards.forEach((card, index) => {

@@ -56,20 +56,19 @@ void main ()
     }
     else if (uVariant < 1.5)
     {
-        // 暴风雪：冰霜底纹与顺风向移动的风带；雪花由 ParticleEmitter 提供。
+        // 暴风雪：只保留流动明暗的破碎外缘，中心完全通透，避免遮住敌人与地面预警。
         p.y *= 1.05;
-        float mask = circleMask(p, 0.96, 0.15);
+        float r = length(p);
         vec2 dir = normalize(uDirection + vec2(0.0001));
-        vec2 tangent = vec2(-dir.y, dir.x);
-        float along = dot(p, dir);
-        float across = dot(p, tangent);
+        float angle = atan(p.y, p.x);
+        float flowAngle = atan(dir.y, dir.x);
         float frost = noise2(uv * 3.6 + dir * uTime * 0.045);
-        frost *= noise2(uv * 7.2 - tangent * uTime * 0.035 + 0.21);
-        float bandA = pow(0.5 + 0.5 * sin(across * 17.0 - along * 4.0 + uTime * 5.2), 7.0);
-        float bandB = pow(0.5 + 0.5 * sin(across * 9.0 - along * 7.0 + uTime * 3.4 + 1.7), 10.0);
-        float wind = clamp(bandA + bandB * 0.72, 0.0, 1.0);
-        rgb = mix(uColorA.rgb, uColorB.rgb, 0.18 + frost * 0.62 + wind * 0.35);
-        alpha = mask * (0.22 + frost * 0.22 + wind * 0.28) * uOpacity * uIntensity * lifeFade;
+        frost *= noise2(uv * 7.2 + vec2(-dir.y, dir.x) * uTime * 0.035 + 0.21);
+        float arcPulse = 0.5 + 0.5 * sin((angle - flowAngle) * 3.0 - uTime * 1.8);
+        float rim = 1.0 - smoothstep(0.0, 0.038, abs(r - 0.87));
+        float brokenRim = rim * (0.22 + 0.58 * smoothstep(0.28, 0.72, frost + arcPulse * 0.26));
+        rgb = mix(uColorA.rgb, uColorB.rgb, 0.38 + frost * 0.4 + arcPulse * 0.18);
+        alpha = brokenRim * 0.46 * uOpacity * uIntensity * lifeFade;
     }
     else if (uVariant < 2.5)
     {

@@ -55,7 +55,7 @@ function dps(def, level) {
       return projectileDps(level) + burnDps;
     }
     case 'cluster': {
-      // fragments 是整轮总数；碎片不会再次命中产生它的主目标。
+      // 旧进阶定义中的 fragments 是整轮总数；正式 Lv8 技能由技能契约单独校验。
       const fragmentSplashFactor = 1 + 0.45 * (34 / 64);
       return projectileDps(level)
         + (level.fragmentDmg || 0) * (level.fragments || 0) * fragmentSplashFactor / cd;
