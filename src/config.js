@@ -90,8 +90,10 @@ export const ENEMY_HIT_FX = Object.freeze({
 // ---------- 元素协同（跨武器 build 钩子） ----------
 export const ELEMENT_SYNERGY = {
   lightningChill: {
-    critMult: 2.0,
-    label: 'SHATTER!',
+    slowMult: 1.5,
+    freezeMult: 2.0,
+    slowLabel: '×1.5',
+    freezeLabel: '×2',
     color: '#c9f5ff',
   },
   poisonFire: {
@@ -262,16 +264,16 @@ export const SPAWN_TIMELINE = [
   { from: 90,  rate: 4.0,  maxAlive: 170, types: { slime: 0.58, runner: 0.24, tank: 0.06, flyer: 0.12 } },
   { from: 150, rate: 4.9,  maxAlive: 220, types: { slime: 0.48, runner: 0.28, tank: 0.10, flyer: 0.10, splitter: 0.04 } },
   { from: 180, rate: 6.0,  maxAlive: 260, types: { slime: 0.44, runner: 0.27, tank: 0.13, flyer: 0.12, splitter: 0.04 } },
-  { from: 240, rate: 7.2,  maxAlive: 300, armoredChance: 0.10, types: { slime: 0.40, runner: 0.26, tank: 0.16, flyer: 0.13, splitter: 0.05 } },
-  { from: 270, rate: 7.7,  maxAlive: 315, armoredChance: 0.15, types: { slime: 0.38, runner: 0.25, tank: 0.15, flyer: 0.16, splitter: 0.06 } },
-  { from: 300, rate: 8.2,  maxAlive: 330, armoredChance: 0.20, types: { slime: 0.34, runner: 0.24, tank: 0.13, flyer: 0.22, splitter: 0.07 } },
-  { from: 360, rate: 9.2,  maxAlive: 360, armoredChance: 0.30, types: { slime: 0.32, runner: 0.25, tank: 0.11, flyer: 0.25, splitter: 0.07 } },
+  { from: 240, rate: 7.2,  maxAlive: 300, armoredChance: 0.06, types: { slime: 0.40, runner: 0.26, tank: 0.16, flyer: 0.13, splitter: 0.05 } },
+  { from: 270, rate: 7.7,  maxAlive: 315, armoredChance: 0.09, types: { slime: 0.38, runner: 0.25, tank: 0.15, flyer: 0.16, splitter: 0.06 } },
+  { from: 300, rate: 8.2,  maxAlive: 330, armoredChance: 0.12, types: { slime: 0.34, runner: 0.24, tank: 0.13, flyer: 0.22, splitter: 0.07 } },
+  { from: 360, rate: 9.2,  maxAlive: 360, armoredChance: 0.18, types: { slime: 0.32, runner: 0.25, tank: 0.11, flyer: 0.25, splitter: 0.07 } },
   // 7:00 提前提高战术怪占比，为 7:30 双 Boss 预热。
-  { from: 420, rate: 10.0, maxAlive: 380, armoredChance: 0.40, types: { slime: 0.30, runner: 0.26, tank: 0.10, flyer: 0.27, splitter: 0.07 } },
-  { from: 450, rate: 10.5, maxAlive: 390, armoredChance: 0.45, types: { slime: 0.28, runner: 0.27, tank: 0.09, flyer: 0.29, splitter: 0.07 } },
-  { from: 480, rate: 10.5, maxAlive: 390, armoredChance: 0.50, types: { slime: 0.28, runner: 0.27, tank: 0.09, flyer: 0.29, splitter: 0.07 } },
-  { from: 540, rate: 11.5, maxAlive: 400, armoredChance: 0.55, types: { slime: 0.26, runner: 0.28, tank: 0.08, flyer: 0.30, splitter: 0.08 } },
-  { from: 600, rate: 11.5, maxAlive: 400, armoredChance: 0.60, types: { slime: 0.26, runner: 0.28, tank: 0.08, flyer: 0.30, splitter: 0.08 } },
+  { from: 420, rate: 10.0, maxAlive: 380, armoredChance: 0.24, types: { slime: 0.30, runner: 0.26, tank: 0.10, flyer: 0.27, splitter: 0.07 } },
+  { from: 450, rate: 10.5, maxAlive: 390, armoredChance: 0.27, types: { slime: 0.28, runner: 0.27, tank: 0.09, flyer: 0.29, splitter: 0.07 } },
+  { from: 480, rate: 10.5, maxAlive: 390, armoredChance: 0.30, types: { slime: 0.28, runner: 0.27, tank: 0.09, flyer: 0.29, splitter: 0.07 } },
+  { from: 540, rate: 11.5, maxAlive: 400, armoredChance: 0.33, types: { slime: 0.26, runner: 0.28, tank: 0.08, flyer: 0.30, splitter: 0.08 } },
+  { from: 600, rate: 11.5, maxAlive: 400, armoredChance: 0.36, types: { slime: 0.26, runner: 0.28, tank: 0.08, flyer: 0.30, splitter: 0.08 } },
 ];
 
 // 脚本事件：精英必掉宝箱；Boss tier 决定生命倍率/演出，final 为终局 Boss。
@@ -455,7 +457,12 @@ export const XP_GEMS = {
 };
 // 升到下一级所需经验 [TUNE]：目标节奏 升级①≈0:30 ②≈1:15 ③≈2:30（GDD §4.3）
 export function xpToNext(lv) {
-  return Math.round(12 + (lv - 1) * 9 + Math.pow(lv - 1, 2) * 1.3);
+  if (lv <= 8) {
+    return Math.round(12 + (lv - 1) * 9 + Math.pow(lv - 1, 2) * 1.3);
+  }
+  // Lv9–14 平滑过渡到后期曲线；Lv14 起每级仅增加 25 经验。
+  if (lv <= 14) return Math.round(139 + (lv - 8) * (131 / 6));
+  return 270 + (lv - 14) * 25;
 }
 export const GEM_MERGE_RADIUS = 240; // 宝石池满时向最近宝石合并的搜索半径
 
@@ -670,6 +677,7 @@ export const ACTIVE_SKILL_KEYS = Object.freeze([
   'bladestorm', 'headhunter', 'lavatrail', 'cluster', 'blizzard', 'icecage',
   'stormeye', 'thunderjudgment', 'plague', 'corrosion', 'holyhalo', 'prism',
 ]);
+export const DEFAULT_MAIN_SKILL = 'lavatrail';
 export const SKILL_MODULE_KEYS = Object.freeze(['scale', 'power', 'trait']);
 export const SKILL_POWER_PER_RANK = 0.375;
 export const SKILL_MODULE_MAX_RANK = 4;
@@ -680,7 +688,7 @@ export const SKILLS = Object.freeze({
     element: 'physical', icon: 'icon_blade', color: 0x9ddcff,
     behavior: 'orbit', maxLv: 8,
     baseParams: {
-      dmg: 12, count: 3, cd: 0.70, orbitRadius: 105, speed: 2.4,
+      dmg: 14, count: 3, cd: 0.70, orbitRadius: 105, speed: 2.4,
     },
     modules: {
       scale: [
@@ -703,7 +711,7 @@ export const SKILLS = Object.freeze({
     behavior: 'headhunter', projTexture: 'blade', projRadius: 12, maxLv: 8,
     volleyStaggerMs: 55,
     baseParams: {
-      dmg: 30, count: 1, pierce: 0, cd: 1.20, speed: 900, range: 1050,
+      dmg: 34, count: 1, pierce: 0, cd: 1.20, speed: 900, range: 1050,
       crit: 0.20, bossMult: 1.50,
     },
     modules: {
@@ -727,9 +735,9 @@ export const SKILLS = Object.freeze({
     behavior: 'lava', projTexture: 'fireball_blazing', projRadius: 16, maxLv: 8,
     volleySpreadDeg: 14, volleyStaggerMs: 90,
     baseParams: {
-      dmg: 19, count: 1, pierce: 0, cd: 1.70, speed: 460, range: 720,
+      dmg: 13.5, count: 2, pierce: 0, cd: 1.70, speed: 460, range: 720,
       aoe: 72, aoeMult: 0.60,
-      trailRadius: 45, trailDmg: 3.6, trailLife: 2, trailTick: 0.5,
+      trailRadius: 45, trailDmg: 2.5, trailLife: 2, trailTick: 0.5,
     },
     modules: {
       scale: [
@@ -753,8 +761,8 @@ export const SKILLS = Object.freeze({
     fragmentsPerProjectile: true,
     volleySpreadDeg: 14, volleyStaggerMs: 90,
     baseParams: {
-      dmg: 24, count: 1, pierce: 0, cd: 1.80, speed: 470, range: 720,
-      aoe: 88, aoeMult: 0.65, fragments: 3, fragmentDmg: 12,
+      dmg: 17, count: 2, pierce: 0, cd: 1.80, speed: 470, range: 720,
+      aoe: 88, aoeMult: 0.65, fragments: 3, fragmentDmg: 8.5,
       fragmentAoe: 44, fragmentRange: 270,
     },
     modules: {
@@ -822,7 +830,7 @@ export const SKILLS = Object.freeze({
     element: 'lightning', icon: 'icon_chainlightning', color: 0xa897ff,
     behavior: 'storm', maxLv: 8,
     baseParams: {
-      dmg: 22, cd: 1.1, bolts: 1, radius: 450,
+      dmg: 15.5, cd: 1.1, bolts: 2, radius: 450,
       splash: 48, splashMult: 0.60,
     },
     modules: {
@@ -845,8 +853,8 @@ export const SKILLS = Object.freeze({
     element: 'lightning', icon: 'icon_chainlightning', color: 0xe2d7ff,
     behavior: 'judgment', maxLv: 8,
     baseParams: {
-      dmg: 38, cd: 1.8, radius: 900,
-      bounces: 1, jump: 280, bounceMult: 0.70,
+      dmg: 27, cd: 1.8, radius: 900,
+      bounces: 2, jump: 280, bounceMult: 0.70,
       stunChance: 0.14, stunDur: 0.5,
     },
     modules: {

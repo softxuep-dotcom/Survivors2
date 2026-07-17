@@ -58,7 +58,7 @@ export class EnemyManager {
     this.poisonFireFrameTime = -1;
     this.poisonFireFrameCount = 0;
     this.poisonFireQueue = Array.from({ length: ELEMENT_SYNERGY.poisonFire.maxQueue }, () => ({
-      x: 0, y: 0, damage: 0, labelY: 0,
+      x: 0, y: 0, damage: 0, labelY: 0, source: '',
     }));
     this.poisonFireQueueHead = 0;
     this.poisonFireQueueTail = 0;
@@ -1128,7 +1128,7 @@ export class EnemyManager {
     return SKILLS[source]?.element || WEAPONS[baseKey]?.element || '';
   }
 
-  triggerPoisonFire(e, amount) {
+  triggerPoisonFire(e, amount, source = '') {
     const cfg = ELEMENT_SYNERGY.poisonFire;
     const now = this.scene.state.time;
     if (e.poisonT <= 0 || e.igniteNextT > now) return;
@@ -1141,6 +1141,7 @@ export class EnemyManager {
     blast.y = e.y;
     blast.labelY = e.y - e.type.spriteH * 0.96;
     blast.damage = Math.max(cfg.minDamage, amount * cfg.damageMult);
+    blast.source = source || cfg.source;
   }
 
   processPoisonFireQueue() {
@@ -1155,7 +1156,7 @@ export class EnemyManager {
     for (let n = 0; n < count; n++) {
       const blast = this.poisonFireQueue[this.poisonFireQueueHead];
       const blastX = blast.x, blastY = blast.y, labelY = blast.labelY;
-      const damage = blast.damage;
+      const damage = blast.damage, source = blast.source;
       this.poisonFireQueueHead = (this.poisonFireQueueHead + 1) % this.poisonFireQueue.length;
       this.poisonFireQueueCount--;
       this.poisonFireFrameCount++;
@@ -1192,7 +1193,7 @@ export class EnemyManager {
         return victims.length >= cfg.maxVictims;
       });
       for (const victim of victims) {
-        this.damage(victim, damage, { source: cfg.source, noSynergy: true });
+        this.damage(victim, damage, { source, noSynergy: true });
       }
       victims.length = 0;
     }
@@ -1231,9 +1232,13 @@ export class EnemyManager {
     this.applyStatus(e, options.status, options.source);
     amount = this.applyTankShield(e, amount, options);
     const element = options.element || this.sourceElement(options.source || '');
-    const chilled = e.freezeT > 0 || e.slowT > 0;
-    const shatter = !options.noSynergy && element === 'lightning' && chilled;
-    const synergyMult = shatter ? ELEMENT_SYNERGY.lightningChill.critMult : 1;
+    const lightningChill = ELEMENT_SYNERGY.lightningChill;
+    const frozenLightning = !options.noSynergy && element === 'lightning' && e.freezeT > 0;
+    const slowedLightning = !frozenLightning && !options.noSynergy && element === 'lightning' && e.slowT > 0;
+    const synergyMult = frozenLightning ? lightningChill.freezeMult
+      : slowedLightning ? lightningChill.slowMult : 1;
+    const synergyLabel = frozenLightning ? lightningChill.freezeLabel
+      : slowedLightning ? lightningChill.slowLabel : '';
     const dealt = Math.max(0, amount * synergyMult * (1 + e.vuln));
     const recorded = Math.min(e.hp, dealt);
     e.hp -= dealt;
@@ -1241,17 +1246,17 @@ export class EnemyManager {
     this.applyHitFlash(e, element);
     if (!options.quiet) {
       this.scene.vfx.damageText(e.x, e.y - e.type.spriteH * 0.6, Math.round(dealt), {
-        color: shatter ? ELEMENT_SYNERGY.lightningChill.color : undefined,
+        color: synergyLabel ? lightningChill.color : undefined,
       });
-      if (shatter) {
-        this.scene.vfx.damageText(e.x, e.y - e.type.spriteH * 0.92, ELEMENT_SYNERGY.lightningChill.label, {
-          color: ELEMENT_SYNERGY.lightningChill.color,
+      if (synergyLabel) {
+        this.scene.vfx.damageText(e.x, e.y - e.type.spriteH * 0.92, synergyLabel, {
+          color: lightningChill.color,
           fontSize: '15px',
           life: 0.5,
         });
       }
     }
-    if (!options.noSynergy && element === 'fire') this.triggerPoisonFire(e, dealt);
+    if (!options.noSynergy && element === 'fire') this.triggerPoisonFire(e, dealt, options.source);
     if (e.hp <= 0) {
       this.kill(e);
       return true;

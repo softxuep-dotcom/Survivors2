@@ -107,9 +107,8 @@ export class UiScene extends Phaser.Scene {
   // 一次性提示条（事件式教学，GDD §2），自动淡出
   layoutToasts() {
     const gap = 10;
-    const totalHeight = this.toasts.reduce((sum, toast) => sum + toast.height, 0)
-      + Math.max(0, this.toasts.length - 1) * gap;
-    let top = this.scale.height * 0.53 - totalHeight / 2;
+    const safe = mobileSafeArea(this);
+    let top = Math.max(safe.top + (safe.portrait ? 150 : 96), this.scale.height * 0.18);
     for (const toast of this.toasts) {
       toast.setPosition(this.scale.width / 2, top + toast.height / 2);
       top += toast.height + gap;

@@ -11,6 +11,7 @@ import { t } from '../i18n.js';
 const PICKUP_DIST = 26;
 const SWEEP_INTERVAL = 0.6; // 孤儿回收扫描间隔（秒）
 const SWEEP_MARGIN = 380;   // 视野半径外再加这么多才算孤儿
+const INTRO_GLOW_GEMS = 6;
 
 function tierOf(value) {
   if (value >= XP_GEMS.large.value) return 2;
@@ -27,9 +28,18 @@ export class PickupManager {
     this.carryValue = 0; // 被回收孤儿宝石的暂存价值
     this.sweepT = SWEEP_INTERVAL;
     this.t = 0;          // 脉动相位时钟
+    this.introGlowAssigned = 0;
+    this.introGlows = Array.from({ length: INTRO_GLOW_GEMS }, () => (
+      scene.add.image(0, 0, 'glow')
+        .setTint(0x5ff7ff)
+        .setDepth(0.95)
+        .setVisible(false)
+        .setActive(false)
+    ));
     this.pool = new Pool(
       () => ({
         x: 0, y: 0, value: 0, kind: 'gem', pulling: false, age: 0, phase: 0, baseScale: 1,
+        introGlow: null,
         spr: scene.add.image(0, 0, 'gem_small').setVisible(false).setActive(false).setDepth(1),
       }),
     );
@@ -70,6 +80,8 @@ export class PickupManager {
     gem.age = 0;
     gem.phase = Math.random() * Math.PI * 2;
     gem.baseScale = 1;
+    gem.introGlow = this.introGlows[this.introGlowAssigned++] || null;
+    gem.introGlow?.setActive(true).setVisible(true).setPosition(x, y).setAlpha(0.52).setScale(0.72);
     gem.spr.setTexture(TIER_TEXTURE[tierOf(value)]);
     gem.spr.setActive(true).setVisible(true).setPosition(x, y).setAlpha(1);
     this.active.push(gem);
@@ -177,6 +189,13 @@ export class PickupManager {
       const pop = Math.min(1, gem.age / 0.16);
       const pulse = 1 + 0.09 * Math.sin(this.t * 3.2 + gem.phase);
       gem.spr.setScale((0.4 + 0.6 * pop) * pulse * gem.baseScale);
+      if (gem.introGlow) {
+        const glowPulse = 0.76 + 0.14 * Math.sin(this.t * 4.4 + gem.phase);
+        gem.introGlow
+          .setPosition(gem.x, gem.y)
+          .setScale(glowPulse * pop)
+          .setAlpha(0.38 + 0.18 * Math.sin(this.t * 4.4 + gem.phase));
+      }
     }
   }
 
@@ -184,6 +203,8 @@ export class PickupManager {
     this.active[index] = this.active[this.active.length - 1];
     this.active.pop();
     if (gem.kind === 'gem') this.gemCount--;
+    gem.introGlow?.setActive(false).setVisible(false);
+    gem.introGlow = null;
     gem.spr.setActive(false).setVisible(false);
     this.pool.release(gem);
   }

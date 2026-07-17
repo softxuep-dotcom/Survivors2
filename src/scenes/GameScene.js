@@ -4,7 +4,7 @@ import Phaser from 'phaser';
 import {
   THEME, AUDIO_PHASES, DEBUG_QUERY, STRESS_QUERY, STRESS_COUNT, STRESS_TYPES,
   RUN, DIFFICULTIES, EVOLUTIONS, CHARACTERS, TALENTS, WORLD_SKINS, AD_REWARDS, PROPS, XP_REWARDS,
-  SKILLS, ELEMENT_COMBO_TIPS,
+  SKILLS, ELEMENT_COMBO_TIPS, DEFAULT_MAIN_SKILL,
 } from '../config.js';
 import { Poki } from '../poki.js';
 import { touchSave } from '../save.js';
@@ -66,7 +66,6 @@ export class GameScene extends Phaser.Scene {
     this.pendingChoiceSources = [];
     this.seenChestEvolution = false;
     this.audioPhaseIdx = 0;
-    this._gemHintDone = false;
     this.revives = this.meta.revives;
     this.rerolls = this.meta.rerolls;
     this.pauseReason = null;
@@ -126,7 +125,7 @@ export class GameScene extends Phaser.Scene {
     if (import.meta.env.DEV && params.has('weapon')) this.weapons.addWeapon(params.get('weapon'));
     this.devMainSkill = import.meta.env.DEV && SKILLS[params?.get('skill')]
       ? params.get('skill')
-      : 'bladestorm';
+      : DEFAULT_MAIN_SKILL;
     if (this.meta.startXpPct > 0) {
       this.levelSystem.xp = Math.floor(this.levelSystem.need * this.meta.startXpPct / 100);
     }
@@ -450,15 +449,6 @@ export class GameScene extends Phaser.Scene {
     if (e.rewardChest) this.pickups.dropChest(e.x, e.y);
     if (e.final) this.time.delayedCall(280, () => this.finishRun(true, 'boss'));
 
-    // 首次掉落经验宝石 → 事件式教学提示（GDD §2；playtest 反馈：不知道蓝色的能吃）
-    if (!this._gemHintDone && !(import.meta.env.DEV && this.stressMode)) {
-      this._gemHintDone = true;
-      const save = this.registry.get('save');
-      if (!save.tutorialGem) {
-        this.ui?.showToast(t('tutorial.gem'));
-        touchSave(save, { tutorialGem: true });
-      }
-    }
   }
 
   updateXpGuide(time) {
@@ -510,9 +500,22 @@ export class GameScene extends Phaser.Scene {
     if (this.pauseReason === 'main-skill') this.resumeGameplay();
     const save = this.registry.get('save');
     if (!save.tutorialDone && !(import.meta.env.DEV && this.stressMode)) this.ui?.showMoveHint();
+    if (!save.tutorialGem && !(import.meta.env.DEV && this.stressMode)) {
+      const showGemHint = () => {
+        if (this.over) return;
+        if (this.paused || this.pickups.gemCount === 0) {
+          this.time.delayedCall(650, showGemHint);
+          return;
+        }
+        this.ui?.showToast(t('tutorial.gem'), 3.6);
+        touchSave(save, { tutorialGem: true });
+      };
+      // Combo 提示先展示；经验提示稍后接上，避免同时堆叠遮挡战场。
+      this.time.delayedCall(5200, showGemHint);
+    }
     const comboTipKey = ELEMENT_COMBO_TIPS[SKILLS[key]?.element];
     if (comboTipKey && !(import.meta.env.DEV && this.stressMode)) {
-      this.ui?.showToast(t(comboTipKey), 7.5);
+      this.ui?.showToast(t(comboTipKey), 5);
     }
     if (this.startBuffKey) {
       const buff = AD_REWARDS.startBuffs[this.startBuffKey];

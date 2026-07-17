@@ -1,5 +1,5 @@
 // 开局主技能选择：全部正式直接技能一次点击进入战斗，无确认层。
-import { ACTIVE_SKILL_KEYS, SKILLS, THEME } from '../config.js';
+import { ACTIVE_SKILL_KEYS, DEFAULT_MAIN_SKILL, SKILLS, THEME } from '../config.js';
 import { getLocale, t } from '../i18n.js';
 import { Sfx } from '../audio.js';
 import { makeButton } from './widgets.js';
@@ -28,7 +28,8 @@ export class MainSkillOverlay {
     }).setOrigin(0.5);
     this.root.add([this.dim, this.title, this.subtitle]);
 
-    this.cards = ACTIVE_SKILL_KEYS.map((key) => {
+    const displayKeys = [DEFAULT_MAIN_SKILL, ...ACTIVE_SKILL_KEYS.filter(key => key !== DEFAULT_MAIN_SKILL)];
+    this.cards = displayKeys.map((key) => {
       const def = SKILLS[key];
       const card = makeButton(scene, 0, 0, CARD_W, CARD_H, t(def.nameKey), () => this.pick(key), {
         fontSize: '21px', minFontSize: 13, fill: 0x111a13, line: def.color,
@@ -43,9 +44,21 @@ export class MainSkillOverlay {
       card.add(description);
       card.skillKey = key;
       card.description = description;
+      if (key === DEFAULT_MAIN_SKILL) {
+        const defaultFrame = scene.add.rectangle(0, 0, CARD_W - 8, CARD_H - 8, 0x000000, 0)
+          .setStrokeStyle(4, THEME.gold, 0.95);
+        const defaultStar = scene.add.text(-CARD_W / 2 + 18, -CARD_H / 2 + 15, '★', {
+          fontFamily: UI_FONT_BOLD, fontSize: '21px', color: THEME.goldCss,
+        }).setOrigin(0.5);
+        card.add([defaultFrame, defaultStar]);
+      }
       this.root.add(card);
       return card;
     });
+    this._onKeyDown = event => {
+      if (this.visible && event.key === 'Enter') this.pick(DEFAULT_MAIN_SKILL);
+    };
+    scene.input.keyboard?.on('keydown', this._onKeyDown);
     this.layout();
   }
 
@@ -122,5 +135,8 @@ export class MainSkillOverlay {
     this.root.setVisible(false);
   }
 
-  destroy() { this.root.destroy(true); }
+  destroy() {
+    this.scene.input.keyboard?.off('keydown', this._onKeyDown);
+    this.root.destroy(true);
+  }
 }

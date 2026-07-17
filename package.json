@@ -10,6 +10,7 @@
     "build": "vite build && node tools/prepare-sites.mjs",
     "check:i18n": "node tools/check-locales.mjs",
     "check:synergy": "node tools/element-synergy-contract.mjs",
+    "check:props": "node tools/prop-system-contract.mjs",
     "check:skills": "node tools/skill-system-contract.mjs",
     "balance": "node tools/balance-sim.mjs",
     "check:poki": "node tools/poki-contract.mjs",
