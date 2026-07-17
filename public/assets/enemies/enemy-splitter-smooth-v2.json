@@ -1,0 +1,315 @@
+{
+  "frames": {
+    "splitter_front_1": {
+      "frame": {
+        "x": 2,
+        "y": 2,
+        "w": 88,
+        "h": 88
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 88,
+        "h": 88
+      },
+      "sourceSize": {
+        "w": 88,
+        "h": 88
+      }
+    },
+    "splitter_front_2": {
+      "frame": {
+        "x": 92,
+        "y": 2,
+        "w": 88,
+        "h": 88
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 88,
+        "h": 88
+      },
+      "sourceSize": {
+        "w": 88,
+        "h": 88
+      }
+    },
+    "splitter_front_3": {
+      "frame": {
+        "x": 182,
+        "y": 2,
+        "w": 88,
+        "h": 88
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 88,
+        "h": 88
+      },
+      "sourceSize": {
+        "w": 88,
+        "h": 88
+      }
+    },
+    "splitter_front_4": {
+      "frame": {
+        "x": 272,
+        "y": 2,
+        "w": 88,
+        "h": 88
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 88,
+        "h": 88
+      },
+      "sourceSize": {
+        "w": 88,
+        "h": 88
+      }
+    },
+    "splitter_front_5": {
+      "frame": {
+        "x": 362,
+        "y": 2,
+        "w": 88,
+        "h": 88
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 88,
+        "h": 88
+      },
+      "sourceSize": {
+        "w": 88,
+        "h": 88
+      }
+    },
+    "splitter_left_1": {
+      "frame": {
+        "x": 2,
+        "y": 92,
+        "w": 88,
+        "h": 88
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 88,
+        "h": 88
+      },
+      "sourceSize": {
+        "w": 88,
+        "h": 88
+      }
+    },
+    "splitter_left_2": {
+      "frame": {
+        "x": 92,
+        "y": 92,
+        "w": 88,
+        "h": 88
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 88,
+        "h": 88
+      },
+      "sourceSize": {
+        "w": 88,
+        "h": 88
+      }
+    },
+    "splitter_left_3": {
+      "frame": {
+        "x": 182,
+        "y": 92,
+        "w": 88,
+        "h": 88
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 88,
+        "h": 88
+      },
+      "sourceSize": {
+        "w": 88,
+        "h": 88
+      }
+    },
+    "splitter_left_4": {
+      "frame": {
+        "x": 272,
+        "y": 92,
+        "w": 88,
+        "h": 88
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 88,
+        "h": 88
+      },
+      "sourceSize": {
+        "w": 88,
+        "h": 88
+      }
+    },
+    "splitter_left_5": {
+      "frame": {
+        "x": 362,
+        "y": 92,
+        "w": 88,
+        "h": 88
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 88,
+        "h": 88
+      },
+      "sourceSize": {
+        "w": 88,
+        "h": 88
+      }
+    },
+    "splitter_front_left_1": {
+      "frame": {
+        "x": 2,
+        "y": 182,
+        "w": 88,
+        "h": 88
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 88,
+        "h": 88
+      },
+      "sourceSize": {
+        "w": 88,
+        "h": 88
+      }
+    },
+    "splitter_front_left_2": {
+      "frame": {
+        "x": 92,
+        "y": 182,
+        "w": 88,
+        "h": 88
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 88,
+        "h": 88
+      },
+      "sourceSize": {
+        "w": 88,
+        "h": 88
+      }
+    },
+    "splitter_front_left_3": {
+      "frame": {
+        "x": 182,
+        "y": 182,
+        "w": 88,
+        "h": 88
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 88,
+        "h": 88
+      },
+      "sourceSize": {
+        "w": 88,
+        "h": 88
+      }
+    },
+    "splitter_front_left_4": {
+      "frame": {
+        "x": 272,
+        "y": 182,
+        "w": 88,
+        "h": 88
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 88,
+        "h": 88
+      },
+      "sourceSize": {
+        "w": 88,
+        "h": 88
+      }
+    },
+    "splitter_front_left_5": {
+      "frame": {
+        "x": 362,
+        "y": 182,
+        "w": 88,
+        "h": 88
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 88,
+        "h": 88
+      },
+      "sourceSize": {
+        "w": 88,
+        "h": 88
+      }
+    }
+  },
+  "meta": {
+    "app": "Codex ChatGPT five-frame three-direction enemy sheet packer",
+    "version": "2.0",
+    "image": "enemy-splitter-smooth-v2.webp",
+    "format": "RGBA8888",
+    "size": {
+      "w": 452,
+      "h": 272
+    },
+    "scale": "1"
+  }
+}

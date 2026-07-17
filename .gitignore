@@ -1,0 +1,20 @@
+# 依赖与构建产物
+node_modules/
+dist/
+*.zip
+
+# 本地会话/工具产物（.claude/launch.json 保留入库，团队共用 dev server 配置）
+.claude/worktrees/
+.claude/settings.local.json
+*.log
+/tmp/imagegen/
+
+# 系统杂项
+.DS_Store
+Thumbs.db
+
+# 兄弟项目遗留目录（如误拷贝）
+runtime-shots/
+
+# 注：artifacts/ 为美术素材管线产物（源图/抠像/QA/预览），按约定入库，勿加入 ignore
+/artifacts

@@ -1,0 +1,25 @@
+{
+  "name": "horde-breaker",
+  "version": "0.3.0",
+  "description": "Horde Breaker - elemental survivors-like for Poki",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0 --port 8081",
+    "start": "vite --host 0.0.0.0 --port 8081",
+    "build": "vite build && node tools/prepare-sites.mjs",
+    "check:i18n": "node tools/check-locales.mjs",
+    "check:synergy": "node tools/element-synergy-contract.mjs",
+    "check:skills": "node tools/skill-system-contract.mjs",
+    "balance": "node tools/balance-sim.mjs",
+    "check:poki": "node tools/poki-contract.mjs",
+    "package:poki": "npm run build && python tools/package-poki.py",
+    "preview": "vite preview --host 0.0.0.0 --port 8081"
+  },
+  "dependencies": {
+    "phaser": "^4.2.0"
+  },
+  "devDependencies": {
+    "vite": "^7.0.0"
+  }
+}
