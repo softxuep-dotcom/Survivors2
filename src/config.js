@@ -114,6 +114,14 @@ export const ELEMENT_SYNERGY = {
   },
 };
 
+// 只为已经落地的跨技能协同提供开局配装提示；没有 Combo 的元素不提示。
+export const ELEMENT_COMBO_TIPS = Object.freeze({
+  ice: 'combo.tip.ice',
+  lightning: 'combo.tip.lightning',
+  poison: 'combo.tip.poison',
+  fire: 'combo.tip.fire',
+});
+
 // ---------- 玩家 ----------
 export const PLAYER = {
   speed: 250,             // px/s [TUNE]
@@ -137,7 +145,7 @@ export const ENEMY_TYPES = {
     hitCd: 0.7, spriteH: 58, shadowW: 62, tint: null,
   },
   tank: {
-    key: 'tank', hp: 30.4, dmg: 14, speed: 40, radius: 28, xp: 3,
+    key: 'tank', hp: 27.4, dmg: 14, speed: 40, radius: 28, xp: 3,
     hitCd: 1.0, spriteH: 74, bakedShadow: true, tint: null,
   },
   flyer: {
@@ -173,8 +181,8 @@ export const ENEMY_BEHAVIOR = {
   },
   tank: {
     frontArcDeg: 118,
-    frontDamageMult: 0.35,
-    eliteFrontDamageMult: 0.2,
+    frontDamageMult: 0.4,
+    eliteFrontDamageMult: 0.25,
     blockLabel: 'BLOCK',
     blockColor: '#b7d7ff',
   },
@@ -191,10 +199,10 @@ export const ENEMY_BEHAVIOR = {
 // 敌人生命随局内时间成长：hp × hpGrowth(t)
 export function hpGrowth(timeSec) {
   const m = timeSec / 60;
-  return 1 + 0.3 * Math.pow(m, 1.15); // [TUNE] 3分钟≈×2.06，5分钟≈×2.91，10分钟≈×5.24
+  return 1 + 0.27 * Math.pow(m, 1.12); // [TUNE] 3分钟≈×1.92，5分钟≈×2.64，10分钟≈×4.56
 }
 
-// 精英与 Boss 保留更陡的独立成长，把血墙从普通杂兵身上移到可辨识的特殊目标。
+// 精英与 Boss 沿用同一条缓和后的成长曲线，再叠加各自倍率维持特殊目标定位。
 export function specialHpGrowth(timeSec) {
   return hpGrowth(timeSec);
 }
@@ -233,7 +241,7 @@ export const PROPS = {
     xp:     { weight: 40, needPct: 0.25 },
     gems:   { weight: 26, count: 3 },
     heal:   { weight: 19, pct: 0.16 },
-    magnet: { weight: 15 },
+    magnet: { weight: 15, radius: 520 }, // 玩家周围的大范围吸取，保留远处宝石的跑图拾取价值
   },
 };
 
@@ -654,13 +662,13 @@ export const EVOLUTIONS = {
   },
 };
 
-// ---------- 直接技能制（当前 8 个；不再走 Lv4 二选一进阶） ----------
+// ---------- 直接技能制（当前 12 个；不再走 Lv4 二选一进阶） ----------
 // 每个技能从 Lv1 就拥有完整行为，Lv1→Lv8 共选择 7 次模块。
 // 模块分为规模 / 威力 / 特性，每类最多 4 级；技能在 Lv8 封顶，因此每局只能取得 7 次模块成长。
-// 威力以刃风暴 8 → 11 → 14 → 17 → 20 为标尺，每级增加基础伤害的 37.5%。
+// 威力模块每级增加基础伤害的 37.5%；Lv1 基础输出已经包含统一的前期强化。
 export const ACTIVE_SKILL_KEYS = Object.freeze([
   'bladestorm', 'headhunter', 'lavatrail', 'cluster', 'blizzard', 'icecage',
-  'stormeye', 'thunderjudgment',
+  'stormeye', 'thunderjudgment', 'plague', 'corrosion', 'holyhalo', 'prism',
 ]);
 export const SKILL_MODULE_KEYS = Object.freeze(['scale', 'power', 'trait']);
 export const SKILL_POWER_PER_RANK = 0.375;
@@ -672,7 +680,7 @@ export const SKILLS = Object.freeze({
     element: 'physical', icon: 'icon_blade', color: 0x9ddcff,
     behavior: 'orbit', maxLv: 8,
     baseParams: {
-      dmg: 8, count: 3, cd: 0.75, orbitRadius: 105, speed: 2.4,
+      dmg: 12, count: 3, cd: 0.70, orbitRadius: 105, speed: 2.4,
     },
     modules: {
       scale: [
@@ -684,32 +692,32 @@ export const SKILLS = Object.freeze({
       trait: [
         { basePct: { speed: 20, orbitRadius: 10 }, text: { en: 'Rotation speed +20%, orbit radius +10%', zh: '旋转速度 +20%，环绕半径 +10%' } },
         { basePct: { speed: 20, orbitRadius: 10 }, text: { en: 'Rotation speed +20%, orbit radius +10%', zh: '旋转速度 +20%，环绕半径 +10%' } },
-        { basePct: { speed: 20, orbitRadius: 10 }, set: { cd: 0.70 }, text: { en: 'Speed +20%, radius +10%, repeat-hit interval: 0.70s', zh: '旋转速度 +20%，环绕半径 +10%，复击降至 0.70 秒' } },
         { basePct: { speed: 20, orbitRadius: 10 }, set: { cd: 0.65 }, text: { en: 'Speed +20%, radius +10%, repeat-hit interval: 0.65s', zh: '旋转速度 +20%，环绕半径 +10%，复击降至 0.65 秒' } },
+        { basePct: { speed: 20, orbitRadius: 10 }, set: { cd: 0.60 }, text: { en: 'Speed +20%, radius +10%, repeat-hit interval: 0.60s', zh: '旋转速度 +20%，环绕半径 +10%，复击降至 0.60 秒' } },
       ],
     },
   },
   headhunter: {
     key: 'headhunter', nameKey: 'evo.headhunter', descKey: 'evo.headhunterDesc',
     element: 'physical', icon: 'icon_blade', color: 0xffd36d,
-    behavior: 'homing', projTexture: 'blade', projRadius: 12, maxLv: 8,
-    volleySpreadDeg: 9, volleyStaggerMs: 70,
+    behavior: 'headhunter', projTexture: 'blade', projRadius: 12, maxLv: 8,
+    volleyStaggerMs: 55,
     baseParams: {
-      dmg: 18, count: 1, pierce: 0, cd: 1.35, speed: 600, range: 900,
-      homing: 5, crit: 0.20, execute: 0.10,
+      dmg: 30, count: 1, pierce: 0, cd: 1.20, speed: 900, range: 1050,
+      crit: 0.20, bossMult: 1.50,
     },
     modules: {
       scale: [
-        { add: { count: 1 }, text: { en: 'Homing blade +1', zh: '追踪飞镖 +1' } },
-        { add: { count: 1 }, text: { en: 'Homing blade +1', zh: '追踪飞镖 +1' } },
-        { add: { count: 1 }, text: { en: 'Homing blade +1', zh: '追踪飞镖 +1' } },
-        { add: { count: 1 }, text: { en: 'Homing blade +1', zh: '追踪飞镖 +1' } },
+        { add: { count: 1 }, text: { en: 'Targeted blade +1', zh: '锁敌飞镖 +1' } },
+        { add: { count: 1 }, text: { en: 'Targeted blade +1', zh: '锁敌飞镖 +1' } },
+        { add: { count: 1 }, text: { en: 'Targeted blade +1', zh: '锁敌飞镖 +1' } },
+        { add: { count: 1 }, text: { en: 'Targeted blade +1', zh: '锁敌飞镖 +1' } },
       ],
       trait: [
         { add: { crit: 0.10 }, text: { en: 'Critical chance +10%', zh: '暴击率 +10%' } },
-        { add: { crit: 0.10, execute: 0.03, pierce: 1 }, text: { en: 'Crit +10%, execute +3%, pierce +1', zh: '暴击率 +10%，处决线 +3%，穿透 +1' } },
-        { add: { crit: 0.10, execute: 0.03 }, text: { en: 'Crit +10%, execute threshold +3%', zh: '暴击率 +10%，处决线 +3%' } },
-        { add: { crit: 0.10, execute: 0.04, pierce: 1 }, text: { en: 'Crit +10%, execute +4%, pierce +1', zh: '暴击率 +10%，处决线 +4%，穿透 +1' } },
+        { add: { crit: 0.10, bossMult: 0.15, pierce: 1 }, text: { en: 'Crit +10%, boss damage +15%, pierce +1', zh: '暴击率 +10%，Boss 伤害 +15%，穿透 +1' } },
+        { add: { crit: 0.10, bossMult: 0.15 }, text: { en: 'Crit +10%, boss damage +15%', zh: '暴击率 +10%，Boss 伤害 +15%' } },
+        { add: { crit: 0.10, bossMult: 0.20, pierce: 1 }, text: { en: 'Crit +10%, boss damage +20%, pierce +1', zh: '暴击率 +10%，Boss 伤害 +20%，穿透 +1' } },
       ],
     },
   },
@@ -719,9 +727,9 @@ export const SKILLS = Object.freeze({
     behavior: 'lava', projTexture: 'fireball_blazing', projRadius: 16, maxLv: 8,
     volleySpreadDeg: 14, volleyStaggerMs: 90,
     baseParams: {
-      dmg: 16, count: 1, pierce: 0, cd: 1.70, speed: 460, range: 720,
+      dmg: 19, count: 1, pierce: 0, cd: 1.70, speed: 460, range: 720,
       aoe: 72, aoeMult: 0.60,
-      trailRadius: 45, trailDmg: 3, trailLife: 2, trailTick: 0.5,
+      trailRadius: 45, trailDmg: 3.6, trailLife: 2, trailTick: 0.5,
     },
     modules: {
       scale: [
@@ -745,8 +753,8 @@ export const SKILLS = Object.freeze({
     fragmentsPerProjectile: true,
     volleySpreadDeg: 14, volleyStaggerMs: 90,
     baseParams: {
-      dmg: 20, count: 1, pierce: 0, cd: 1.80, speed: 470, range: 720,
-      aoe: 88, aoeMult: 0.65, fragments: 3, fragmentDmg: 10,
+      dmg: 24, count: 1, pierce: 0, cd: 1.80, speed: 470, range: 720,
+      aoe: 88, aoeMult: 0.65, fragments: 3, fragmentDmg: 12,
       fragmentAoe: 44, fragmentRange: 270,
     },
     modules: {
@@ -769,7 +777,7 @@ export const SKILLS = Object.freeze({
     element: 'ice', icon: 'icon_frostpulse', color: 0x7adfff,
     behavior: 'field', maxLv: 8,
     baseParams: {
-      dmg: 5, cd: 0.8, radius: 220, slow: 0.25, slowDur: 1,
+      dmg: 6, cd: 0.8, radius: 220, slow: 0.25, slowDur: 1,
     },
     modules: {
       scale: [
@@ -791,7 +799,7 @@ export const SKILLS = Object.freeze({
     element: 'ice', icon: 'icon_frostpulse', color: 0xb9f1ff,
     behavior: 'pulse', maxLv: 8,
     baseParams: {
-      dmg: 24, cd: 3.0, radius: 160,
+      dmg: 29, cd: 3.0, radius: 160,
       freezeChance: 0.25, freezeDur: 1.1,
     },
     modules: {
@@ -814,7 +822,7 @@ export const SKILLS = Object.freeze({
     element: 'lightning', icon: 'icon_chainlightning', color: 0xa897ff,
     behavior: 'storm', maxLv: 8,
     baseParams: {
-      dmg: 18, cd: 1.1, bolts: 1, radius: 450,
+      dmg: 22, cd: 1.1, bolts: 1, radius: 450,
       splash: 48, splashMult: 0.60,
     },
     modules: {
@@ -837,7 +845,7 @@ export const SKILLS = Object.freeze({
     element: 'lightning', icon: 'icon_chainlightning', color: 0xe2d7ff,
     behavior: 'judgment', maxLv: 8,
     baseParams: {
-      dmg: 32, cd: 1.8, radius: 900,
+      dmg: 38, cd: 1.8, radius: 900,
       bounces: 1, jump: 280, bounceMult: 0.70,
       stunChance: 0.14, stunDur: 0.5,
     },
@@ -853,6 +861,95 @@ export const SKILLS = Object.freeze({
         { add: { stunDur: 0.2 }, set: { bounceMult: 0.85 }, text: { en: 'Stun duration +0.2s, bounce damage: 85%', zh: '眩晕时间 +0.2 秒，弹射伤害升至 85%' } },
         { add: { stunChance: 0.12 }, set: { bounceMult: 0.925 }, text: { en: 'Stun +12%, bounce damage: 92.5%', zh: '眩晕率 +12%，弹射伤害升至 92.5%' } },
         { add: { stunChance: 0.14, stunDur: 0.2 }, set: { bounceMult: 1 }, text: { en: 'Stun +14%/+0.2s, bounce damage: 100%', zh: '眩晕率 +14%、时间 +0.2 秒，弹射伤害升至 100%' } },
+      ],
+    },
+  },
+  plague: {
+    key: 'plague', nameKey: 'evo.plague', descKey: 'evo.plagueDesc',
+    element: 'poison', icon: 'icon_venomflask', color: 0x7f6aa8,
+    behavior: 'pool', projTexture: 'venom_flask_plague', projRadius: 12, maxLv: 8,
+    baseParams: {
+      dmg: 11, cd: 1.75, radius: 105, duration: 3.5, tick: 0.5,
+      poisonDps: 11, speed: 450, plague: true, plagueChainDepth: 1,
+    },
+    modules: {
+      scale: [
+        { basePct: { radius: 15 }, text: { en: 'Plague pool radius +15%', zh: '瘟疫毒池范围 +15%' } },
+        { basePct: { radius: 15 }, text: { en: 'Plague pool radius +15%', zh: '瘟疫毒池范围 +15%' } },
+        { basePct: { radius: 15 }, text: { en: 'Plague pool radius +15%', zh: '瘟疫毒池范围 +15%' } },
+        { basePct: { radius: 15 }, text: { en: 'Plague pool radius +15%', zh: '瘟疫毒池范围 +15%' } },
+      ],
+      trait: [
+        { add: { duration: 0.5 }, text: { en: 'Pool duration +0.5s', zh: '毒池持续时间 +0.5 秒' } },
+        { add: { duration: 0.5 }, set: { tick: 0.45 }, text: { en: 'Duration +0.5s, damage interval: 0.45s', zh: '持续时间 +0.5 秒，跳伤间隔降至 0.45 秒' } },
+        { add: { duration: 0.5 }, basePct: { poisonDps: 20 }, text: { en: 'Duration +0.5s, poison damage +20%', zh: '持续时间 +0.5 秒，中毒伤害 +20%' } },
+        { add: { duration: 0.5 }, set: { tick: 0.40 }, text: { en: 'Duration +0.5s, damage interval: 0.40s', zh: '持续时间 +0.5 秒，跳伤间隔降至 0.40 秒' } },
+      ],
+    },
+  },
+  corrosion: {
+    key: 'corrosion', nameKey: 'evo.corrosion', descKey: 'evo.corrosionDesc',
+    element: 'poison', icon: 'icon_venomflask', color: 0xc9f24b,
+    behavior: 'pool', projTexture: 'venom_flask_corrosion', projRadius: 12, maxLv: 8,
+    baseParams: {
+      dmg: 11, cd: 1.75, radius: 105, duration: 3.5, tick: 0.5,
+      poisonDps: 10, speed: 450, vuln: 0.08, vulnDur: 1.5,
+    },
+    modules: {
+      scale: [
+        { basePct: { radius: 15 }, text: { en: 'Corrosion pool radius +15%', zh: '腐蚀毒池范围 +15%' } },
+        { basePct: { radius: 15 }, text: { en: 'Corrosion pool radius +15%', zh: '腐蚀毒池范围 +15%' } },
+        { basePct: { radius: 15 }, text: { en: 'Corrosion pool radius +15%', zh: '腐蚀毒池范围 +15%' } },
+        { basePct: { radius: 15 }, text: { en: 'Corrosion pool radius +15%', zh: '腐蚀毒池范围 +15%' } },
+      ],
+      trait: [
+        { add: { duration: 0.5, vuln: 0.03 }, text: { en: 'Duration +0.5s, vulnerability +3%', zh: '持续时间 +0.5 秒，易伤 +3%' } },
+        { add: { duration: 0.5, vulnDur: 0.3 }, text: { en: 'Duration +0.5s, vulnerability duration +0.3s', zh: '持续时间 +0.5 秒，易伤持续 +0.3 秒' } },
+        { add: { duration: 0.5, vuln: 0.03 }, set: { tick: 0.45 }, text: { en: 'Duration +0.5s, vulnerability +3%, interval: 0.45s', zh: '持续时间 +0.5 秒，易伤 +3%，跳伤间隔 0.45 秒' } },
+        { add: { duration: 0.5, vuln: 0.04, vulnDur: 0.4 }, set: { tick: 0.40 }, text: { en: 'Duration +0.5s, vulnerability +4%/+0.4s, interval: 0.40s', zh: '持续时间 +0.5 秒，易伤 +4%/+0.4 秒，跳伤间隔 0.40 秒' } },
+      ],
+    },
+  },
+  holyhalo: {
+    key: 'holyhalo', nameKey: 'evo.holyhalo', descKey: 'evo.holyhaloDesc',
+    element: 'light', icon: 'icon_holyorb', color: 0xffef9a,
+    behavior: 'aura', maxLv: 8,
+    baseParams: { dmg: 12, cd: 1.0, radius: 120, heal: 0.25 },
+    modules: {
+      scale: [
+        { basePct: { radius: 15 }, text: { en: 'Holy aura radius +15%', zh: '圣辉光环范围 +15%' } },
+        { basePct: { radius: 15 }, text: { en: 'Holy aura radius +15%', zh: '圣辉光环范围 +15%' } },
+        { basePct: { radius: 15 }, text: { en: 'Holy aura radius +15%', zh: '圣辉光环范围 +15%' } },
+        { basePct: { radius: 15 }, text: { en: 'Holy aura radius +15%', zh: '圣辉光环范围 +15%' } },
+      ],
+      trait: [
+        { add: { heal: 0.05 }, basePct: { cd: -8 }, text: { en: 'Cooldown -8%, healing +0.05/s', zh: '冷却 -8%，每秒回复 +0.05' } },
+        { add: { heal: 0.05 }, basePct: { cd: -8 }, text: { en: 'Cooldown -8%, healing +0.05/s', zh: '冷却 -8%，每秒回复 +0.05' } },
+        { add: { heal: 0.05 }, basePct: { cd: -10 }, text: { en: 'Cooldown -10%, healing +0.05/s', zh: '冷却 -10%，每秒回复 +0.05' } },
+        { add: { heal: 0.05 }, basePct: { cd: -12 }, text: { en: 'Cooldown -12%, healing +0.05/s', zh: '冷却 -12%，每秒回复 +0.05' } },
+      ],
+    },
+  },
+  prism: {
+    key: 'prism', nameKey: 'evo.prism', descKey: 'evo.prismDesc',
+    element: 'light', icon: 'icon_holyorb', color: 0xfff4c2,
+    behavior: 'bounce', projTexture: 'holy_orb', projRadius: 16, maxLv: 8,
+    baseParams: {
+      dmg: 17, count: 1, cd: 2.0, speed: 360, duration: 4.5,
+      rehit: 1.2, splitRays: 1, rayDmg: 6,
+    },
+    modules: {
+      scale: [
+        { add: { splitRays: 1 }, text: { en: 'Radiant beam +1 per hit', zh: '每次命中的圣光束 +1' } },
+        { add: { count: 1 }, text: { en: 'Prism orb +1', zh: '棱镜光球 +1' } },
+        { add: { splitRays: 1 }, text: { en: 'Radiant beam +1 per hit', zh: '每次命中的圣光束 +1' } },
+        { add: { count: 1 }, text: { en: 'Prism orb +1', zh: '棱镜光球 +1' } },
+      ],
+      trait: [
+        { add: { duration: 0.4 }, basePct: { speed: 10 }, text: { en: 'Duration +0.4s, flight speed +10%', zh: '持续时间 +0.4 秒，飞行速度 +10%' } },
+        { set: { rehit: 1.1 }, basePct: { rayDmg: 20 }, text: { en: 'Repeat hit: 1.1s, beam damage +20%', zh: '复击间隔 1.1 秒，光束伤害 +20%' } },
+        { add: { duration: 0.4 }, basePct: { speed: 10 }, text: { en: 'Duration +0.4s, flight speed +10%', zh: '持续时间 +0.4 秒，飞行速度 +10%' } },
+        { set: { rehit: 1.0 }, basePct: { rayDmg: 20 }, text: { en: 'Repeat hit: 1.0s, beam damage +20%', zh: '复击间隔 1.0 秒，光束伤害 +20%' } },
       ],
     },
   },
@@ -874,7 +971,7 @@ export function skillParamsFor(def, modules) {
   }
   for (const [key, pct] of Object.entries(basePct)) params[key] = base[key] * (1 + pct / 100);
   const power = 1 + (modules.power || 0) * SKILL_POWER_PER_RANK;
-  for (const key of ['dmg', 'trailDmg', 'fragmentDmg']) {
+  for (const key of ['dmg', 'trailDmg', 'fragmentDmg', 'poisonDps', 'rayDmg']) {
     if (Number.isFinite(params[key])) params[key] = Math.round(params[key] * power * 1000) / 1000;
   }
   return params;
@@ -889,9 +986,8 @@ export const PASSIVES = {
   core:      { key: 'core',      nameKey: 'passive.core',      descKey: 'passive.coreDesc',      icon: 'icon_core',      maxLv: 3, values: [20, 35, 50], regen: [0.5, 1, 1.5] },
   rune:      { key: 'rune',      nameKey: 'passive.rune',      descKey: 'passive.runeDesc',      icon: 'icon_rune',      maxLv: 3, values: [10, 18, 28] },
 };
-export const MAX_WEAPONS = 4;  // 同时持有上限（GDD §3.2）
-// M0.5 期间放开到全部 6 个（内容少，3 个上限 5 分钟就学完导致只剩血包）；M1 武器补齐后收回 3
-export const MAX_PASSIVES = 3;
+// 只限制刃风暴这类主动技能；被动不占主动技能槽，6 种均可在局内升至 Lv3。
+export const MAX_ACTIVE_SKILLS = 4;
 // 全部学满后的无限兜底卡（保证每次升级都有意义，playtest 反馈 2026-07-13）
 export const MAXED_BONUS = { healPct: 0.30, dmgPct: 4, speedPct: 2 };
 

@@ -1,10 +1,10 @@
 // 局内主场景：组装各系统并驱动主循环。系统逻辑都在 game/ 下，这里只做编排。
-// UI（HUD/三选一/摇杆可视件）在并行的 UiScene——世界相机 zoom 不影响 UI。
+// UI（HUD/升级四选一/摇杆可视件）在并行的 UiScene——世界相机 zoom 不影响 UI。
 import Phaser from 'phaser';
 import {
   THEME, AUDIO_PHASES, DEBUG_QUERY, STRESS_QUERY, STRESS_COUNT, STRESS_TYPES,
   RUN, DIFFICULTIES, EVOLUTIONS, CHARACTERS, TALENTS, WORLD_SKINS, AD_REWARDS, PROPS, XP_REWARDS,
-  SKILLS,
+  SKILLS, ELEMENT_COMBO_TIPS,
 } from '../config.js';
 import { Poki } from '../poki.js';
 import { touchSave } from '../save.js';
@@ -496,7 +496,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   onLevelUp() {
-    // 压测必须持续跑满主循环，不能被三选一弹窗暂停。
+    // 压测必须持续跑满主循环，不能被升级选卡弹窗暂停。
     if (import.meta.env.DEV && this.stressMode) return;
     this.pendingLevelUps++;
     this.pendingChoiceSources.push('level');
@@ -510,6 +510,10 @@ export class GameScene extends Phaser.Scene {
     if (this.pauseReason === 'main-skill') this.resumeGameplay();
     const save = this.registry.get('save');
     if (!save.tutorialDone && !(import.meta.env.DEV && this.stressMode)) this.ui?.showMoveHint();
+    const comboTipKey = ELEMENT_COMBO_TIPS[SKILLS[key]?.element];
+    if (comboTipKey && !(import.meta.env.DEV && this.stressMode)) {
+      this.ui?.showToast(t(comboTipKey), 7.5);
+    }
     if (this.startBuffKey) {
       const buff = AD_REWARDS.startBuffs[this.startBuffKey];
       this.ui?.showToast(t('ad.buffActive', { name: t(buff.nameKey) }), 3.2);
@@ -541,7 +545,7 @@ export class GameScene extends Phaser.Scene {
     this.state.damage[source] = (this.state.damage[source] || 0) + amount;
   }
 
-  // 局外重摇只替换两张卡，保留一张旧选项，避免局外资源直接控制整组 build。
+  // 局外重摇保留一张旧选项、替换其余三张，避免局外资源直接控制整组 build。
   buildPartialReroll(choices) {
     if (!choices?.length) return this.levelSystem.buildChoices();
     const keep = choices[Math.floor(Math.random() * choices.length)];
@@ -582,7 +586,6 @@ export class GameScene extends Phaser.Scene {
     this.adRerollUsed = false;
     this.pauseGameplay('level');
     const firstChoices = this.levelSystem.buildChoices();
-    const firstMainUpgrade = this.levelSystem.levelUpCount === 0;
     const showChoices = (choices = firstChoices) => this.ui.overlay.show(choices, (choice) => {
       if (this.adBusy) return;
       this.levelSystem.noteOfferedChoices(choices);
@@ -595,14 +598,14 @@ export class GameScene extends Phaser.Scene {
       this.resumeGameplay();
       if (this.pendingLevelUps > 0) this.time.delayedCall(60, () => this.tryShowLevelUp());
     }, {
-      rerolls: firstMainUpgrade ? 0 : this.rerolls,
+      rerolls: this.rerolls,
       onReroll: () => {
         if (this.rerolls <= 0) return;
         this.rerolls--;
         this.analytics.event('reroll', this.state.time, { remaining: this.rerolls });
         showChoices(this.buildPartialReroll(choices));
       },
-      adReroll: !firstMainUpgrade && !this.adRerollUsed,
+      adReroll: !this.adRerollUsed,
       onAdReroll: async () => {
         if (this.adBusy || this.adRerollUsed) return;
         this.adBusy = true;

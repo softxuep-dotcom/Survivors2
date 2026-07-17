@@ -1,4 +1,4 @@
-// 升级三选一覆盖层：竖屏使用全宽横向技能卡，横屏保留三卡并排。
+// 升级四选一覆盖层：竖屏使用全宽横向技能卡，横屏四卡并排。
 import Phaser from 'phaser';
 import { WEAPONS, EVOLUTIONS, SKILLS, PASSIVES, THEME, MAXED_BONUS } from '../config.js';
 import { t } from '../i18n.js';
@@ -101,11 +101,11 @@ export class LevelUpOverlay {
     this.root.add(this.reroll);
 
     this.cards = [];
-    for (let i = 0; i < 3; i++) this.cards.push(this.buildCard(i));
+    for (let i = 0; i < 4; i++) this.cards.push(this.buildCard(i));
 
     this.keyHandler = (event) => {
       if (!this.visible || this.busy) return;
-      const idx = { Digit1: 0, Digit2: 1, Digit3: 2 }[event.code];
+      const idx = { Digit1: 0, Digit2: 1, Digit3: 2, Digit4: 3 }[event.code];
       if (idx != null && this.choices[idx]) this.pick(idx);
     };
     scene.input.keyboard.on('keydown', this.keyHandler);
@@ -302,7 +302,7 @@ export class LevelUpOverlay {
     } else if (choice.kind === 'passive') {
       const def = PASSIVES[choice.key];
       icon.setTexture(def.icon);
-      badge.setText(choice.toLv === 1 ? t('levelup.newWeapon') : t('levelup.lvup', { lv: choice.toLv }));
+      badge.setText(choice.toLv === 1 ? t('levelup.newPassive') : t('levelup.lvup', { lv: choice.toLv }));
       name.setText(t(def.nameKey));
       desc.setText(t(def.descKey, {
         value: def.values[choice.toLv - 1],
@@ -352,7 +352,7 @@ export class LevelUpOverlay {
       .setAlpha(1);
     this.reroll.label.setColor(rerolls > 0 ? '#eadab4' : THEME.goldCss);
 
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < this.cards.length; i++) {
       const card = this.cards[i];
       const choice = choices[i];
       card.setVisible(!!choice);
@@ -378,19 +378,22 @@ export class LevelUpOverlay {
     const w = this.scene.scale.width;
     const h = this.scene.scale.height;
     this.dim.setSize(w, h);
-    const count = Math.max(1, Math.min(3, this.choices.length || 3));
+    const count = Math.max(1, Math.min(this.cards.length, this.choices.length || this.cards.length));
     if (this.portrait) {
-      const gap = 16;
-      const totalH = this.cardH * count + gap * (count - 1);
-      const top = Math.max(this.safe.top + 166, (h - totalH) / 2 - 24);
+      const gap = count > 3 ? 10 : 16;
+      const availableH = h - this.safe.top - this.safe.bottom - 220;
+      const scale = Math.min(1, availableH / (this.cardH * count + gap * (count - 1)));
+      const scaledGap = gap * scale;
+      const totalH = this.cardH * scale * count + scaledGap * (count - 1);
+      const top = Math.max(this.safe.top + 138, (h - totalH) / 2 - 12);
       const titleY = top - 116;
       this.title.setPosition(w / 2, titleY).setWordWrapWidth(w - 42, true);
       const subtitleY = titleY + this.title.height / 2 + 36;
       this.subtitle.setPosition(w / 2, subtitleY).setWordWrapWidth(w - 56, true);
       drawRays(this.rays, w / 2, titleY, Math.min(w, 590));
-      this._layoutScale = 1;
-      for (let i = 0; i < 3; i++) {
-        this.cards[i].setPosition(w / 2, top + this.cardH / 2 + i * (this.cardH + gap)).setScale(1);
+      this._layoutScale = scale;
+      for (let i = 0; i < this.cards.length; i++) {
+        this.cards[i].setPosition(w / 2, top + this.cardH * scale / 2 + i * (this.cardH * scale + scaledGap)).setScale(scale);
       }
       this.reroll.setPosition(w / 2, Math.min(h - this.safe.bottom - 36, top + totalH + 54));
       return;
@@ -403,7 +406,7 @@ export class LevelUpOverlay {
     const totalW = DESKTOP_CARD_W * count + DESKTOP_GAP * (count - 1);
     const scale = Math.min(1, (w - 24) / totalW, (h - 170) / DESKTOP_CARD_H);
     this._layoutScale = scale;
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < this.cards.length; i++) {
       const x = w / 2 + (i - (count - 1) / 2) * (DESKTOP_CARD_W + DESKTOP_GAP) * scale;
       this.cards[i].setPosition(x, h / 2 + 25).setScale(scale);
     }

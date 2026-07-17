@@ -1,7 +1,7 @@
 // 武器系统：正式局使用直接技能制；旧基础/进阶定义保留给镜像 Boss 与 VFX Lab。
 // 场景只负责调度；投射物/持续区域均池化，伤害与状态统一交给 EnemyManager 结算。
 import {
-  WEAPONS, EVOLUTIONS, SKILLS, SKILL_MODULE_MAX_RANK, skillParamsFor, PERF,
+  WEAPONS, EVOLUTIONS, SKILLS, SKILL_MODULE_MAX_RANK, MAX_ACTIVE_SKILLS, skillParamsFor, PERF,
 } from '../config.js';
 import { Pool } from '../core/Pool.js';
 import { Sfx } from '../audio.js';
@@ -13,6 +13,7 @@ const TAU = Math.PI * 2;
 const BEHAVIORS = {
   projectile(ctx) { ctx.wm.fireAimed(ctx.weapon, ctx.params); },
   homing(ctx) { ctx.wm.fireAimed(ctx.weapon, ctx.params, { mode: 'homing' }); },
+  headhunter(ctx) { ctx.wm.fireHeadhunter(ctx.weapon, ctx.params); },
   lava(ctx) { ctx.wm.fireAimed(ctx.weapon, ctx.params, { mode: 'firetrail' }); },
   cluster(ctx) { ctx.wm.fireAimed(ctx.weapon, ctx.params, { mode: 'cluster' }); },
   pulse(ctx) {
@@ -80,7 +81,7 @@ export class WeaponManager {
     this.pool = new Pool(() => ({
       x: 0, y: 0, vx: 0, vy: 0, dmg: 0, pierce: 0, radius: 10, life: 0,
       aoe: 0, aoeMult: 0, mode: 'normal', sourceKey: '', speed: 0,
-      homing: 0, crit: 0, execute: 0, collision: true, spin: 0,
+      homing: 0, crit: 0, execute: 0, bossMult: 1, collision: true, spin: 0,
       trailT: 0, vfxT: 0, trailRadius: 0, trailDmg: 0, trailLife: 0, trailTick: 0.5,
       fragments: 0, fragmentDmg: 0, fragmentAoe: 34, fragmentRange: 270, fragmented: false,
       splitRays: 0, rayDmg: 0, rehitT: 0, rehitInterval: 0, owner: null, angle: 0,
@@ -115,7 +116,8 @@ export class WeaponManager {
 
   addSkill(key, { main = false } = {}) {
     const def = SKILLS[key];
-    if (!def || this.getWeapon(key)) return false;
+    const activeSkillCount = this.weapons.filter(weapon => !!weapon.skillKey).length;
+    if (!def || this.getWeapon(key) || activeSkillCount >= MAX_ACTIVE_SKILLS) return false;
     const weapon = {
       skillKey: key, baseKey: key, baseDef: def, def, lv: 1, cd: 0.2, evolved: true, main,
       modules: { scale: 0, power: 0, trait: 0 }, params: null,
@@ -208,6 +210,32 @@ export class WeaponManager {
     }
   }
 
+  fireHeadhunter(weapon, params) {
+    const player = this.scene.player;
+    const count = params.count || 1;
+    const range = params.range || 1050;
+    const target = this.findHeadhunterTarget(player.x, player.y, range);
+    if (!target) return;
+    const angle = Math.atan2(target.y - player.y, target.x - player.x);
+    const stagger = (weapon.def.volleyStaggerMs || 55) / 1000;
+    Sfx.weaponCast(weapon.def.key);
+    this.scene.vfx.headhunterTrack(player.x, player.y - 14, target.x, target.y);
+
+    for (let i = 0; i < count; i++) {
+      this.queueShot(i * stagger, () => {
+        this.fireProjectile(weapon.def, player.x, player.y - 14, angle, params);
+      });
+    }
+  }
+
+  findHeadhunterTarget(x, y, range) {
+    const nearest = predicate => this.scene.enemies.grid.nearestInCircle(x, y, range, predicate);
+    const aliveEnemy = enemy => enemy.hp > 0 && !enemy.isProp;
+    return nearest(enemy => aliveEnemy(enemy) && !!enemy.bossTier)
+      || nearest(enemy => aliveEnemy(enemy) && !!enemy.elite && !!enemy.rewardChest)
+      || nearest(aliveEnemy);
+  }
+
   fireProjectile(def, x, y, angle, params, overrides = {}) {
     if (this.active.length >= PERF.maxProjectiles) return null;
     const p = this.pool.get();
@@ -229,6 +257,7 @@ export class WeaponManager {
     p.homing = params.homing || 0;
     p.crit = params.crit || 0;
     p.execute = params.execute || 0;
+    p.bossMult = params.bossMult || 1;
     p.collision = overrides.collision ?? true;
     p.spin = overrides.spin || 0;
     p.trailT = 0;
@@ -553,7 +582,8 @@ export class WeaponManager {
   }
 
   handleHit(p, e) {
-    let dmg = p.dmg;
+    const boss = !!e.bossTier || !!e.type?.boss;
+    let dmg = p.dmg * (boss ? p.bossMult : 1);
     const critical = !!p.crit && Math.random() < p.crit;
     if (critical) dmg *= 2;
     const executed = !!p.execute && !e.type.boss && e.hp / e.maxHp <= p.execute;

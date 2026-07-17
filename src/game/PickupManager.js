@@ -3,7 +3,7 @@
 //   1) 远离视野的孤儿宝石定期回收，其价值累进 carryValue，随下一颗掉落返还
 //      （修复 playtest 反馈：跑图甩下的宝石占满池子后，新击杀"看起来不掉宝石"）
 //   2) 池仍满时并入最近宝石并升档显示
-import { PERF, XP_GEMS, PLAYER } from '../config.js';
+import { PERF, XP_GEMS, PLAYER, PROPS } from '../config.js';
 import { Pool } from '../core/Pool.js';
 import { Sfx } from '../audio.js';
 import { t } from '../i18n.js';
@@ -106,7 +106,7 @@ export class PickupManager {
     return drop;
   }
 
-  // 磁石（战利品道具掉落）：拾取后全场经验吸向玩家
+  // 磁石（战利品道具掉落）：拾取后大范围经验吸向玩家
   dropMagnet(x, y) {
     const drop = this.pool.get();
     drop.x = x; drop.y = y; drop.value = 0; drop.kind = 'magnet';
@@ -120,10 +120,15 @@ export class PickupManager {
     return drop;
   }
 
-  // 全场吸取：经验全部飞向玩家（宝箱除外，避免误触发三选一）
-  vacuumAll() {
+  // 范围吸取：只让半径内经验飞向玩家（宝箱等功能拾取物不受影响）
+  vacuumWithin(radius) {
+    const px = this.scene.player.x;
+    const py = this.scene.player.y;
+    const radius2 = radius * radius;
     for (const gem of this.active) {
-      if (gem.kind === 'gem') gem.pulling = true;
+      const dx = gem.x - px;
+      const dy = gem.y - py;
+      if (gem.kind === 'gem' && dx * dx + dy * dy <= radius2) gem.pulling = true;
     }
   }
 
@@ -195,9 +200,10 @@ export class PickupManager {
       this.scene.vfx.damageText(player.x, player.y - 52, `+${amount}`, { color: '#7fe3ae' });
     } else if (gem.kind === 'magnet') {
       Sfx.chest?.();
-      this.vacuumAll();
+      const radius = PROPS.loot.magnet.radius;
+      this.vacuumWithin(radius);
       this.scene.ui?.showToast?.(t('event.vacuum'), 1.8);
-      this.scene.vfx.areaPulse(this.scene.player.x, this.scene.player.y, 220, 0x5ff7ff);
+      this.scene.vfx.areaPulse(this.scene.player.x, this.scene.player.y, radius, 0x5ff7ff);
     } else {
       Sfx.gem();
       this.scene.levelSystem.addXp(gem.value * this.scene.player.xpMult);

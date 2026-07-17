@@ -1,5 +1,5 @@
 // 并行 UI 场景：跑在 GameScene 之上，相机不缩放（zoom 只作用于世界层）。
-// HUD / 三选一 / 摇杆可视件 / 暗角 / 教学提示都在这里。
+// HUD / 升级四选一 / 摇杆可视件 / 暗角 / 教学提示都在这里。
 import Phaser from 'phaser';
 import { THEME } from '../config.js';
 import { t } from '../i18n.js';
@@ -106,8 +106,14 @@ export class UiScene extends Phaser.Scene {
 
   // 一次性提示条（事件式教学，GDD §2），自动淡出
   layoutToasts() {
-    const baseY = this.scale.height * 0.53;
-    this.toasts.forEach((toast, i) => toast.setPosition(this.scale.width / 2, baseY + i * 44));
+    const gap = 10;
+    const totalHeight = this.toasts.reduce((sum, toast) => sum + toast.height, 0)
+      + Math.max(0, this.toasts.length - 1) * gap;
+    let top = this.scale.height * 0.53 - totalHeight / 2;
+    for (const toast of this.toasts) {
+      toast.setPosition(this.scale.width / 2, top + toast.height / 2);
+      top += toast.height + gap;
+    }
   }
 
   showToast(text, duration = 6.5) {

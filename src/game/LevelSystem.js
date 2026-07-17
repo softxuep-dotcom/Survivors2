@@ -1,10 +1,12 @@
-// 经验与单层三选一卡池。
+// 经验与单层升级卡池。
 // 正式局使用直接技能：开局强制主技能，最多持有 4 个；每张成长卡直接应用模块并升级。
 import {
   SKILLS, ACTIVE_SKILL_KEYS, SKILL_MODULE_KEYS, SKILL_MODULE_MAX_RANK,
-  SKILL_POWER_PER_RANK, PASSIVES, xpToNext, MAX_WEAPONS, MAX_PASSIVES, MAXED_BONUS,
+  SKILL_POWER_PER_RANK, PASSIVES, xpToNext, MAX_ACTIVE_SKILLS, MAXED_BONUS,
 } from '../config.js';
 import { getLocale } from '../i18n.js';
+
+const REGULAR_CHOICE_COUNT = 4;
 
 function weightedPick(candidates) {
   if (!candidates.length) return null;
@@ -34,7 +36,6 @@ export class LevelSystem {
     this.lv = 1;
     this.xp = 0;
     this.need = xpToNext(1);
-    this.levelUpCount = 0;
     this.mainSkillKey = null;
     this.missedAppearances = Object.fromEntries(ACTIVE_SKILL_KEYS.map(key => [key, 0]));
   }
@@ -95,18 +96,7 @@ export class LevelSystem {
       .filter(choice => choice && !excluded.has(`${choice.key}:${choice.moduleKey}`));
   }
 
-  // 开局主技能第一次升级固定给出三个模块，保证第一次升级就强化核心表现。
-  buildFirstMainUpgrade() {
-    if (this.levelUpCount !== 0 || !this.mainSkillKey) return null;
-    const weapon = this.scene.weapons.getWeapon(this.mainSkillKey);
-    if (!weapon || weapon.lv !== 1) return null;
-    return SKILL_MODULE_KEYS.map(moduleKey => this.moduleChoice(weapon, moduleKey));
-  }
-
   buildChoices() {
-    const firstMain = this.buildFirstMainUpgrade();
-    if (firstMain) return firstMain;
-
     const player = this.scene.player;
     const owned = this.ownedSkills();
     const eligible = owned.filter(weapon => weapon.lv < weapon.def.maxLv);
@@ -145,29 +135,40 @@ export class LevelSystem {
       if (!weapon || !addModuleFor(this.scene.weapons.getWeapon(weapon.skillKey))) break;
     }
 
-    // 第三张进入统一内容池：成长模块 / 新技能 / 被动。
+    // 后两张进入统一内容池：成长模块 / 新技能 / 被动。
     const contentPool = [];
     for (const weapon of eligible) {
       if ((skillCounts.get(weapon.skillKey) || 0) >= 2) continue;
       contentPool.push(...this.moduleCandidates(weapon, pickedModules));
     }
-    if (owned.length < MAX_WEAPONS) {
+    if (owned.length < MAX_ACTIVE_SKILLS) {
       for (const key of ACTIVE_SKILL_KEYS) {
         if (!this.scene.weapons.getWeapon(key)) contentPool.push({ kind: 'skill', key, toLv: 1, weight: 1.8 });
       }
     }
-    const ownedPassives = Object.keys(player.passives).filter(key => player.passives[key] > 0);
     for (const def of Object.values(PASSIVES)) {
       const lv = player.passives[def.key] || 0;
-      if (lv >= def.maxLv || (lv === 0 && ownedPassives.length >= MAX_PASSIVES)) continue;
+      if (lv >= def.maxLv) continue;
       contentPool.push({ kind: 'passive', key: def.key, toLv: lv + 1, weight: lv > 0 ? 1.5 : 1 });
     }
-    const third = weightedPick(contentPool);
-    if (third) picks.push(third);
+
+    // 前期主动/被动正常混抽；满 4 个主动后只移除未获得的主动技能，已有主动成长与被动仍保留。
+    // 从统一池无放回抽取，避免同一升级项在同一手牌重复出现。
+    while (picks.length < REGULAR_CHOICE_COUNT && contentPool.length) {
+      const availablePool = contentPool.filter(choice =>
+        choice.kind !== 'module' || (skillCounts.get(choice.key) || 0) < 2);
+      const choice = weightedPick(availablePool);
+      if (!choice) break;
+      picks.push(choice);
+      if (choice.kind === 'module') {
+        skillCounts.set(choice.key, (skillCounts.get(choice.key) || 0) + 1);
+      }
+      contentPool.splice(contentPool.indexOf(choice), 1);
+    }
 
     const fillers = [{ kind: 'heal' }, { kind: 'bonus', key: 'dmg' }, { kind: 'bonus', key: 'speed' }];
     let fillerIndex = 0;
-    while (picks.length < 3) picks.push(fillers[fillerIndex++ % fillers.length]);
+    while (picks.length < REGULAR_CHOICE_COUNT) picks.push(fillers[fillerIndex++ % fillers.length]);
     return picks;
   }
 
@@ -197,6 +198,5 @@ export class LevelSystem {
       else player.bonusSpeed += MAXED_BONUS.speedPct;
       player.recalcStats();
     }
-    this.levelUpCount++;
   }
 }

@@ -1,5 +1,6 @@
 import { EN, ZH } from '../src/i18n.js';
 import { GENERATED_LOCALES } from '../src/locales.generated.js';
+import { readFile } from 'node:fs/promises';
 
 const expectedKeys = Object.keys(EN);
 const dictionaries = { en: EN, 'zh-CN': ZH, ...GENERATED_LOCALES };
@@ -14,6 +15,22 @@ function variables(value) {
 }
 
 const errors = [];
+const generatedSource = await readFile(new URL('../src/locales.generated.js', import.meta.url), 'utf8');
+let sourceLocale = '';
+const sourceKeys = new Map();
+for (const line of generatedSource.split(/\r?\n/)) {
+  const localeMatch = line.match(/^  "([^"]+)": \{$/);
+  if (localeMatch) {
+    sourceLocale = localeMatch[1];
+    sourceKeys.set(sourceLocale, new Set());
+    continue;
+  }
+  const keyMatch = line.match(/^    "([^"]+)": /);
+  if (!sourceLocale || !keyMatch) continue;
+  const seen = sourceKeys.get(sourceLocale);
+  if (seen.has(keyMatch[1])) errors.push(`${sourceLocale}: duplicate source key ${keyMatch[1]}`);
+  seen.add(keyMatch[1]);
+}
 for (const [locale, dictionary] of Object.entries(dictionaries)) {
   const keys = Object.keys(dictionary);
   for (const key of expectedKeys) {

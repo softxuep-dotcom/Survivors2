@@ -727,7 +727,7 @@ export function generateTextures(scene) {
   g.strokeCircle(26, 26, 24);
   g.generateTexture('joy_knob', 52, 52);
 
-  // --- 三选一卡片图标（占位质量，M3 换正式图；GDD M0"占位卡"） ---
+  // --- 升级卡片图标（占位质量，M3 换正式图；GDD M0“占位卡”） ---
   const icon = (key, draw) => {
     if (scene.textures.exists(key)) return;
     g.clear();
