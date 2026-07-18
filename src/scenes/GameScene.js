@@ -199,7 +199,6 @@ export class GameScene extends Phaser.Scene {
     startStageAudio(initialPhase);
     this.applyWorldSkin(this.state.time >= WORLD_SKINS.blood.at ? 'blood' : 'forest', false);
     unlockAudio();
-    Poki.gameplayStart();
 
     this._onResize = this.onResize.bind(this);
     this.scale.on('resize', this._onResize);
@@ -498,6 +497,7 @@ export class GameScene extends Phaser.Scene {
     this.mainSkillChosen = true;
     this.analytics.event('main_skill', this.state.time, { key });
     if (this.pauseReason === 'main-skill') this.resumeGameplay();
+    else Poki.gameplayStart();
     const save = this.registry.get('save');
     if (!save.tutorialDone && !(import.meta.env.DEV && this.stressMode)) this.ui?.showMoveHint();
     if (!save.tutorialGem && !(import.meta.env.DEV && this.stressMode)) {

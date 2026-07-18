@@ -128,6 +128,10 @@ assert.match(game, /rewardedBreak\(\{ size: 'small' \}\)/, 'level-up reroll plac
 assert.match(game, /rewardedBreak\(\{ size: 'medium' \}\)/, 'revive placement missing');
 assert.match(game, /resumeFromManualPause\(\)[\s\S]*?commercialBreak\(\)[\s\S]*?resumeGameplay\(\)/,
   'commercial break must run while leaving pause and before gameplay resumes');
+assert.doesNotMatch(game, /unlockAudio\(\);\s*Poki\.gameplayStart\(\)/,
+  'initial gameplayStart must wait for the player to choose a main skill');
+assert.match(game, /onMainSkillSelected\(key\)[\s\S]*?resumeGameplay\(\);\s*else Poki\.gameplayStart\(\)/,
+  'initial gameplayStart must fire when main-skill selection enters active gameplay');
 assert.match(result, /rewardedBreak\(\{ size: 'large' \}\)/, 'result double placement missing');
 assert.doesNotMatch(result, /commercialBreak\(/, 'result retry must not trigger an interstitial ad');
 assert.match(game, /const params = import\.meta\.env\.DEV \? new URLSearchParams/,
