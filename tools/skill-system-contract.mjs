@@ -16,6 +16,8 @@ assert.equal(DEFAULT_MAIN_SKILL, 'lavatrail', 'the opening skill focus must defa
 assert.equal(MAX_ACTIVE_SKILLS, 4, 'run must cap active skills at four');
 assert.equal(SKILL_MODULE_MAX_RANK, 4, 'every module route must cap at rank four');
 assert.equal(SKILL_POWER_PER_RANK, 0.375, 'power must add 37.5% of base damage per rank');
+assert.deepEqual(PASSIVES.gears.values, [6, 10, 15], 'precision gears values changed unexpectedly');
+assert.deepEqual(PASSIVES.whetstone.values, [8, 14, 20], 'battle emblem values changed unexpectedly');
 assert.deepEqual(
   [1, 8, 9, 14, 15, 16, 17].map(xpToNext),
   [12, 139, 161, 270, 295, 320, 345],
@@ -38,7 +40,7 @@ const typical = key => skillParamsFor(SKILLS[key], { scale: 3, power: 2, trait: 
 const fullRoutes = key => skillParamsFor(SKILLS[key], { scale: 4, power: 4, trait: 4 });
 const lv1Expected = {
   bladestorm: { dmg: 14 },
-  headhunter: { dmg: 34, bossMult: 1.5 },
+  headhunter: { dmg: 34, bossMult: 1.5, pierce: 1 },
   lavatrail: { dmg: 13.5, count: 2, trailDmg: 2.5 },
   cluster: { dmg: 17, count: 2, fragmentDmg: 8.5 },
   blizzard: { dmg: 6 },
@@ -56,45 +58,50 @@ for (const [key, expected] of Object.entries(lv1Expected)) {
 }
 let params = typical('bladestorm');
 assert.equal(params.count, 9); close(params.dmg, 24.5, 'bladestorm damage'); close(params.orbitRadius, 126, 'bladestorm radius');
-close(params.speed, 3.36, 'bladestorm rotation'); close(params.cd, 0.70, 'bladestorm rehit');
+close(params.speed, 3.36, 'bladestorm rotation'); close(params.cd, 0.60, 'bladestorm rehit');
 params = typical('headhunter');
-assert.equal(params.count, 4); assert.equal(params.pierce, 1); close(params.dmg, 59.5, 'headhunter damage'); close(params.crit, 0.4, 'headhunter crit'); close(params.bossMult, 1.65, 'headhunter boss multiplier'); close(params.cd, 1.2, 'headhunter cooldown');
+assert.equal(params.count, 4); assert.equal(params.pierce, 1); close(params.dmg, 59.5, 'headhunter damage'); close(params.crit, 0.4, 'headhunter crit'); close(params.bossMult, 1.75, 'headhunter boss multiplier'); close(params.cd, 1.1, 'headhunter cooldown');
 assert.equal(params.execute, undefined, 'formal headhunter must not keep the non-boss execute route');
-close(params.speed, 900, 'headhunter straight-flight speed'); close(params.range, 1050, 'headhunter targeting range');
+close(params.speed, 900, 'headhunter straight-flight speed'); close(params.range, 1200, 'headhunter targeting range');
 assert.equal(SKILLS.headhunter.behavior, 'headhunter', 'headhunter must use its direct-target behavior');
 params = typical('lavatrail');
 assert.equal(params.count, 5); close(params.dmg, 23.625, 'lava direct'); close(params.trailDmg, 4.375, 'lava tick'); close(params.trailLife, 3.6, 'lava duration'); close(params.trailRadius, 63, 'lava width');
 params = typical('cluster');
-assert.equal(params.count, 3); assert.equal(params.fragments, 7); close(params.dmg, 29.75, 'cluster main'); close(params.fragmentDmg, 14.875, 'cluster fragment'); close(params.aoe, 105.6, 'cluster radius'); close(params.fragmentRange, 216, 'cluster spread');
+assert.equal(params.count, 3); assert.equal(params.fragments, 7); close(params.dmg, 29.75, 'cluster main'); close(params.fragmentDmg, 14.875, 'cluster fragment'); close(params.aoe, 105.6, 'cluster radius'); close(params.fragmentRange, 270, 'cluster spread'); close(params.aoeMult, 0.8, 'cluster splash multiplier');
 params = typical('blizzard');
 close(params.dmg, 10.5, 'blizzard tick'); close(params.cd, 0.72, 'blizzard interval'); close(params.radius, 352, 'blizzard radius'); close(params.slow, 0.41, 'blizzard slow');
 params = typical('icecage');
-close(params.dmg, 50.75, 'icecage damage'); close(params.cd, 3, 'icecage cooldown'); close(params.radius, 232, 'icecage radius');
+close(params.dmg, 50.75, 'icecage damage'); close(params.cd, 2.6, 'icecage cooldown'); close(params.radius, 261, 'icecage radius');
 assert.equal(params.slow, undefined, 'icecage must not slow'); assert.equal(params.slowDur, undefined, 'icecage must not carry slow duration');
 close(params.freezeChance, 0.4, 'icecage freeze'); close(params.freezeDur, 1.4, 'icecage freeze duration');
+const icecageCooldowns = [3.0, 2.8, 2.6, 2.4, 2.1];
+for (let trait = 0; trait < icecageCooldowns.length; trait++) {
+  close(skillParamsFor(SKILLS.icecage, { scale: 0, power: 0, trait }).cd,
+    icecageCooldowns[trait], `icecage trait ${trait} cooldown`);
+}
 params = typical('stormeye');
 assert.equal(params.bolts, 5); close(params.dmg, 27.125, 'stormeye damage'); close(params.cd, 0.99, 'stormeye cooldown');
-close(params.radius, 562.5, 'stormeye targeting radius'); close(params.splash, 57.6, 'stormeye splash radius');
-close(params.splashMult, 0.6, 'stormeye splash multiplier');
+close(params.radius, 562.5, 'stormeye targeting radius'); close(params.splash, 62.4, 'stormeye splash radius');
+close(params.splashMult, 0.7, 'stormeye splash multiplier');
 params = typical('thunderjudgment');
 assert.equal(params.bounces, 5); close(params.dmg, 47.25, 'judgment main damage');
 close(params.bounceMult, 0.85, 'judgment bounce multiplier'); close(params.stunChance, 0.24, 'judgment stun chance');
 close(params.stunDur, 0.7, 'judgment stun duration');
 params = typical('plague');
-close(params.dmg, 19.25, 'plague pool damage'); close(params.poisonDps, 19.25, 'plague poison damage');
-close(params.radius, 152.25, 'plague radius'); close(params.duration, 4.5, 'plague duration'); close(params.tick, 0.45, 'plague interval');
+close(params.dmg, 19.25, 'plague pool damage'); close(params.poisonDps, 22.137, 'plague poison damage');
+close(params.radius, 162.8, 'plague radius'); close(params.duration, 4.5, 'plague duration'); close(params.tick, 0.45, 'plague interval');
 assert.equal(params.plague, true); assert.equal(params.plagueChainDepth, 1);
 params = typical('corrosion');
 close(params.dmg, 19.25, 'corrosion pool damage'); close(params.poisonDps, 17.5, 'corrosion poison damage');
-close(params.radius, 152.25, 'corrosion radius'); close(params.duration, 4.5, 'corrosion duration');
+close(params.radius, 162.8, 'corrosion radius'); close(params.duration, 4.5, 'corrosion duration');
 close(params.vuln, 0.11, 'corrosion vulnerability'); close(params.vulnDur, 1.8, 'corrosion vulnerability duration');
 params = typical('holyhalo');
 close(params.dmg, 21, 'holy halo damage'); close(params.cd, 0.84, 'holy halo cooldown');
 close(params.radius, 174, 'holy halo radius'); close(params.heal, 0.35, 'holy halo healing');
 params = typical('prism');
 assert.equal(params.count, 2); assert.equal(params.splitRays, 3); close(params.dmg, 29.75, 'prism orb damage');
-close(params.rayDmg, 12.6, 'prism ray damage'); close(params.duration, 4.9, 'prism duration');
-close(params.speed, 396, 'prism speed'); close(params.rehit, 1.1, 'prism repeat hit');
+close(params.rayDmg, 12.6, 'prism ray damage'); close(params.duration, 5, 'prism duration');
+close(params.speed, 396, 'prism speed'); close(params.cd, 1.84, 'prism cooldown'); close(params.rehit, 1.1, 'prism repeat hit');
 
 const clusterVolley = Object.create(WeaponManager.prototype);
 const clusterShotFragments = [];
@@ -163,37 +170,37 @@ assert.deepEqual(bossDamage, [45, 45], 'two headhunter blades must each deal the
 
 params = fullRoutes('bladestorm');
 assert.equal(params.count, 11); close(params.dmg, 35, 'bladestorm full power'); close(params.speed, 4.32, 'bladestorm full rotation');
-close(params.orbitRadius, 147, 'bladestorm full radius'); close(params.cd, 0.60, 'bladestorm full rehit');
+close(params.orbitRadius, 147, 'bladestorm full radius'); close(params.cd, 0.50, 'bladestorm full rehit');
 params = fullRoutes('headhunter');
-assert.equal(params.count, 5); assert.equal(params.pierce, 2); close(params.dmg, 85, 'headhunter full power'); close(params.crit, 0.6, 'headhunter full crit'); close(params.bossMult, 2, 'headhunter full boss multiplier'); close(params.cd, 1.2, 'headhunter full cooldown');
+assert.equal(params.count, 5); assert.equal(params.pierce, 1); close(params.dmg, 85, 'headhunter full power'); close(params.crit, 0.6, 'headhunter full crit'); close(params.bossMult, 2.1, 'headhunter full boss multiplier'); close(params.cd, 1.1, 'headhunter full cooldown');
 params = fullRoutes('lavatrail');
 assert.equal(params.count, 6); close(params.dmg, 33.75, 'lava full direct'); close(params.trailDmg, 6.25, 'lava full tick'); close(params.trailLife, 5.2, 'lava full duration'); close(params.trailRadius, 81, 'lava full width'); close(params.trailTick, 0.4, 'lava full interval');
 params = fullRoutes('cluster');
-assert.equal(params.count, 3); assert.equal(params.fragments, 11); close(params.dmg, 42.5, 'cluster full main'); close(params.fragmentDmg, 21.25, 'cluster full fragment'); close(params.aoe, 123.2, 'cluster full radius'); close(params.fragmentAoe, 57.2, 'cluster full fragment radius');
+assert.equal(params.count, 3); assert.equal(params.fragments, 11); close(params.dmg, 42.5, 'cluster full main'); close(params.fragmentDmg, 21.25, 'cluster full fragment'); close(params.aoe, 123.2, 'cluster full radius'); close(params.aoeMult, 0.8, 'cluster full splash multiplier'); close(params.fragmentAoe, 57.2, 'cluster full fragment radius');
 params = fullRoutes('blizzard');
 close(params.dmg, 15, 'blizzard full damage'); close(params.radius, 396, 'blizzard full radius'); close(params.slow, 0.57, 'blizzard full slow'); close(params.cd, 0.6, 'blizzard full interval');
 params = fullRoutes('icecage');
-close(params.dmg, 72.5, 'icecage full damage'); close(params.cd, 2.4, 'icecage full cooldown'); close(params.radius, 256, 'icecage full radius');
+close(params.dmg, 72.5, 'icecage full damage'); close(params.cd, 2.1, 'icecage full cooldown'); close(params.radius, 288, 'icecage full radius');
 assert.equal(params.slow, undefined, 'full icecage must not slow'); assert.equal(params.slowDur, undefined, 'full icecage must not carry slow duration');
 close(params.freezeChance, 0.7, 'icecage full freeze'); close(params.freezeDur, 1.8, 'icecage full freeze duration');
 params = fullRoutes('stormeye');
-assert.equal(params.bolts, 6); close(params.dmg, 38.75, 'stormeye full power damage'); close(params.cd, 0.715, 'stormeye full trait cooldown'); close(params.radius, 675, 'stormeye full targeting'); close(params.splash, 67.2, 'stormeye full splash');
+assert.equal(params.bolts, 6); close(params.dmg, 38.75, 'stormeye full power damage'); close(params.cd, 0.66, 'stormeye full trait cooldown'); close(params.radius, 675, 'stormeye full targeting'); close(params.splash, 76.8, 'stormeye full splash'); close(params.splashMult, 0.8, 'stormeye full splash multiplier');
 params = fullRoutes('thunderjudgment');
 assert.equal(params.bounces, 6); close(params.dmg, 67.5, 'judgment full power damage'); close(params.bounceMult, 1, 'judgment full bounce multiplier'); close(params.stunChance, 0.5, 'judgment full stun chance'); close(params.stunDur, 0.9, 'judgment full stun duration');
 params = fullRoutes('plague');
-close(params.dmg, 27.5, 'plague full pool damage'); close(params.poisonDps, 33, 'plague full poison damage');
-close(params.radius, 168, 'plague full radius'); close(params.duration, 5.5, 'plague full duration'); close(params.tick, 0.4, 'plague full interval');
+close(params.dmg, 27.5, 'plague full pool damage'); close(params.poisonDps, 37.125, 'plague full poison damage');
+close(params.radius, 180.4, 'plague full radius'); close(params.duration, 5.5, 'plague full duration'); close(params.tick, 0.4, 'plague full interval');
 params = fullRoutes('corrosion');
 close(params.dmg, 27.5, 'corrosion full pool damage'); close(params.poisonDps, 25, 'corrosion full poison damage');
-close(params.radius, 168, 'corrosion full radius'); close(params.duration, 5.5, 'corrosion full duration');
+close(params.radius, 180.4, 'corrosion full radius'); close(params.duration, 5.5, 'corrosion full duration');
 close(params.vuln, 0.18, 'corrosion full vulnerability'); close(params.vulnDur, 2.2, 'corrosion full vulnerability duration'); close(params.tick, 0.4, 'corrosion full interval');
 params = fullRoutes('holyhalo');
 close(params.dmg, 30, 'holy halo full damage'); close(params.cd, 0.62, 'holy halo full cooldown');
 close(params.radius, 192, 'holy halo full radius'); close(params.heal, 0.45, 'holy halo full healing');
 params = fullRoutes('prism');
 assert.equal(params.count, 3); assert.equal(params.splitRays, 3); close(params.dmg, 42.5, 'prism full orb damage');
-close(params.rayDmg, 21, 'prism full ray damage'); close(params.duration, 5.3, 'prism full duration');
-close(params.speed, 432, 'prism full speed'); close(params.rehit, 1, 'prism full repeat hit');
+close(params.rayDmg, 21.75, 'prism full ray damage'); close(params.duration, 5.5, 'prism full duration');
+close(params.speed, 432, 'prism full speed'); close(params.cd, 1.64, 'prism full cooldown'); close(params.rehit, 0.9, 'prism full repeat hit');
 
 function makeRuntimeHarness(targets) {
   const damage = [];
@@ -288,6 +295,15 @@ const scene = {
   onLevelUp() {},
 };
 const levels = new LevelSystem(scene);
+const flamePowerCard = levels.moduleChoice({
+  skillKey: 'lavatrail', def: SKILLS.lavatrail, modules: { power: 0 }, lv: 1,
+}, 'power');
+assert.ok(flamePowerCard.description.includes('+5.1') && flamePowerCard.description.includes('+0.9'));
+assert.ok(!flamePowerCard.description.includes('%'), 'power cards must show concrete per-skill damage gains instead of a percentage');
+const plaguePowerCard = levels.moduleChoice({
+  skillKey: 'plague', def: SKILLS.plague, modules: { power: 0 }, lv: 1,
+}, 'power');
+assert.equal((plaguePowerCard.description.match(/\+4\.1/g) || []).length, 2);
 assert.equal(levels.selectMainSkill('bladestorm'), true, 'main skill selection failed');
 const originalRandom = Math.random;
 Math.random = () => 0.999999;

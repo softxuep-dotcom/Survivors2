@@ -12,11 +12,13 @@
   #game-version { box-sizing: border-box; position: fixed; left: max(10px, env(safe-area-inset-left)); bottom: max(7px, env(safe-area-inset-bottom)); z-index: 2147483100; padding: 3px 6px; border: 1px solid #6f897555; border-radius: 999px; color: #a8b7aa; background: #0b100cb8; font: 600 10px/1 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif; letter-spacing: .04em; text-shadow: 0 1px 2px #000; pointer-events: none; user-select: none; }
   .poki-ad-active #game-version { display: none; }
   canvas { display: block; }
-  #loading { box-sizing: border-box; position: fixed; inset: 0; z-index: 10; display: grid; place-content: center; gap: 18px; padding: max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left)); color: #fff; background: #0e1410; font: 700 18px/1.2 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif; text-align: center; transition: opacity .25s ease; }
+  #loading { box-sizing: border-box; position: fixed; inset: 0; z-index: 2147483200; display: grid; place-content: center; gap: 18px; padding: max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left)); color: #fff; background: #0e1410; font: 700 18px/1.2 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif; text-align: center; transition: opacity .25s ease; }
   #loading.hidden { opacity: 0; pointer-events: none; }
   #loading-bar { width: min(280px, 68vw); height: 8px; overflow: hidden; border: 1px solid #6f8975; border-radius: 999px; background: #1c2b20; box-shadow: 0 8px 24px #0008, inset 0 1px #ffffff18; }
-  #loading-fill { width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #58c98f, #ffd34e); transition: width .12s ease; }
+  #loading-fill { width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #58c98f, #ffd34e, #58c98f); background-size: 200% 100%; animation: loading-flow .9s linear infinite; box-shadow: 0 0 12px #ffd34e55; }
   #loading-percent { color: #aed0b4; font-size: 13px; font-weight: 400; }
+  @keyframes loading-flow { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+  @media (prefers-reduced-motion: reduce) { #loading-fill { animation: none; } }
 </style>
 </head>
 <body>
@@ -27,18 +29,40 @@
 </div>
 <div id="game"></div>
 <script>
+  window.loadingStartedAt = performance.now();
+  window.loadingTarget = 0;
+  window.loadingDisplayed = 0;
+  window.loadingFinished = false;
   window.setLoadingProgress = function (value) {
-    var percent = Math.round(Math.max(0, Math.min(1, value || 0)) * 100);
+    window.loadingTarget = Math.max(window.loadingTarget, Math.max(0, Math.min(1, value || 0)));
+  };
+  window.renderLoadingProgress = function (value) {
+    var percent = Math.round(value * 100);
     document.getElementById('loading-fill').style.width = percent + '%';
     document.getElementById('loading-percent').textContent = percent + '%';
   };
   window.finishLoading = function () {
     window.setLoadingProgress(1);
+    window.loadingFinished = true;
+  };
+  window.animateLoadingProgress = function (now) {
     var loading = document.getElementById('loading');
     if (!loading) return;
-    loading.classList.add('hidden');
-    setTimeout(function () { loading.remove(); }, 300);
+    var delta = Math.min(32, now - (window.loadingLastFrame || now));
+    window.loadingLastFrame = now;
+    if (window.loadingDisplayed < window.loadingTarget) {
+      window.loadingDisplayed = Math.min(window.loadingTarget, window.loadingDisplayed + delta / 500);
+      window.renderLoadingProgress(window.loadingDisplayed);
+    }
+    var elapsed = now - window.loadingStartedAt;
+    if (window.loadingFinished && window.loadingDisplayed >= 0.999 && elapsed >= 550) {
+      loading.classList.add('hidden');
+      setTimeout(function () { loading.remove(); }, 300);
+      return;
+    }
+    requestAnimationFrame(window.animateLoadingProgress);
   };
+  requestAnimationFrame(window.animateLoadingProgress);
   window.addEventListener('keydown', function (event) {
     if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.code)) event.preventDefault();
   }, { passive: false });

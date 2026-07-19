@@ -453,6 +453,51 @@ export class Vfx {
     }
   }
 
+  freezeLock(x, y, enemyRadius = 24) {
+    const burstRadius = Math.max(38, enemyRadius * 1.9);
+    this.areaPulse(x, y, burstRadius, 0xb9efff);
+    if (this.emitNative('iceShards', x, y, 8) > 0) return;
+    for (let i = 0; i < 8; i++) {
+      const a = Math.PI + (i / 7) * Math.PI + (Math.random() - 0.5) * 0.16;
+      const speed = 72 + Math.random() * 74;
+      this.spawnParticle(x, y + enemyRadius * 0.2, Math.cos(a) * speed, Math.sin(a) * speed - 28,
+        0.34, 0.3 + Math.random() * 0.22, i % 2 ? 0xb9efff : 0xffffff, 'ice_shard', {
+          kind: 'ice', kindLimit: PERF.maxIceParticles, rotation: a + Math.PI * 0.5,
+          spin: (Math.random() - 0.5) * 8, endScale: 0.05, depth: 3.78,
+        });
+    }
+  }
+
+  freezeMote(x, y, enemyRadius = 24) {
+    const side = Math.random() < 0.5 ? -1 : 1;
+    const px = x + side * enemyRadius * (0.48 + Math.random() * 0.5);
+    return this.spawnParticle(px, y + Math.random() * enemyRadius * 0.7,
+      -side * (3 + Math.random() * 7), -14 - Math.random() * 13,
+      0.52 + Math.random() * 0.22, 0.18 + Math.random() * 0.13,
+      Math.random() < 0.3 ? 0xffffff : 0xa8eaff, 'snowflake', {
+        kind: 'freezeMote', kindLimit: 18, startAlpha: 0.72, endAlpha: 0,
+        endScale: 0.04, spin: side * (1.5 + Math.random() * 2.5), depth: 3.2,
+      });
+  }
+
+  freezeBreak(x, y, enemyRadius = 24, heavy = false) {
+    const count = heavy ? 14 : 9;
+    this.areaPulse(x, y, Math.max(34, enemyRadius * (heavy ? 2.05 : 1.65)), 0x75dfff);
+    for (let i = 0; i < count; i++) {
+      const a = (i / count) * Math.PI * 2 + Math.random() * 0.24;
+      const speed = 90 + Math.random() * 120;
+      this.spawnParticle(x + Math.cos(a) * enemyRadius * 0.38,
+        y + enemyRadius * 0.15 + Math.sin(a) * enemyRadius * 0.25,
+        Math.cos(a) * speed, Math.sin(a) * speed - 38,
+        0.34 + Math.random() * 0.16, 0.28 + Math.random() * 0.24,
+        i % 3 ? 0x69d5ff : 0xf4fdff, 'ice_shard', {
+          kind: 'ice', kindLimit: PERF.maxIceParticles,
+          rotation: a + Math.PI * 0.5, spin: (Math.random() - 0.5) * 11,
+          endScale: 0.04, startAlpha: 0.96, depth: 3.8,
+        });
+    }
+  }
+
   // 悬赏目标的低频轨道碎光：复用世界粒子池，不创建常驻对象，也不占用大面积场域 Shader。
   bountyMote(x, y, phase = 0) {
     const tangentX = -Math.sin(phase) * 18;

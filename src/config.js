@@ -473,12 +473,12 @@ export const WEAPONS = {
     key: 'blade',
     nameKey: 'weapon.blade', descKey: 'weapon.bladeDesc', lvDescKey: 'weapon.blade.lv',
     element: 'physical', color: 0xd8ecff, icon: 'icon_blade',
-    behavior: 'projectile', projTexture: 'blade', projRadius: 12,
+    behavior: 'projectile', projTexture: 'blade', projRadius: 18,
     maxLv: 3,
     levels: [
-      { dmg: 12, count: 1, pierce: 2, cd: 1.05, speed: 640, range: 720 },
-      { dmg: 14, count: 2, pierce: 2, cd: 1.00, speed: 660, range: 740 },
-      { dmg: 18, count: 2, pierce: 3, cd: 0.92, speed: 680, range: 760 },
+      { dmg: 12, count: 1, pierce: 2, cd: 1.05, speed: 640, range: 880 },
+      { dmg: 14, count: 2, pierce: 2, cd: 1.00, speed: 660, range: 920 },
+      { dmg: 18, count: 2, pierce: 3, cd: 0.92, speed: 680, range: 960 },
     ],
     volleySpreadDeg: 9,   // 多发时扇形夹角
     volleyStaggerMs: 70,  // 多发时逐发间隔
@@ -580,10 +580,10 @@ export const EVOLUTIONS = {
   },
   headhunter: {
     key: 'headhunter', baseKey: 'blade', nameKey: 'evo.headhunter', descKey: 'evo.headhunterDesc',
-    icon: 'icon_blade', color: 0xffd36d, behavior: 'homing', projTexture: 'blade', projRadius: 12, levelStart: EVOLUTION_LEVEL_START, maxLv: 7,
+    icon: 'icon_blade', color: 0xffd36d, behavior: 'homing', projTexture: 'blade', projRadius: 18, levelStart: EVOLUTION_LEVEL_START, maxLv: 7,
     levels: evolutionLevels(
-      { dmg: 58, count: 2, cd: 0.72, speed: 610, range: 960, pierce: 1, homing: 5.0, crit: 0.30, execute: 0.18 },
-      { dmg: 68, count: 2, cd: 0.64, speed: 640, range: 1020, pierce: 1, homing: 5.6, crit: 0.34, execute: 0.20 },
+      { dmg: 58, count: 2, cd: 0.72, speed: 610, range: 1150, pierce: 1, homing: 5.0, crit: 0.30, execute: 0.18 },
+      { dmg: 68, count: 2, cd: 0.64, speed: 640, range: 1220, pierce: 1, homing: 5.6, crit: 0.34, execute: 0.20 },
     ),
   },
   lavatrail: {
@@ -686,7 +686,7 @@ export const SKILLS = Object.freeze({
   bladestorm: {
     key: 'bladestorm', nameKey: 'evo.bladestorm', descKey: 'evo.bladestormDesc',
     element: 'physical', icon: 'icon_blade', color: 0x9ddcff,
-    behavior: 'orbit', maxLv: 8,
+    behavior: 'orbit', projTexture: 'blade', projRadius: 18, maxLv: 8,
     baseParams: {
       dmg: 14, count: 3, cd: 0.70, orbitRadius: 105, speed: 2.4,
     },
@@ -698,20 +698,20 @@ export const SKILLS = Object.freeze({
         { add: { count: 2 }, text: { en: 'Orbiting blades +2', zh: '环绕飞刃 +2' } },
       ],
       trait: [
-        { basePct: { speed: 20, orbitRadius: 10 }, text: { en: 'Rotation speed +20%, orbit radius +10%', zh: '旋转速度 +20%，环绕半径 +10%' } },
-        { basePct: { speed: 20, orbitRadius: 10 }, text: { en: 'Rotation speed +20%, orbit radius +10%', zh: '旋转速度 +20%，环绕半径 +10%' } },
         { basePct: { speed: 20, orbitRadius: 10 }, set: { cd: 0.65 }, text: { en: 'Speed +20%, radius +10%, repeat-hit interval: 0.65s', zh: '旋转速度 +20%，环绕半径 +10%，复击降至 0.65 秒' } },
         { basePct: { speed: 20, orbitRadius: 10 }, set: { cd: 0.60 }, text: { en: 'Speed +20%, radius +10%, repeat-hit interval: 0.60s', zh: '旋转速度 +20%，环绕半径 +10%，复击降至 0.60 秒' } },
+        { basePct: { speed: 20, orbitRadius: 10 }, set: { cd: 0.55 }, text: { en: 'Speed +20%, radius +10%, repeat-hit interval: 0.55s', zh: '旋转速度 +20%，环绕半径 +10%，复击降至 0.55 秒' } },
+        { basePct: { speed: 20, orbitRadius: 10 }, set: { cd: 0.50 }, text: { en: 'Speed +20%, radius +10%, repeat-hit interval: 0.50s', zh: '旋转速度 +20%，环绕半径 +10%，复击降至 0.50 秒' } },
       ],
     },
   },
   headhunter: {
     key: 'headhunter', nameKey: 'evo.headhunter', descKey: 'evo.headhunterDesc',
     element: 'physical', icon: 'icon_blade', color: 0xffd36d,
-    behavior: 'headhunter', projTexture: 'blade', projRadius: 12, maxLv: 8,
+    behavior: 'headhunter', projTexture: 'blade', projRadius: 18, maxLv: 8,
     volleyStaggerMs: 55,
     baseParams: {
-      dmg: 34, count: 1, pierce: 0, cd: 1.20, speed: 900, range: 1050,
+      dmg: 34, count: 1, pierce: 1, cd: 1.20, speed: 900, range: 1200,
       crit: 0.20, bossMult: 1.50,
     },
     modules: {
@@ -722,10 +722,10 @@ export const SKILLS = Object.freeze({
         { add: { count: 1 }, text: { en: 'Targeted blade +1', zh: '锁敌飞镖 +1' } },
       ],
       trait: [
-        { add: { crit: 0.10 }, text: { en: 'Critical chance +10%', zh: '暴击率 +10%' } },
-        { add: { crit: 0.10, bossMult: 0.15, pierce: 1 }, text: { en: 'Crit +10%, boss damage +15%, pierce +1', zh: '暴击率 +10%，Boss 伤害 +15%，穿透 +1' } },
+        { add: { crit: 0.10, bossMult: 0.10 }, set: { cd: 1.10 }, text: { en: 'Crit +10%, boss damage +10%, cooldown: 1.10s', zh: '暴击率 +10%，Boss 伤害 +10%，冷却降至 1.10 秒' } },
         { add: { crit: 0.10, bossMult: 0.15 }, text: { en: 'Crit +10%, boss damage +15%', zh: '暴击率 +10%，Boss 伤害 +15%' } },
-        { add: { crit: 0.10, bossMult: 0.20, pierce: 1 }, text: { en: 'Crit +10%, boss damage +20%, pierce +1', zh: '暴击率 +10%，Boss 伤害 +20%，穿透 +1' } },
+        { add: { crit: 0.10, bossMult: 0.15 }, text: { en: 'Crit +10%, boss damage +15%', zh: '暴击率 +10%，Boss 伤害 +15%' } },
+        { add: { crit: 0.10, bossMult: 0.20 }, text: { en: 'Crit +10%, boss damage +20%', zh: '暴击率 +10%，Boss 伤害 +20%' } },
       ],
     },
   },
@@ -774,7 +774,7 @@ export const SKILLS = Object.freeze({
       ],
       trait: [
         { basePct: { aoe: 20 }, text: { en: 'Explosion radius +20%', zh: '爆炸范围 +20%' } },
-        { set: { fragmentRange: 216 }, text: { en: 'Fragment spread tightened by 20%', zh: '碎片散布收紧 20%' } },
+        { set: { aoeMult: 0.80 }, text: { en: 'Main explosion splash damage: 80%', zh: '主爆炸溅射伤害升至 80%' } },
         { basePct: { aoe: 20 }, text: { en: 'Explosion radius +20%', zh: '爆炸范围 +20%' } },
         { basePct: { fragmentAoe: 30 }, text: { en: 'Fragment explosion radius +30%', zh: '碎片爆炸范围 +30%' } },
       ],
@@ -807,7 +807,7 @@ export const SKILLS = Object.freeze({
     element: 'ice', icon: 'icon_frostpulse', color: 0xb9f1ff,
     behavior: 'pulse', maxLv: 8,
     baseParams: {
-      dmg: 29, cd: 3.0, radius: 160,
+      dmg: 29, cd: 3.0, radius: 180,
       freezeChance: 0.25, freezeDur: 1.1,
     },
     modules: {
@@ -818,10 +818,10 @@ export const SKILLS = Object.freeze({
         { basePct: { radius: 15 }, text: { en: 'Cage radius +15%', zh: '牢笼范围 +15%' } },
       ],
       trait: [
-        { add: { freezeChance: 0.15 }, text: { en: 'Freeze chance +15%', zh: '冻结概率 +15%' } },
-        { add: { freezeDur: 0.3 }, text: { en: 'Freeze duration +0.3s', zh: '冻结时间 +0.3 秒' } },
-        { add: { freezeChance: 0.15 }, set: { cd: 2.7 }, text: { en: 'Freeze chance +15%, cooldown: 2.7s', zh: '冻结概率 +15%，冷却降至 2.7 秒' } },
-        { add: { freezeChance: 0.15, freezeDur: 0.4 }, set: { cd: 2.4 }, text: { en: 'Cooldown: 2.4s, freeze +15% for +0.4s', zh: '冷却降至 2.4 秒，冻结概率 +15%、时间 +0.4 秒' } },
+        { add: { freezeChance: 0.15 }, set: { cd: 2.8 }, text: { en: 'Freeze chance +15%, cooldown: 2.8s', zh: '冻结概率 +15%，冷却降至 2.8 秒' } },
+        { add: { freezeDur: 0.3 }, set: { cd: 2.6 }, text: { en: 'Freeze duration +0.3s, cooldown: 2.6s', zh: '冻结时间 +0.3 秒，冷却降至 2.6 秒' } },
+        { add: { freezeChance: 0.15 }, set: { cd: 2.4 }, text: { en: 'Freeze chance +15%, cooldown: 2.4s', zh: '冻结概率 +15%，冷却降至 2.4 秒' } },
+        { add: { freezeChance: 0.15, freezeDur: 0.4 }, set: { cd: 2.1 }, text: { en: 'Cooldown: 2.1s, freeze +15% for +0.4s', zh: '冷却降至 2.1 秒，冻结概率 +15%、时间 +0.4 秒' } },
       ],
     },
   },
@@ -841,10 +841,10 @@ export const SKILLS = Object.freeze({
         { add: { bolts: 1 }, text: { en: 'Lightning strike +1 per volley', zh: '每轮雷击 +1' } },
       ],
       trait: [
-        { basePct: { cd: -10, splash: 10 }, text: { en: 'Cooldown -10%, splash radius +10%', zh: '冷却 -10%，溅射范围 +10%' } },
-        { basePct: { radius: 25, splash: 10 }, text: { en: 'Targeting +25%, splash radius +10%', zh: '索敌范围 +25%，溅射范围 +10%' } },
-        { basePct: { cd: -12, splash: 10 }, text: { en: 'Cooldown -12%, splash radius +10%', zh: '冷却 -12%，溅射范围 +10%' } },
-        { basePct: { cd: -13, radius: 25, splash: 10 }, text: { en: 'Cooldown -13%, targeting +25%, splash +10%', zh: '冷却 -13%，索敌 +25%，溅射 +10%' } },
+        { basePct: { cd: -10, splash: 15 }, text: { en: 'Cooldown -10%, splash radius +15%', zh: '冷却 -10%，溅射范围 +15%' } },
+        { basePct: { radius: 25, splash: 15 }, set: { splashMult: 0.70 }, text: { en: 'Targeting +25%, splash +15%, splash damage: 70%', zh: '索敌 +25%，溅射范围 +15%，溅射伤害升至 70%' } },
+        { basePct: { cd: -15, splash: 15 }, text: { en: 'Cooldown -15%, splash radius +15%', zh: '冷却 -15%，溅射范围 +15%' } },
+        { basePct: { cd: -15, radius: 25, splash: 15 }, set: { splashMult: 0.80 }, text: { en: 'Cooldown -15%, targeting +25%, splash +15%, splash damage: 80%', zh: '冷却 -15%，索敌 +25%，溅射 +15%，溅射伤害升至 80%' } },
       ],
     },
   },
@@ -877,18 +877,18 @@ export const SKILLS = Object.freeze({
     element: 'poison', icon: 'icon_venomflask', color: 0x7f6aa8,
     behavior: 'pool', projTexture: 'venom_flask_plague', projRadius: 12, maxLv: 8,
     baseParams: {
-      dmg: 11, cd: 1.75, radius: 105, duration: 3.5, tick: 0.5,
+      dmg: 11, cd: 1.75, radius: 110, duration: 3.5, tick: 0.5,
       poisonDps: 11, speed: 450, plague: true, plagueChainDepth: 1,
     },
     modules: {
       scale: [
-        { basePct: { radius: 15 }, text: { en: 'Plague pool radius +15%', zh: '瘟疫毒池范围 +15%' } },
-        { basePct: { radius: 15 }, text: { en: 'Plague pool radius +15%', zh: '瘟疫毒池范围 +15%' } },
-        { basePct: { radius: 15 }, text: { en: 'Plague pool radius +15%', zh: '瘟疫毒池范围 +15%' } },
-        { basePct: { radius: 15 }, text: { en: 'Plague pool radius +15%', zh: '瘟疫毒池范围 +15%' } },
+        { basePct: { radius: 16 }, text: { en: 'Plague pool radius +16%', zh: '瘟疫毒池范围 +16%' } },
+        { basePct: { radius: 16 }, text: { en: 'Plague pool radius +16%', zh: '瘟疫毒池范围 +16%' } },
+        { basePct: { radius: 16 }, text: { en: 'Plague pool radius +16%', zh: '瘟疫毒池范围 +16%' } },
+        { basePct: { radius: 16 }, text: { en: 'Plague pool radius +16%', zh: '瘟疫毒池范围 +16%' } },
       ],
       trait: [
-        { add: { duration: 0.5 }, text: { en: 'Pool duration +0.5s', zh: '毒池持续时间 +0.5 秒' } },
+        { add: { duration: 0.5 }, basePct: { poisonDps: 15 }, text: { en: 'Pool duration +0.5s, poison damage +15%', zh: '毒池持续 +0.5 秒，中毒伤害 +15%' } },
         { add: { duration: 0.5 }, set: { tick: 0.45 }, text: { en: 'Duration +0.5s, damage interval: 0.45s', zh: '持续时间 +0.5 秒，跳伤间隔降至 0.45 秒' } },
         { add: { duration: 0.5 }, basePct: { poisonDps: 20 }, text: { en: 'Duration +0.5s, poison damage +20%', zh: '持续时间 +0.5 秒，中毒伤害 +20%' } },
         { add: { duration: 0.5 }, set: { tick: 0.40 }, text: { en: 'Duration +0.5s, damage interval: 0.40s', zh: '持续时间 +0.5 秒，跳伤间隔降至 0.40 秒' } },
@@ -900,15 +900,15 @@ export const SKILLS = Object.freeze({
     element: 'poison', icon: 'icon_venomflask', color: 0xc9f24b,
     behavior: 'pool', projTexture: 'venom_flask_corrosion', projRadius: 12, maxLv: 8,
     baseParams: {
-      dmg: 11, cd: 1.75, radius: 105, duration: 3.5, tick: 0.5,
+      dmg: 11, cd: 1.75, radius: 110, duration: 3.5, tick: 0.5,
       poisonDps: 10, speed: 450, vuln: 0.08, vulnDur: 1.5,
     },
     modules: {
       scale: [
-        { basePct: { radius: 15 }, text: { en: 'Corrosion pool radius +15%', zh: '腐蚀毒池范围 +15%' } },
-        { basePct: { radius: 15 }, text: { en: 'Corrosion pool radius +15%', zh: '腐蚀毒池范围 +15%' } },
-        { basePct: { radius: 15 }, text: { en: 'Corrosion pool radius +15%', zh: '腐蚀毒池范围 +15%' } },
-        { basePct: { radius: 15 }, text: { en: 'Corrosion pool radius +15%', zh: '腐蚀毒池范围 +15%' } },
+        { basePct: { radius: 16 }, text: { en: 'Corrosion pool radius +16%', zh: '腐蚀毒池范围 +16%' } },
+        { basePct: { radius: 16 }, text: { en: 'Corrosion pool radius +16%', zh: '腐蚀毒池范围 +16%' } },
+        { basePct: { radius: 16 }, text: { en: 'Corrosion pool radius +16%', zh: '腐蚀毒池范围 +16%' } },
+        { basePct: { radius: 16 }, text: { en: 'Corrosion pool radius +16%', zh: '腐蚀毒池范围 +16%' } },
       ],
       trait: [
         { add: { duration: 0.5, vuln: 0.03 }, text: { en: 'Duration +0.5s, vulnerability +3%', zh: '持续时间 +0.5 秒，易伤 +3%' } },
@@ -954,10 +954,10 @@ export const SKILLS = Object.freeze({
         { add: { count: 1 }, text: { en: 'Prism orb +1', zh: '棱镜光球 +1' } },
       ],
       trait: [
-        { add: { duration: 0.4 }, basePct: { speed: 10 }, text: { en: 'Duration +0.4s, flight speed +10%', zh: '持续时间 +0.4 秒，飞行速度 +10%' } },
+        { add: { duration: 0.5 }, basePct: { speed: 10, cd: -8 }, text: { en: 'Duration +0.5s, speed +10%, cooldown -8%', zh: '持续 +0.5 秒，速度 +10%，冷却 -8%' } },
         { set: { rehit: 1.1 }, basePct: { rayDmg: 20 }, text: { en: 'Repeat hit: 1.1s, beam damage +20%', zh: '复击间隔 1.1 秒，光束伤害 +20%' } },
-        { add: { duration: 0.4 }, basePct: { speed: 10 }, text: { en: 'Duration +0.4s, flight speed +10%', zh: '持续时间 +0.4 秒，飞行速度 +10%' } },
-        { set: { rehit: 1.0 }, basePct: { rayDmg: 20 }, text: { en: 'Repeat hit: 1.0s, beam damage +20%', zh: '复击间隔 1.0 秒，光束伤害 +20%' } },
+        { add: { duration: 0.5 }, basePct: { speed: 10, cd: -10 }, text: { en: 'Duration +0.5s, speed +10%, cooldown -10%', zh: '持续 +0.5 秒，速度 +10%，冷却 -10%' } },
+        { set: { rehit: 0.9 }, basePct: { rayDmg: 25 }, text: { en: 'Repeat hit: 0.9s, beam damage +25%', zh: '复击间隔 0.9 秒，光束伤害 +25%' } },
       ],
     },
   },
@@ -989,8 +989,8 @@ export function skillParamsFor(def, modules) {
 export const PASSIVES = {
   boots:     { key: 'boots',     nameKey: 'passive.boots',     descKey: 'passive.bootsDesc',     icon: 'icon_boots',     maxLv: 3, values: [8, 14, 20] },
   magnet:    { key: 'magnet',    nameKey: 'passive.magnet',    descKey: 'passive.magnetDesc',    icon: 'icon_magnet',    maxLv: 3, values: [40, 80, 140] },
-  gears:     { key: 'gears',     nameKey: 'passive.gears',     descKey: 'passive.gearsDesc',     icon: 'icon_gears',     maxLv: 3, values: [8, 14, 20] },
-  whetstone: { key: 'whetstone', nameKey: 'passive.whetstone', descKey: 'passive.whetstoneDesc', icon: 'icon_battle_emblem', maxLv: 3, values: [10, 18, 28] },
+  gears:     { key: 'gears',     nameKey: 'passive.gears',     descKey: 'passive.gearsDesc',     icon: 'icon_gears',     maxLv: 3, values: [6, 10, 15] },
+  whetstone: { key: 'whetstone', nameKey: 'passive.whetstone', descKey: 'passive.whetstoneDesc', icon: 'icon_battle_emblem', maxLv: 3, values: [8, 14, 20] },
   core:      { key: 'core',      nameKey: 'passive.core',      descKey: 'passive.coreDesc',      icon: 'icon_core',      maxLv: 3, values: [20, 35, 50], regen: [0.5, 1, 1.5] },
   rune:      { key: 'rune',      nameKey: 'passive.rune',      descKey: 'passive.runeDesc',      icon: 'icon_rune',      maxLv: 3, values: [10, 18, 28] },
 };

@@ -60,6 +60,7 @@ export class BootScene extends Phaser.Scene {
     this.load.image('ice_shard', 'assets/vfx/ice-shard.png');
     this.load.image('holy_star', 'assets/vfx/holy-star.png');
     this.load.image('blade_slash', 'assets/vfx/blade-slash.png');
+    this.load.image('blade', 'assets/weapons/flying-blade-v2.png');
     this.load.image('chest_jackpot', 'assets/ui/chest-jackpot.webp');
     this.load.image('prop_crate_art', 'assets/props/prop-crate.webp');
     this.load.image('prop_brazier_art', 'assets/props/prop-brazier.webp');

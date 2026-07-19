@@ -25,9 +25,25 @@ function localizedText(text) {
   return getLocale() === 'zh-CN' ? text.zh : text.en;
 }
 
-function powerRankText() {
-  const pct = SKILL_POWER_PER_RANK * 100;
-  return Number.isInteger(pct) ? `${pct}` : pct.toFixed(1).replace(/\.0$/, '');
+const POWER_DAMAGE_LABELS = Object.freeze([
+  { key: 'dmg', zh: '基础伤害', en: 'Base damage' },
+  { key: 'trailDmg', zh: '火区每跳伤害', en: 'Ground damage per tick' },
+  { key: 'fragmentDmg', zh: '碎片伤害', en: 'Fragment damage' },
+  { key: 'poisonDps', zh: '中毒伤害/秒', en: 'Poison damage/sec' },
+  { key: 'rayDmg', zh: '光束伤害', en: 'Beam damage' },
+]);
+
+function pointText(value) {
+  const rounded = Math.round(value * 10) / 10;
+  return Number.isInteger(rounded) ? `${rounded}` : rounded.toFixed(1);
+}
+
+function powerGainText(def) {
+  const zh = getLocale() === 'zh-CN';
+  return POWER_DAMAGE_LABELS
+    .filter(({ key }) => Number.isFinite(def.baseParams[key]))
+    .map(({ key, zh: zhLabel, en }) => `${zh ? zhLabel : en} +${pointText(def.baseParams[key] * SKILL_POWER_PER_RANK)}`)
+    .join(zh ? '，' : ', ');
 }
 
 export class LevelSystem {
@@ -83,9 +99,7 @@ export class LevelSystem {
       moduleLabel: getLocale() === 'zh-CN' ? zh : en,
       description: effect
         ? localizedText(effect.text)
-        : (getLocale() === 'zh-CN'
-          ? `该技能全部伤害 +${powerRankText()}%`
-          : `All damage from this skill +${powerRankText()}%`),
+        : powerGainText(weapon.def),
       weight: 1 + rank * 0.5,
     };
   }

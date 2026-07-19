@@ -14,6 +14,11 @@ const GOLD_DARK = 0x8c681f;
 const CTA_FILL = 0xc99a28;
 const CTA_LINE = 0xffe29a;
 const CTA_TEXT = '#15180e';
+// 首页预览按角色的实际非透明边界缩放，不能直接比较两套不同尺寸的帧画布。
+const HERO_PREVIEW_VISIBLE_Y = Object.freeze({
+  knight: Object.freeze({ top: 22, bottom: 150 }),
+  witch: Object.freeze({ top: 0, bottom: 112 }),
+});
 
 function chamferedPoints(w, h, cut, offsetY = 0) {
   const x = w / 2;
@@ -179,10 +184,14 @@ function makeHeroCard(scene, x, y, w, h, def, unlocked, selected, onSelect, port
   inner.fillCircle(0, -h * 0.2, Math.min(w, h) * 0.42);
   root.add(inner);
 
-  const heroSize = Math.min(w * 0.92, h * (portrait ? 0.58 : 0.6));
-  const heroY = -h * 0.18;
-  const hero = scene.add.sprite(0, heroY, def.texture, 0)
-    .setDisplaySize(heroSize, heroSize)
+  const heroVisibleHeight = Math.min(w * 0.78, h * (portrait ? 0.52 : 0.54));
+  const heroBaselineY = h * 0.11;
+  const visibleY = HERO_PREVIEW_VISIBLE_Y[def.key]
+    || { top: 0, bottom: scene.textures.getFrame(def.texture, 0)?.realHeight || 1 };
+  const heroScale = heroVisibleHeight / Math.max(1, visibleY.bottom - visibleY.top);
+  const hero = scene.add.sprite(0, heroBaselineY - visibleY.bottom * heroScale, def.texture, 0)
+    .setOrigin(0.5, 0)
+    .setScale(heroScale)
     .setAlpha(unlocked ? 1 : 0.34);
   if (unlocked && def.walkAnimation && scene.anims.exists(def.walkAnimation)) hero.play(def.walkAnimation);
   root.add(hero);

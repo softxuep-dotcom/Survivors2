@@ -334,18 +334,20 @@ export function generateTextures(scene) {
   g.generateTexture('player_ranger', 48, 54);
 
   // --- 飞刃投射物（朝右，运行时按方向旋转） ---
-  g.clear();
-  g.fillStyle(0x22303f, 0.55);
-  g.fillPoints(p([[0, 6], [8, 1], [34, 4], [40, 6], [34, 8], [8, 11]]), true);
-  g.fillStyle(0xc9dcef, 1);
-  g.fillPoints(p([[2, 6], [9, 2], [34, 4.5], [40, 6], [34, 7.5], [9, 10]]), true);
-  g.fillStyle(0xffffff, 0.95);
-  g.fillPoints(p([[10, 5.5], [34, 5], [40, 6], [12, 6.5]]), true);
-  g.fillStyle(0x8fa7bd, 1);
-  g.fillRect(2, 3, 4, 6);
-  g.fillStyle(0xd8b25a, 1);
-  g.fillRect(5, 2.5, 2, 7);
-  g.generateTexture('blade', 40, 12);
+  if (!scene.textures.exists('blade')) {
+    g.clear();
+    g.fillStyle(0x22303f, 0.55);
+    g.fillPoints(p([[0, 6], [8, 1], [34, 4], [40, 6], [34, 8], [8, 11]]), true);
+    g.fillStyle(0xc9dcef, 1);
+    g.fillPoints(p([[2, 6], [9, 2], [34, 4.5], [40, 6], [34, 7.5], [9, 10]]), true);
+    g.fillStyle(0xffffff, 0.95);
+    g.fillPoints(p([[10, 5.5], [34, 5], [40, 6], [12, 6.5]]), true);
+    g.fillStyle(0x8fa7bd, 1);
+    g.fillRect(2, 3, 4, 6);
+    g.fillStyle(0xd8b25a, 1);
+    g.fillRect(5, 2.5, 2, 7);
+    g.generateTexture('blade', 40, 12);
+  }
 
   // --- 经验宝石 ×3 档（青/绿/金），带发光底晕（playtest 反馈：辨识度不足） ---
   const gemSpec = [
@@ -711,6 +713,59 @@ export function generateTextures(scene) {
   g.fillStyle(0x34420e, 0.94); g.fillPoints(p([[9, 1], [16, 5], [14, 14], [9, 18], [3, 14], [2, 5]]), true);
   g.lineStyle(2, 0xdfff62, 1); g.lineBetween(5, 5, 12, 14); g.lineBetween(12, 4, 7, 15);
   g.generateTexture('status_corrosion', 18, 18);
+
+  // 热门 ARPG 常用的贴身冻结：脚下薄霜负责落地，身体冰片和裂纹负责状态识别。
+  g.clear();
+  g.fillStyle(0x2f8fbd, 0.16); g.fillEllipse(64, 34, 118, 43);
+  g.fillStyle(0x75dfff, 0.12); g.fillEllipse(64, 33, 96, 31);
+  g.lineStyle(2, 0xbcefff, 0.52); g.strokeEllipse(64, 34, 104, 34);
+  g.lineStyle(1.25, 0xeafcff, 0.62);
+  g.lineBetween(64, 33, 28, 24); g.lineBetween(64, 33, 43, 47);
+  g.lineBetween(64, 33, 88, 17); g.lineBetween(64, 33, 101, 42);
+  g.lineBetween(28, 24, 18, 18); g.lineBetween(28, 24, 21, 31);
+  g.lineBetween(88, 17, 94, 10); g.lineBetween(101, 42, 111, 47);
+  g.fillStyle(0xdff9ff, 0.66);
+  g.fillTriangle(17, 40, 24, 27, 30, 43);
+  g.fillTriangle(99, 43, 106, 26, 112, 40);
+  g.generateTexture('freeze_ground', 128, 64);
+
+  g.clear();
+  // 不做完整冰块，只在轮廓边缘附着不规则冰片，让敌人仍能清楚辨认。
+  const leftPlate = p([[15, 32], [28, 18], [40, 29], [35, 55], [20, 64], [10, 50]]);
+  const rightPlate = p([[61, 20], [79, 12], [89, 29], [82, 50], [67, 45]]);
+  const lowerLeft = p([[16, 72], [34, 62], [46, 77], [39, 103], [21, 96]]);
+  const lowerRight = p([[52, 72], [70, 57], [84, 74], [79, 101], [58, 96]]);
+  for (const plate of [leftPlate, rightPlate, lowerLeft, lowerRight]) {
+    g.fillStyle(0x55c8ed, 0.22); g.fillPoints(plate, true);
+    g.lineStyle(1.8, 0xaeefff, 0.78); g.strokePoints(plate, true, true);
+  }
+  g.fillStyle(0xeafcff, 0.28);
+  g.fillTriangle(15, 32, 28, 18, 30, 47);
+  g.fillTriangle(61, 20, 79, 12, 70, 39);
+  g.fillTriangle(16, 72, 34, 62, 29, 92);
+  g.fillTriangle(52, 72, 70, 57, 63, 91);
+  g.lineStyle(1.4, 0xf4fdff, 0.9);
+  g.lineBetween(34, 26, 46, 43); g.lineBetween(46, 43, 39, 59); g.lineBetween(46, 43, 57, 53);
+  g.lineBetween(74, 18, 66, 34); g.lineBetween(66, 34, 74, 50);
+  g.lineBetween(31, 69, 43, 79); g.lineBetween(43, 79, 36, 94);
+  g.lineBetween(67, 65, 58, 79); g.lineBetween(58, 79, 67, 94);
+  g.fillStyle(0xffffff, 0.94);
+  g.fillCircle(46, 43, 1.8); g.fillCircle(66, 34, 1.5); g.fillCircle(58, 79, 1.5);
+  g.generateTexture('status_freeze', 96, 112);
+
+  g.clear();
+  // 小体型只用一层薄冰膜和三叉裂纹，缩小后不会读成翅膀或耳朵。
+  g.fillStyle(0x4fc4ec, 0.2); g.fillEllipse(32, 33, 51, 49);
+  g.lineStyle(1.7, 0xbcefff, 0.76);
+  g.beginPath(); g.moveTo(13, 25); g.lineTo(19, 14); g.lineTo(33, 8); g.lineTo(48, 15); g.lineTo(55, 29); g.strokePath();
+  g.beginPath(); g.moveTo(11, 38); g.lineTo(18, 52); g.lineTo(32, 58); g.lineTo(47, 52); g.lineTo(55, 39); g.strokePath();
+  g.lineStyle(1.35, 0xf4fdff, 0.9);
+  g.lineBetween(33, 13, 31, 31); g.lineBetween(31, 31, 20, 42);
+  g.lineBetween(31, 31, 43, 39); g.lineBetween(31, 31, 36, 51);
+  g.fillStyle(0xeafcff, 0.58);
+  g.fillTriangle(15, 45, 21, 34, 25, 52);
+  g.fillTriangle(43, 51, 48, 34, 53, 45);
+  g.generateTexture('status_freeze_small', 64, 64);
 
   // --- 虚拟摇杆 ---
   g.clear();

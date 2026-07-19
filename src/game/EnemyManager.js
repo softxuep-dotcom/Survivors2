@@ -107,7 +107,8 @@ export class EnemyManager {
           bossSummonT: 0, bossSummonCount: 0,
           bossFireballCd: 0, bossFireballWindup: 0, bossFireballTargetX: 0, bossFireballTargetY: 0,
           bossWarning: null,
-          slowT: 0, slow: 0, freezeT: 0, stunT: 0,
+          slowT: 0, slow: 0, freezeT: 0, freezeFxActive: false,
+          freezeFxAge: 0, freezeMoteT: 0, stunT: 0,
           poisonT: 0, poisonTick: 0, poisonDps: 0, poisonSource: '', plague: false,
           plagueDepth: 0, plagueMaxDepth: 0,
           vulnT: 0, vuln: 0, vulnFxT: 0,
@@ -359,7 +360,8 @@ export class EnemyManager {
     e.bossFireballWindup = 0;
     e.bossFireballTargetX = 0; e.bossFireballTargetY = 0;
     e.bossWarning = null;
-    e.slowT = 0; e.slow = 0; e.freezeT = 0; e.stunT = 0;
+    e.slowT = 0; e.slow = 0; e.freezeT = 0; e.freezeFxActive = false;
+    e.freezeFxAge = 0; e.freezeMoteT = 0; e.stunT = 0;
     e.poisonT = 0; e.poisonTick = 0; e.poisonDps = 0; e.poisonSource = ''; e.plague = false;
     e.plagueDepth = 0; e.plagueMaxDepth = 0;
     e.vulnT = 0; e.vuln = 0; e.vulnFxT = 0;
@@ -378,7 +380,7 @@ export class EnemyManager {
     this.playDirection(e, 1, 0);
     e.spriteScale = type.spriteH / (e.spr.height || 72) * e.scale;
     e.spr.setScale(e.spriteScale).setAlpha(1);
-    e.shadow.setActive(true).setVisible(!type.bakedShadow)
+    e.shadow.setTexture('shadow').setActive(true).setVisible(!type.bakedShadow)
       .setDisplaySize((type.shadowW || type.radius * 2) * e.scale, type.radius * 0.7 * e.scale)
       .setAlpha(0.35)
       .setPosition(x, y + type.spriteH * 0.42 * e.scale);
@@ -388,6 +390,10 @@ export class EnemyManager {
   }
 
   playDirection(e, dx, dy) {
+    if (e.freezeFxActive || e.freezeT > 0) {
+      e.spr.anims.pause();
+      return;
+    }
     if (e.finalCharacter) {
       const animKey = `player_${e.finalCharacter}_walk_right`;
       if (this.scene.anims.exists(animKey) && e.spr.anims.currentAnim?.key !== animKey) {
@@ -684,7 +690,20 @@ export class EnemyManager {
         e.slowT = Math.max(0, e.slowT - dt);
         if (e.slowT === 0) e.slow = 0;
       }
-      if (e.freezeT > 0) e.freezeT -= dt;
+      if (e.freezeT > 0) {
+        e.freezeT = Math.max(0, e.freezeT - dt);
+        e.freezeFxAge += dt;
+        e.freezeMoteT -= dt;
+        if (e.freezeMoteT <= 0) {
+          this.scene.vfx.freezeMote?.(e.x, e.y - e.type.spriteH * 0.24 * e.scale, e.radius);
+          e.freezeMoteT = 0.44 + Math.random() * 0.34;
+        }
+        if (e.freezeFxActive && e.freezeT === 0) {
+          this.scene.vfx.freezeBreak?.(e.x, e.y, e.radius);
+          e.freezeFxActive = false;
+          this.refreshStatusVisual(e);
+        }
+      }
       if (e.stunT > 0) e.stunT -= dt;
       if (e.vulnT > 0) {
         e.vulnT -= dt;
@@ -976,7 +995,7 @@ export class EnemyManager {
 
       // 朝向动画（错帧刷新）
       e.animT -= dt;
-      if (e.animT <= 0) {
+      if (!disabled && e.animT <= 0) {
         e.animT = ANIM_REFRESH;
         const lockedFlight = flying && (e.flightState === FLIGHT_WINDUP || e.flightState === FLIGHT_DASH);
         const lockedBoss = e.bossTier && (e.bossState === BOSS_WINDUP || e.bossState === BOSS_CHARGE);
@@ -984,28 +1003,30 @@ export class EnemyManager {
           lockedFlight ? e.dashY : lockedBoss ? e.bossTargetY : moveY);
       }
 
-      const bob = flying ? Math.sin(timeSec * 6 + e.flightPhase) * 5 : 0;
-      const runnerWindupPulse = e.type.key === 'runner' && e.runnerState === RUNNER_WINDUP
+      const frozen = e.freezeFxActive || e.freezeT > 0;
+      if (frozen) e.spr.anims.pause();
+      const bob = frozen ? 0 : flying ? Math.sin(timeSec * 6 + e.flightPhase) * 5 : 0;
+      const runnerWindupPulse = !frozen && e.type.key === 'runner' && e.runnerState === RUNNER_WINDUP
         ? 1 + 0.12 * Math.sin(timeSec * 34 + e.statusPhase)
         : 1;
-      const runnerDashPulse = e.type.key === 'runner' && e.runnerState === RUNNER_DASH ? 1.08 : 1;
-      const windupPulse = flying && e.flightState === FLIGHT_WINDUP
+      const runnerDashPulse = !frozen && e.type.key === 'runner' && e.runnerState === RUNNER_DASH ? 1.08 : 1;
+      const windupPulse = !frozen && flying && e.flightState === FLIGHT_WINDUP
         ? 1 + 0.10 * Math.sin(timeSec * 30 + e.flightPhase)
         : 1;
-      const bossWindupPulse = e.bossTier && e.bossState === BOSS_WINDUP
+      const bossWindupPulse = !frozen && e.bossTier && e.bossState === BOSS_WINDUP
         ? 1 + 0.09 * Math.sin(timeSec * 24 + e.statusPhase)
         : 1;
-      const bossWindupAlpha = e.bossTier && e.bossState === BOSS_WINDUP
+      const bossWindupAlpha = !frozen && e.bossTier && e.bossState === BOSS_WINDUP
         ? 0.68 + 0.3 * Math.abs(Math.sin(timeSec * 20 + e.statusPhase))
         : 1;
-      const bossRoarPulse = e.bossRoarT > 0
+      const bossRoarPulse = !frozen && e.bossRoarT > 0
         ? 1.035 + 0.025 * Math.sin(timeSec * 18 + e.statusPhase)
         : 1;
-      const treasurePulse = e.treasure ? 1 + 0.05 * Math.sin(timeSec * 5 + e.flightPhase) : 1;
+      const treasurePulse = !frozen && e.treasure ? 1 + 0.05 * Math.sin(timeSec * 5 + e.flightPhase) : 1;
       const hitPulseScale = e.flashStyle === 'lightning'
         ? ENEMY_HIT_FX.lightning.pulseScale
         : ENEMY_HIT_FX.normal.pulseScale;
-      const hitPulse = e.flashT > 0
+      const hitPulse = !frozen && e.flashT > 0
         ? 1 + hitPulseScale
           * Math.sin(Math.PI * (1 - e.flashT / e.flashDuration))
         : 1;
@@ -1017,18 +1038,44 @@ export class EnemyManager {
           : e.type.key === 'runner' && e.runnerState === RUNNER_WINDUP
             ? 0.74 + 0.24 * Math.abs(Math.sin(timeSec * 24))
             : bossWindupAlpha);
-      e.shadow.setPosition(e.x, e.y + e.type.spriteH * 0.42 * e.scale)
-        .setAlpha(flying ? 0.20 + 0.06 * Math.sin(timeSec * 6 + e.flightPhase) : 0.35);
-      if (e.statusStyle) {
+      if (e.statusStyle === 'freeze') {
+        const entry = Math.min(1, e.freezeFxAge / 0.16);
+        const ease = 1 - ((1 - entry) ** 3);
+        const bodyWidth = Math.max(e.radius * 2.3, e.type.spriteH * 0.72 * e.scale);
+        const bodyHeight = e.type.spriteH * 1.04 * e.scale;
+        const groundWidth = Math.max(e.radius * 3.1, e.type.spriteH * 0.92 * e.scale);
+        const groundHeight = Math.max(e.radius * 0.9, e.type.spriteH * 0.28 * e.scale);
+        e.shadow.setPosition(e.x, e.y + e.type.spriteH * 0.43 * e.scale)
+          .setDisplaySize(groundWidth * (0.35 + ease * 0.65), groundHeight * ease)
+          .setAlpha(0.82 * entry);
+        const compact = e.statusSpr.texture.key === 'status_freeze_small';
+        e.statusSpr.setPosition(e.x, e.y + e.type.spriteH * 0.02 * e.scale)
+          .setDisplaySize(bodyWidth * (1.08 - ease * 0.08), bodyHeight * (1.08 - ease * 0.08))
+          .setAlpha(((compact ? 0.82 : 0.66) + Math.sin(timeSec * 2.2 + e.statusPhase) * 0.025) * entry)
+          .setRotation(0);
+      } else if (e.statusStyle) {
+        e.shadow.setPosition(e.x, e.y + e.type.spriteH * 0.42 * e.scale)
+          .setAlpha(flying ? 0.20 + 0.06 * Math.sin(timeSec * 6 + e.flightPhase) : 0.35);
         e.statusSpr.setPosition(e.x, e.y + bob - e.type.spriteH * 0.64 * e.scale)
           .setAlpha(0.68 + Math.sin(timeSec * 5.2 + e.statusPhase) * 0.18)
-          .setScale((e.bossTier ? 1.15 : 0.88) + Math.sin(timeSec * 4.1 + e.statusPhase) * 0.06);
+          .setScale((e.bossTier ? 1.15 : 0.88) + Math.sin(timeSec * 4.1 + e.statusPhase) * 0.06)
+          .setRotation(0);
+      } else {
+        e.shadow.setPosition(e.x, e.y + e.type.spriteH * 0.42 * e.scale)
+          .setAlpha(flying ? 0.20 + 0.06 * Math.sin(timeSec * 6 + e.flightPhase) : 0.35);
       }
     }
   }
 
   restoreTint(e) {
-    e.spr.setTintMode(Phaser.TintModes.MULTIPLY).clearTint();
+    e.spr.clearTint();
+    if (e.statusStyle === 'freeze') {
+      const compact = !e.bossTier && e.type.spriteH * e.scale < 72;
+      e.spr.setTintMode(compact ? Phaser.TintModes.FILL : Phaser.TintModes.MULTIPLY)
+        .setTint(compact ? 0x86cde4 : 0xa6d9eb);
+      return;
+    }
+    e.spr.setTintMode(Phaser.TintModes.MULTIPLY);
     if (e.baseTint != null) e.spr.setTint(e.baseTint);
     else if (e.statusStyle === 'plague') e.spr.setTint(0xb9a4ca);
     else if (e.statusStyle === 'corrosion') e.spr.setTint(0xdff58d);
@@ -1077,15 +1124,30 @@ export class EnemyManager {
   }
 
   refreshStatusVisual(e) {
-    const style = e.poisonT > 0
-      ? (e.poisonSource === 'plague' || e.plague ? 'plague' : e.poisonSource === 'corrosion' ? 'corrosion' : 'poison')
-      : e.vulnT > 0 ? 'corrosion' : '';
+    const wasFrozen = e.statusStyle === 'freeze';
+    const style = e.freezeFxActive ? 'freeze'
+      : e.poisonT > 0
+        ? (e.poisonSource === 'plague' || e.plague ? 'plague' : e.poisonSource === 'corrosion' ? 'corrosion' : 'poison')
+        : e.vulnT > 0 ? 'corrosion' : '';
     if (style === e.statusStyle) return;
     e.statusStyle = style;
     if (!style) {
-      e.statusSpr.setActive(false).setVisible(false);
+      e.statusSpr.setActive(false).setVisible(false).setRotation(0);
     } else {
-      e.statusSpr.setTexture(`status_${style}`).setActive(true).setVisible(true);
+      const texture = style === 'freeze' && !e.bossTier && e.type.spriteH * e.scale < 72
+        ? 'status_freeze_small'
+        : `status_${style}`;
+      e.statusSpr.setTexture(texture).setActive(true).setVisible(true)
+        .setAlpha(1).setScale(1).setRotation(0);
+    }
+    if (style === 'freeze' && !wasFrozen) {
+      e.shadow.setTexture('freeze_ground').setVisible(true);
+      e.spr.anims.pause();
+    } else if (wasFrozen && style !== 'freeze') {
+      e.shadow.setTexture('shadow')
+        .setDisplaySize((e.type.shadowW || e.type.radius * 2) * e.scale, e.type.radius * 0.7 * e.scale)
+        .setVisible(!e.type.bakedShadow);
+      e.spr.anims.resume();
     }
     if (e.flashT <= 0) this.restoreTint(e);
   }
@@ -1093,7 +1155,15 @@ export class EnemyManager {
   applyStatus(e, status, source = '') {
     if (!status) return;
     if (status.slow) { e.slow = Math.max(e.slow, status.slow); e.slowT = Math.max(e.slowT, status.slowDur || 1); }
-    if (status.freezeChance && Math.random() < status.freezeChance) e.freezeT = Math.max(e.freezeT, status.freezeDur || 1.2);
+    if (status.freezeChance && Math.random() < status.freezeChance) {
+      e.freezeT = Math.max(e.freezeT, status.freezeDur || 1.2);
+      if (!e.freezeFxActive) {
+        e.freezeFxActive = true;
+        e.freezeFxAge = 0;
+        e.freezeMoteT = 0.12 + Math.random() * 0.12;
+        this.scene.vfx.freezeLock?.(e.x, e.y, e.radius);
+      }
+    }
     if (status.stunChance && Math.random() < status.stunChance) e.stunT = Math.max(e.stunT, status.stunDur || 0.7);
     if (status.poisonDps) {
       e.poisonDps = Math.max(e.poisonDps, status.poisonDps * this.scene.player.dmgMult);
@@ -1270,6 +1340,7 @@ export class EnemyManager {
     this.active[idx] = this.active[this.active.length - 1];
     this.active.pop();
     this.releaseBossWarning(e);
+    if (e.freezeFxActive || e.freezeT > 0) this.scene.vfx.freezeBreak?.(e.x, e.y, e.radius, true);
     e.spr.setActive(false).setVisible(false);
     e.shadow.setActive(false).setVisible(false);
     e.statusSpr.setActive(false).setVisible(false);

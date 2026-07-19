@@ -1,6 +1,6 @@
 {
   "name": "horde-breaker",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Horde Breaker - elemental survivors-like for Poki",
   "private": true,
   "type": "module",

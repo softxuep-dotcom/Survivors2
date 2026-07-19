@@ -290,7 +290,13 @@ export class VfxLabScene extends Phaser.Scene {
 
     this.player.invulnerableT = Number.POSITIVE_INFINITY;
     this.player.update(dt, { x: 0, y: 0 });
-    for (const enemy of this.enemies.active) enemy.freezeT = Number.POSITIVE_INFINITY;
+    for (const enemy of this.enemies.active) {
+      enemy.freezeT = Number.POSITIVE_INFINITY;
+      if (this.selectedSkill === 'icecage' && !enemy.freezeFxActive) {
+        enemy.freezeFxActive = true;
+        this.enemies.refreshStatusVisual(enemy);
+      }
+    }
     this.enemies.update(dt, this.player, this.state.time);
 
     const weapon = this.weapons.weapons[0];
