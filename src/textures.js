@@ -714,21 +714,6 @@ export function generateTextures(scene) {
   g.lineStyle(2, 0xdfff62, 1); g.lineBetween(5, 5, 12, 14); g.lineBetween(12, 4, 7, 15);
   g.generateTexture('status_corrosion', 18, 18);
 
-  // 热门 ARPG 常用的贴身冻结：脚下薄霜负责落地，身体冰片和裂纹负责状态识别。
-  g.clear();
-  g.fillStyle(0x2f8fbd, 0.16); g.fillEllipse(64, 34, 118, 43);
-  g.fillStyle(0x75dfff, 0.12); g.fillEllipse(64, 33, 96, 31);
-  g.lineStyle(2, 0xbcefff, 0.52); g.strokeEllipse(64, 34, 104, 34);
-  g.lineStyle(1.25, 0xeafcff, 0.62);
-  g.lineBetween(64, 33, 28, 24); g.lineBetween(64, 33, 43, 47);
-  g.lineBetween(64, 33, 88, 17); g.lineBetween(64, 33, 101, 42);
-  g.lineBetween(28, 24, 18, 18); g.lineBetween(28, 24, 21, 31);
-  g.lineBetween(88, 17, 94, 10); g.lineBetween(101, 42, 111, 47);
-  g.fillStyle(0xdff9ff, 0.66);
-  g.fillTriangle(17, 40, 24, 27, 30, 43);
-  g.fillTriangle(99, 43, 106, 26, 112, 40);
-  g.generateTexture('freeze_ground', 128, 64);
-
   g.clear();
   // 不做完整冰块，只在轮廓边缘附着不规则冰片，让敌人仍能清楚辨认。
   const leftPlate = p([[15, 32], [28, 18], [40, 29], [35, 55], [20, 64], [10, 50]]);

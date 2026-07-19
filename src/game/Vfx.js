@@ -468,18 +468,6 @@ export class Vfx {
     }
   }
 
-  freezeMote(x, y, enemyRadius = 24) {
-    const side = Math.random() < 0.5 ? -1 : 1;
-    const px = x + side * enemyRadius * (0.48 + Math.random() * 0.5);
-    return this.spawnParticle(px, y + Math.random() * enemyRadius * 0.7,
-      -side * (3 + Math.random() * 7), -14 - Math.random() * 13,
-      0.52 + Math.random() * 0.22, 0.18 + Math.random() * 0.13,
-      Math.random() < 0.3 ? 0xffffff : 0xa8eaff, 'snowflake', {
-        kind: 'freezeMote', kindLimit: 18, startAlpha: 0.72, endAlpha: 0,
-        endScale: 0.04, spin: side * (1.5 + Math.random() * 2.5), depth: 3.2,
-      });
-  }
-
   freezeBreak(x, y, enemyRadius = 24, heavy = false) {
     const count = heavy ? 14 : 9;
     this.areaPulse(x, y, Math.max(34, enemyRadius * (heavy ? 2.05 : 1.65)), 0x75dfff);

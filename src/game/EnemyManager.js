@@ -108,7 +108,7 @@ export class EnemyManager {
           bossFireballCd: 0, bossFireballWindup: 0, bossFireballTargetX: 0, bossFireballTargetY: 0,
           bossWarning: null,
           slowT: 0, slow: 0, freezeT: 0, freezeFxActive: false,
-          freezeFxAge: 0, freezeMoteT: 0, stunT: 0,
+          freezeFxAge: 0, stunT: 0,
           poisonT: 0, poisonTick: 0, poisonDps: 0, poisonSource: '', plague: false,
           plagueDepth: 0, plagueMaxDepth: 0,
           vulnT: 0, vuln: 0, vulnFxT: 0,
@@ -361,7 +361,7 @@ export class EnemyManager {
     e.bossFireballTargetX = 0; e.bossFireballTargetY = 0;
     e.bossWarning = null;
     e.slowT = 0; e.slow = 0; e.freezeT = 0; e.freezeFxActive = false;
-    e.freezeFxAge = 0; e.freezeMoteT = 0; e.stunT = 0;
+    e.freezeFxAge = 0; e.stunT = 0;
     e.poisonT = 0; e.poisonTick = 0; e.poisonDps = 0; e.poisonSource = ''; e.plague = false;
     e.plagueDepth = 0; e.plagueMaxDepth = 0;
     e.vulnT = 0; e.vuln = 0; e.vulnFxT = 0;
@@ -693,11 +693,6 @@ export class EnemyManager {
       if (e.freezeT > 0) {
         e.freezeT = Math.max(0, e.freezeT - dt);
         e.freezeFxAge += dt;
-        e.freezeMoteT -= dt;
-        if (e.freezeMoteT <= 0) {
-          this.scene.vfx.freezeMote?.(e.x, e.y - e.type.spriteH * 0.24 * e.scale, e.radius);
-          e.freezeMoteT = 0.44 + Math.random() * 0.34;
-        }
         if (e.freezeFxActive && e.freezeT === 0) {
           this.scene.vfx.freezeBreak?.(e.x, e.y, e.radius);
           e.freezeFxActive = false;
@@ -1043,11 +1038,8 @@ export class EnemyManager {
         const ease = 1 - ((1 - entry) ** 3);
         const bodyWidth = Math.max(e.radius * 2.3, e.type.spriteH * 0.72 * e.scale);
         const bodyHeight = e.type.spriteH * 1.04 * e.scale;
-        const groundWidth = Math.max(e.radius * 3.1, e.type.spriteH * 0.92 * e.scale);
-        const groundHeight = Math.max(e.radius * 0.9, e.type.spriteH * 0.28 * e.scale);
-        e.shadow.setPosition(e.x, e.y + e.type.spriteH * 0.43 * e.scale)
-          .setDisplaySize(groundWidth * (0.35 + ease * 0.65), groundHeight * ease)
-          .setAlpha(0.82 * entry);
+        e.shadow.setPosition(e.x, e.y + e.type.spriteH * 0.42 * e.scale)
+          .setAlpha(flying ? 0.2 : 0.35);
         const compact = e.statusSpr.texture.key === 'status_freeze_small';
         e.statusSpr.setPosition(e.x, e.y + e.type.spriteH * 0.02 * e.scale)
           .setDisplaySize(bodyWidth * (1.08 - ease * 0.08), bodyHeight * (1.08 - ease * 0.08))
@@ -1141,7 +1133,9 @@ export class EnemyManager {
         .setAlpha(1).setScale(1).setRotation(0);
     }
     if (style === 'freeze' && !wasFrozen) {
-      e.shadow.setTexture('freeze_ground').setVisible(true);
+      e.shadow.setTexture('shadow')
+        .setDisplaySize((e.type.shadowW || e.type.radius * 2) * e.scale, e.type.radius * 0.7 * e.scale)
+        .setVisible(!e.type.bakedShadow);
       e.spr.anims.pause();
     } else if (wasFrozen && style !== 'freeze') {
       e.shadow.setTexture('shadow')
@@ -1160,7 +1154,6 @@ export class EnemyManager {
       if (!e.freezeFxActive) {
         e.freezeFxActive = true;
         e.freezeFxAge = 0;
-        e.freezeMoteT = 0.12 + Math.random() * 0.12;
         this.scene.vfx.freezeLock?.(e.x, e.y, e.radius);
       }
     }
