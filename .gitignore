@@ -17,4 +17,3 @@ Thumbs.db
 runtime-shots/
 
 # 注：artifacts/ 为美术素材管线产物（源图/抠像/QA/预览），按约定入库，勿加入 ignore
-/artifacts

@@ -1,6 +1,8 @@
-// localStorage 存档（结构沿用 Merge Towers save.js：版本迁移 + 坏档容错 + 兜底写档）
+// 存档后端默认使用 localStorage；CrazyGames SDK v3 就绪后切换到同接口的
+// Data module，从而兼容游客本地档与登录用户跨设备同步。
 const KEY = 'hb_save_v1';
 const SAVE_VERSION = 3;
+let activeStorage = null;
 
 const DEFAULT = {
   v: SAVE_VERSION,
@@ -46,6 +48,34 @@ function cleanAnalytics(value) {
   return value.filter(v => v && typeof v === 'object' && !Array.isArray(v)).slice(-20);
 }
 
+function fallbackStorage() {
+  return typeof globalThis !== 'undefined' ? globalThis.localStorage || null : null;
+}
+
+function storage() {
+  return activeStorage || fallbackStorage();
+}
+
+export function configureSaveStorage(nextStorage) {
+  const fallback = fallbackStorage();
+  if (!nextStorage || typeof nextStorage.getItem !== 'function' || typeof nextStorage.setItem !== 'function') {
+    activeStorage = fallback;
+    return false;
+  }
+  try {
+    const platformSave = nextStorage.getItem(KEY);
+    const legacySave = fallback?.getItem(KEY);
+    // One-time migration for players who already had a browser-local save.
+    // Existing platform/cloud data always wins and is never overwritten here.
+    if (platformSave == null && legacySave != null) nextStorage.setItem(KEY, legacySave);
+    activeStorage = nextStorage;
+    return true;
+  } catch (_) {
+    activeStorage = fallback;
+    return false;
+  }
+}
+
 export function sanitizeSave(raw = {}) {
   const src = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
   const unlockedCharacters = cleanCharacters(src.unlockedCharacters);
@@ -70,7 +100,7 @@ export function sanitizeSave(raw = {}) {
 
 export function loadSave() {
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = storage()?.getItem(KEY);
     if (!raw) return sanitizeSave();
     const parsed = JSON.parse(raw);
     const save = sanitizeSave(parsed);
@@ -78,7 +108,7 @@ export function loadSave() {
     return save;
   } catch (e) {
     const clean = sanitizeSave();
-    try { localStorage.setItem(KEY, JSON.stringify(clean)); } catch (_) {}
+    try { storage()?.setItem(KEY, JSON.stringify(clean)); } catch (_) {}
     return clean;
   }
 }
@@ -86,7 +116,7 @@ export function loadSave() {
 export function writeSave(s) {
   const clean = sanitizeSave(s);
   if (s && typeof s === 'object') Object.assign(s, clean);
-  try { localStorage.setItem(KEY, JSON.stringify(clean)); } catch (e) {}
+  try { storage()?.setItem(KEY, JSON.stringify(clean)); } catch (e) {}
   return clean;
 }
 
@@ -98,7 +128,7 @@ export function touchSave(s, patch = {}) {
 
 export function resetSave() {
   const clean = sanitizeSave();
-  try { localStorage.setItem(KEY, JSON.stringify(clean)); } catch (e) {}
+  try { storage()?.setItem(KEY, JSON.stringify(clean)); } catch (e) {}
   return clean;
 }
 

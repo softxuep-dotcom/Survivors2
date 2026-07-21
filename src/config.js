@@ -213,12 +213,33 @@ export const ENEMY_VARIANTS = {
   armored: {
     hpMult: 3, scale: 1.23, tint: 0xb97842,
     chanceMultByType: { slime: 1.3, runner: 1, flyer: 1 },
+    // 与刷怪密度/兵种阶段解耦，调整变体节奏时不带动整条敌潮。
+    chanceTimeline: [
+      { from: 180, chance: 0.06 },
+      { from: 210, chance: 0.09 },
+      { from: 240, chance: 0.12 },
+      { from: 300, chance: 0.18 },
+      { from: 360, chance: 0.24 },
+      { from: 390, chance: 0.27 },
+      { from: 420, chance: 0.30 },
+      { from: 480, chance: 0.33 },
+      { from: 540, chance: 0.36 },
+    ],
   },
   treasure: {
     hpMult: 5.5, scale: 1.45, tint: 0xffd36d,
     enabledAt: 315, chancePerSpawn: 0.0006, pityAt: 510, maxPerRun: 1,
   },
 };
+
+export function armoredVariantChance(timeSec) {
+  let chance = 0;
+  for (const step of ENEMY_VARIANTS.armored.chanceTimeline) {
+    if (timeSec < step.from) break;
+    chance = step.chance;
+  }
+  return chance;
+}
 
 // ---------- 可破坏战利品道具（VS 火盆式战利品，不挡路，作为普通目标参与技能索敌） ----------
 // hits=命中次数制（每次伤害事件 -1，与武器数值无关）；直射弹命中道具不消耗穿透。
@@ -264,16 +285,16 @@ export const SPAWN_TIMELINE = [
   { from: 90,  rate: 4.0,  maxAlive: 170, types: { slime: 0.58, runner: 0.24, tank: 0.06, flyer: 0.12 } },
   { from: 150, rate: 4.9,  maxAlive: 220, types: { slime: 0.48, runner: 0.28, tank: 0.10, flyer: 0.10, splitter: 0.04 } },
   { from: 180, rate: 6.0,  maxAlive: 260, types: { slime: 0.44, runner: 0.27, tank: 0.13, flyer: 0.12, splitter: 0.04 } },
-  { from: 240, rate: 7.2,  maxAlive: 300, armoredChance: 0.06, types: { slime: 0.40, runner: 0.26, tank: 0.16, flyer: 0.13, splitter: 0.05 } },
-  { from: 270, rate: 7.7,  maxAlive: 315, armoredChance: 0.09, types: { slime: 0.38, runner: 0.25, tank: 0.15, flyer: 0.16, splitter: 0.06 } },
-  { from: 300, rate: 8.2,  maxAlive: 330, armoredChance: 0.12, types: { slime: 0.34, runner: 0.24, tank: 0.13, flyer: 0.22, splitter: 0.07 } },
-  { from: 360, rate: 9.2,  maxAlive: 360, armoredChance: 0.18, types: { slime: 0.32, runner: 0.25, tank: 0.11, flyer: 0.25, splitter: 0.07 } },
+  { from: 240, rate: 7.2,  maxAlive: 300, types: { slime: 0.40, runner: 0.26, tank: 0.16, flyer: 0.13, splitter: 0.05 } },
+  { from: 270, rate: 7.7,  maxAlive: 315, types: { slime: 0.38, runner: 0.25, tank: 0.15, flyer: 0.16, splitter: 0.06 } },
+  { from: 300, rate: 8.2,  maxAlive: 330, types: { slime: 0.34, runner: 0.24, tank: 0.13, flyer: 0.22, splitter: 0.07 } },
+  { from: 360, rate: 9.2,  maxAlive: 360, types: { slime: 0.32, runner: 0.25, tank: 0.11, flyer: 0.25, splitter: 0.07 } },
   // 7:00 提前提高战术怪占比，为 7:30 双 Boss 预热。
-  { from: 420, rate: 10.0, maxAlive: 380, armoredChance: 0.24, types: { slime: 0.30, runner: 0.26, tank: 0.10, flyer: 0.27, splitter: 0.07 } },
-  { from: 450, rate: 10.5, maxAlive: 390, armoredChance: 0.27, types: { slime: 0.28, runner: 0.27, tank: 0.09, flyer: 0.29, splitter: 0.07 } },
-  { from: 480, rate: 10.5, maxAlive: 390, armoredChance: 0.30, types: { slime: 0.28, runner: 0.27, tank: 0.09, flyer: 0.29, splitter: 0.07 } },
-  { from: 540, rate: 11.5, maxAlive: 400, armoredChance: 0.33, types: { slime: 0.26, runner: 0.28, tank: 0.08, flyer: 0.30, splitter: 0.08 } },
-  { from: 600, rate: 11.5, maxAlive: 400, armoredChance: 0.36, types: { slime: 0.26, runner: 0.28, tank: 0.08, flyer: 0.30, splitter: 0.08 } },
+  { from: 420, rate: 10.0, maxAlive: 380, types: { slime: 0.30, runner: 0.26, tank: 0.10, flyer: 0.27, splitter: 0.07 } },
+  { from: 450, rate: 10.5, maxAlive: 390, types: { slime: 0.28, runner: 0.27, tank: 0.09, flyer: 0.29, splitter: 0.07 } },
+  { from: 480, rate: 10.5, maxAlive: 390, types: { slime: 0.28, runner: 0.27, tank: 0.09, flyer: 0.29, splitter: 0.07 } },
+  { from: 540, rate: 11.5, maxAlive: 400, types: { slime: 0.26, runner: 0.28, tank: 0.08, flyer: 0.30, splitter: 0.08 } },
+  { from: 600, rate: 11.5, maxAlive: 400, types: { slime: 0.26, runner: 0.28, tank: 0.08, flyer: 0.30, splitter: 0.08 } },
 ];
 
 // 脚本事件：精英必掉宝箱；Boss tier 决定生命倍率/演出，final 为终局 Boss。

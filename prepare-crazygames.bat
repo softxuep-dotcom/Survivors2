@@ -2,14 +2,14 @@
 setlocal EnableExtensions
 
 cd /d "%~dp0"
-title Horde Breaker - Poki ZIP Packager
+title Horde Spark - CrazyGames Upload Files
 
 set "NO_PAUSE="
 if /i "%~1"=="--no-pause" set "NO_PAUSE=1"
 
 echo.
 echo ========================================
-echo   Horde Breaker - Poki ZIP Packager
+echo   Horde Spark - CrazyGames Upload Files
 echo ========================================
 echo.
 
@@ -30,18 +30,6 @@ if errorlevel 1 (
     goto :failed
 )
 
-set "PYTHON_CMD="
-where py >nul 2>nul
-if not errorlevel 1 set "PYTHON_CMD=py -3"
-if not defined PYTHON_CMD (
-    where python >nul 2>nul
-    if not errorlevel 1 set "PYTHON_CMD=python"
-)
-if not defined PYTHON_CMD (
-    echo [ERROR] Python 3 was not found in PATH.
-    goto :failed
-)
-
 if not exist "node_modules\vite\package.json" (
     echo [1/3] Dependencies are missing. Running npm ci...
     call npm ci
@@ -54,17 +42,18 @@ echo [2/3] Building the production game...
 call npm run build
 if errorlevel 1 goto :failed
 
-echo [3/3] Creating and verifying the versioned Poki ZIP...
-call %PYTHON_CMD% tools\package-poki.py
+echo [3/3] Verifying files for direct upload...
+call node tools\crazygames-upload.mjs
 if errorlevel 1 goto :failed
 
 echo.
-echo [SUCCESS] Poki upload ZIP is ready.
+echo [SUCCESS] Upload every file and folder inside dist\client.
+echo           Keep index.html at the upload root.
 if not defined NO_PAUSE pause
 exit /b 0
 
 :failed
 echo.
-echo [FAILED] Poki ZIP was not created. Review the error above.
+echo [FAILED] CrazyGames upload files are not ready. Review the error above.
 if not defined NO_PAUSE pause
 exit /b 1

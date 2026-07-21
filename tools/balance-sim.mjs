@@ -3,7 +3,7 @@
 import {
   WEAPONS, EVOLUTIONS, ENEMY_TYPES, ENEMY_VARIANTS, SPAWN_TIMELINE, SPAWN_EVENTS, DIFFICULTIES,
   PLAYER, BOSS_HP_MULT, BOSS_SKILL, FINAL_BOSS, EVOLUTION_LEVEL_START, EVOLUTION_EARLY_POWER,
-  hpGrowth, specialHpGrowth,
+  hpGrowth, specialHpGrowth, armoredVariantChance,
 } from '../src/config.js';
 
 // Even single-target damage is not permanently focused on the boss because auto-targeting follows the horde.
@@ -95,7 +95,7 @@ function waveHpPerSecond(time, difficulty) {
   const totalWeight = Object.values(stage.types).reduce((a, b) => a + b, 0);
   const avgHp = Object.entries(stage.types).reduce((sum, [key, weight]) => {
     const typeChanceMult = ENEMY_VARIANTS.armored.chanceMultByType?.[key] || 1;
-    const armoredChance = Math.min(1, (stage.armoredChance || 0) * typeChanceMult);
+    const armoredChance = Math.min(1, armoredVariantChance(time) * typeChanceMult);
     const variantHpMult = 1 + armoredChance * (ENEMY_VARIANTS.armored.hpMult - 1);
     return sum + ENEMY_TYPES[key].hp * weight * variantHpMult;
   }, 0) / totalWeight;

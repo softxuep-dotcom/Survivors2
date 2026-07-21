@@ -1,4 +1,4 @@
-// Poki 主流语言。本文件保留英文/中文源词条，其余完整词典由 tools/generate-locales.mjs 生成。
+// 当前支持语言。本文件保留英文/中文源词条，其余完整词典由 tools/generate-locales.mjs 生成。
 import { GENERATED_LOCALES } from './locales.generated.js';
 
 const STORAGE_KEY = 'hb_locale';
@@ -42,6 +42,8 @@ export const EN = {
   'ad.reviveTitle': 'ONE MORE CHANCE?',
   'ad.reviveDesc': 'Revive at 35% HP, clear nearby enemies and gain brief protection.',
   'ad.revive': '🎬 REVIVE',
+  'ad.loading': 'LOADING AD…',
+  'ad.unavailable': 'Ad unavailable. Please try again.',
   'ad.endRun': 'END RUN',
   'pause.title': 'PAUSED',
   'pause.desc': 'Take a breath. The horde is waiting.',
@@ -208,6 +210,8 @@ export const ZH = {
   'ad.reviveTitle': '再战一次？',
   'ad.reviveDesc': '以 35% 生命复活，清除近身敌人并获得短暂无敌。',
   'ad.revive': '🎬 复活',
+  'ad.loading': '广告加载中…',
+  'ad.unavailable': '广告暂不可用，请稍后再试。',
   'ad.endRun': '结束本局',
   'pause.title': '已暂停',
   'pause.desc': '喘口气，尸潮还在等你。',

@@ -32,6 +32,7 @@ export class ActionModal {
     });
     this.secondary = makeButton(scene, 0, 116, 330, 58, '', () => this.onSecondary?.(), {
       fontSize: '19px', fill: 0x141b16, line: 0x8c681f, color: '#d9cfad', chamfer: 9,
+      triggerOnPointerDown: true,
     });
     this.root.add([this.dim, this.panel, this.emblem, this.title, this.description, this.primary, this.secondary]);
     this.layout();
@@ -49,8 +50,12 @@ export class ActionModal {
     this.root.setVisible(true);
   }
 
-  disableSecondary() {
-    this.secondary.disableInteractive().setVisible(false);
+  setSecondaryBusy(label) {
+    this.secondary
+      .setLabel(stripLeadingIcon(label))
+      .setVisible(true)
+      .disableInteractive()
+      .setAlpha(0.62);
   }
 
   hide() { this.root.setVisible(false); }

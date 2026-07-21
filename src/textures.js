@@ -1002,7 +1002,7 @@ function generateBeamTextures(scene) {
   makeBeam('electric_spark', 28, 7, 0.9);
 }
 
-// 所有 GLSL 特效共用的确定性噪声纹理；本地生成，不产生 Poki 外部资源请求。
+// 所有 GLSL 特效共用的确定性噪声纹理；本地生成，不产生平台外部资源请求。
 function generateVfxNoiseTexture(scene) {
   const key = 'vfx_noise';
   if (scene.textures.exists(key)) return;

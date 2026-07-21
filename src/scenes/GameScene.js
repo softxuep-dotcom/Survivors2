@@ -6,7 +6,7 @@ import {
   RUN, DIFFICULTIES, EVOLUTIONS, CHARACTERS, TALENTS, WORLD_SKINS, AD_REWARDS, PROPS, XP_REWARDS,
   SKILLS, ELEMENT_COMBO_TIPS, DEFAULT_MAIN_SKILL,
 } from '../config.js';
-import { Poki } from '../poki.js';
+import { CrazyGames } from '../crazygames.js';
 import { touchSave } from '../save.js';
 import { t } from '../i18n.js';
 import { startStageAudio, stopStageAudio, setAudioPhase, setAudioPaused, Sfx, unlockAudio } from '../audio.js';
@@ -33,7 +33,13 @@ export class GameScene extends Phaser.Scene {
     this.difficulty = DIFFICULTIES[key] || DIFFICULTIES.easy;
     this.registry.set('difficulty', this.difficulty.key);
     const save = this.registry.get('save');
-    this.characterKey = CHARACTERS[data.character] ? data.character : selectedCharacter(save);
+    const params = import.meta.env.DEV ? new URLSearchParams(window.location.search) : null;
+    const captureCharacter = params?.has('captureVideo') ? params.get('captureCharacter') : null;
+    this.characterKey = CHARACTERS[data.character]
+      ? data.character
+      : CHARACTERS[captureCharacter]
+        ? captureCharacter
+        : selectedCharacter(save);
     this.startBuffKey = AD_REWARDS.startBuffs[data.startBuff] ? data.startBuff : null;
   }
 
@@ -43,8 +49,9 @@ export class GameScene extends Phaser.Scene {
     if (import.meta.env.DEV) {
       this.debugMode = !!params && (params.has(DEBUG_QUERY) || params.has(STRESS_QUERY));
       this.stressMode = !!params && params.has(STRESS_QUERY);
-      this.godMode = !!params && (this.stressMode || params.has('god'));
-      this.autoplay = !!params && params.has('autoplay');
+      this.captureVideo = !!params && params.has('captureVideo');
+      this.godMode = !!params && (this.stressMode || this.captureVideo || params.has('god'));
+      this.autoplay = !!params && (this.captureVideo || params.has('autoplay'));
       this.devStart = params ? Math.max(0, Number(params.get('start')) || 0) : 0;
       this.devRunEvent = params?.get('event') || '';
       if (this.autoplay) this.godMode = true;
@@ -126,6 +133,12 @@ export class GameScene extends Phaser.Scene {
     this.devMainSkill = import.meta.env.DEV && SKILLS[params?.get('skill')]
       ? params.get('skill')
       : DEFAULT_MAIN_SKILL;
+    this.captureSkillKeys = import.meta.env.DEV && this.captureVideo
+      ? (params.get('captureSkills') || this.devMainSkill)
+        .split(',')
+        .map(skillKey => skillKey.trim())
+        .filter(skillKey => SKILLS[skillKey])
+      : [];
     if (this.meta.startXpPct > 0) {
       this.levelSystem.xp = Math.floor(this.levelSystem.need * this.meta.startXpPct / 100);
     }
@@ -206,7 +219,7 @@ export class GameScene extends Phaser.Scene {
     this._onVisibility = this.onVisibilityChange.bind(this);
     this._onAdState = this.onAdState.bind(this);
     window.addEventListener('keydown', this._onPauseKey);
-    window.addEventListener('poki-ad-state', this._onAdState);
+    window.addEventListener('crazygames-ad-state', this._onAdState);
     document.addEventListener('visibilitychange', this._onVisibility);
     this.events.once('shutdown', () => this.onShutdown());
   }
@@ -267,7 +280,14 @@ export class GameScene extends Phaser.Scene {
 
     // 输入与玩家
     let moveVec = this.inputCtl.getMoveVector(this.player.x, this.player.y);
-    if (import.meta.env.DEV && this.autoplay) moveVec = this.runEvents.autoplayMoveVector(moveVec);
+    if (import.meta.env.DEV && this.captureVideo) {
+      // 录制模式只用于宣传片 QA：稳定绕圈移动，展示怪群、掉落物与 VFX。
+      moveVec = { x: Math.cos(time * 0.72), y: Math.sin(time * 0.72) };
+      this.inputCtl.moved = true;
+      this.ui.hideMoveHint();
+    } else if (import.meta.env.DEV && this.autoplay) {
+      moveVec = this.runEvents.autoplayMoveVector(moveVec);
+    }
     this.player.update(dt, moveVec);
     if (this.inputCtl.moved && this.ui.moveHint) {
       this.ui.hideMoveHint();
@@ -351,7 +371,7 @@ export class GameScene extends Phaser.Scene {
     this.pauseReason = reason;
     this.anims.pauseAll();
     if (reason !== 'level') setAudioPaused(true, 'game-pause');
-    Poki.gameplayStop();
+    CrazyGames.gameplayStop();
     this.ui?.setPauseVisible(false);
     this.inputCtl?.onUp();
     return true;
@@ -364,7 +384,7 @@ export class GameScene extends Phaser.Scene {
     this.anims.resumeAll();
     setAudioPaused(false, 'game-pause');
     this.ui?.setPauseVisible(true);
-    Poki.gameplayStart();
+    CrazyGames.gameplayStart();
   }
 
   pauseManually(reason = 'manual') {
@@ -377,32 +397,23 @@ export class GameScene extends Phaser.Scene {
     });
   }
 
-  async resumeFromManualPause() {
+  resumeFromManualPause() {
     if (!['manual', 'visibility'].includes(this.pauseReason) || this.adBusy) return;
-    this.adBusy = true;
     this.ui?.hideActionModal();
-    try {
-      // Poki 插屏只放在“退出暂停并返回玩法”的边界；广告期间 Game 仍保持暂停。
-      await Poki.commercialBreak();
-    } finally {
-      this.adBusy = false;
-      this.input.enabled = true;
-      if (this.ui?.input) this.ui.input.enabled = true;
-    }
     if (this.over || !['manual', 'visibility'].includes(this.pauseReason)) return;
     this.resumeGameplay();
   }
 
   quitToMenu() {
     if (this.adBusy) return;
-    Poki.gameplayStop();
+    CrazyGames.gameplayStop();
     stopStageAudio();
     setAudioPaused(false, 'game-pause');
     this.scene.start('Menu');
   }
 
   onPauseKey(event) {
-    if (Poki.isAdPlaying() || !['Escape', 'Space'].includes(event.code)) return;
+    if (CrazyGames.isAdPlaying() || !['Escape', 'Space'].includes(event.code)) return;
     event.preventDefault();
     if (['manual', 'visibility'].includes(this.pauseReason)) this.resumeFromManualPause();
     else if (!this.paused) this.pauseManually('manual');
@@ -495,9 +506,10 @@ export class GameScene extends Phaser.Scene {
   onMainSkillSelected(key) {
     if (this.mainSkillChosen || !this.levelSystem.selectMainSkill(key)) return;
     this.mainSkillChosen = true;
+    if (import.meta.env.DEV && this.captureVideo) this.applyCaptureLoadout();
     this.analytics.event('main_skill', this.state.time, { key });
     if (this.pauseReason === 'main-skill') this.resumeGameplay();
-    else Poki.gameplayStart();
+    else CrazyGames.gameplayStart();
     const save = this.registry.get('save');
     if (!save.tutorialDone && !(import.meta.env.DEV && this.stressMode)) this.ui?.showMoveHint();
     if (!save.tutorialGem && !(import.meta.env.DEV && this.stressMode)) {
@@ -522,6 +534,20 @@ export class GameScene extends Phaser.Scene {
       this.ui?.showToast(t('ad.buffActive', { name: t(buff.nameKey) }), 3.2);
     }
     if (this.pendingLevelUps > 0) this.time.delayedCall(120, () => this.tryShowLevelUp());
+  }
+
+  // 开发环境宣传片录制专用：直接注入高等级元素技能，不影响正式局成长。
+  applyCaptureLoadout() {
+    const keys = [...new Set([this.devMainSkill, ...this.captureSkillKeys])].slice(0, 4);
+    for (const skillKey of keys) {
+      if (!this.weapons.getWeapon(skillKey)) this.weapons.addSkill(skillKey);
+      const weapon = this.weapons.getWeapon(skillKey);
+      if (!weapon?.skillKey) continue;
+      weapon.modules = { scale: 2, power: 3, trait: 2 };
+      weapon.lv = Math.min(weapon.def.maxLv, 8);
+      weapon.cd = 0.05;
+      this.weapons.refreshSkillParams(weapon);
+    }
   }
 
   onChestCollected() {
@@ -616,7 +642,7 @@ export class GameScene extends Phaser.Scene {
         this.ui.overlay.setBusy(true);
         let rewarded = false;
         try {
-          rewarded = await Poki.rewardedBreak({ size: 'small' });
+          rewarded = await CrazyGames.rewardedAd();
         } finally {
           this.adBusy = false;
           this.input.enabled = true;
@@ -670,10 +696,10 @@ export class GameScene extends Phaser.Scene {
     if (this.adBusy || this.adReviveUsed || this.over) return;
     this.adBusy = true;
     this.adReviveUsed = true;
-    this.ui?.actionModal.disableSecondary();
+    this.ui?.actionModal.setSecondaryBusy(t('ad.loading'));
     let rewarded = false;
     try {
-      rewarded = await Poki.rewardedBreak({ size: 'medium' });
+      rewarded = await CrazyGames.rewardedAd();
     } finally {
       this.adBusy = false;
       this.input.enabled = true;
@@ -682,10 +708,12 @@ export class GameScene extends Phaser.Scene {
     if (this.over) return;
     if (!rewarded) {
       this.ui?.showActionModal({
-        title: t('ad.reviveTitle'), description: t('ad.reviveDesc'),
+        title: t('ad.reviveTitle'),
+        description: `${t('ad.reviveDesc')}\n${t('ad.unavailable')}`,
         primaryLabel: t('ad.endRun'), onPrimary: () => this.finishRun(false, 'death'),
         secondaryLabel: t('ad.revive'), onSecondary: () => this.tryAdRevive(),
       });
+      this.ui?.showToast(t('ad.unavailable'), 2.8);
       this.adReviveUsed = false;
       return;
     }
@@ -704,7 +732,11 @@ export class GameScene extends Phaser.Scene {
   finishRun(victory, reason) {
     if (this.over) return;
     this.over = true;
-    Poki.gameplayStop();
+    CrazyGames.gameplayStop();
+    if (victory) {
+      CrazyGames.happytime();
+      CrazyGames.reportCompletion(100);
+    }
     setAudioPaused(false, 'game-pause');
     stopStageAudio();
     if (victory) Sfx.victory();
@@ -748,7 +780,7 @@ export class GameScene extends Phaser.Scene {
   onShutdown() {
     this.scale.off('resize', this._onResize);
     window.removeEventListener('keydown', this._onPauseKey);
-    window.removeEventListener('poki-ad-state', this._onAdState);
+    window.removeEventListener('crazygames-ad-state', this._onAdState);
     document.removeEventListener('visibilitychange', this._onVisibility);
     this.inputCtl?.destroy();
     this.runEvents?.destroy();

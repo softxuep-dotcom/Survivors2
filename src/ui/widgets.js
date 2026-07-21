@@ -84,11 +84,18 @@ export function makeButton(scene, x, y, w, h, label, onClick, opts = {}) {
 
   container.on('pointerover', () => scene.tweens.add({ targets: container, scale: 1.04, duration: 90 }));
   container.on('pointerout', () => scene.tweens.add({ targets: container, scale: 1, duration: 90 }));
-  container.on('pointerdown', () => container.setScale(0.96));
-  container.on('pointerup', () => {
+  const activate = () => {
     container.setScale(1);
     Sfx.uiClick();
     onClick?.();
+  };
+  container.on('pointerdown', () => {
+    container.setScale(0.96);
+    if (opts.triggerOnPointerDown) activate();
+  });
+  container.on('pointerup', () => {
+    container.setScale(1);
+    if (!opts.triggerOnPointerDown) activate();
   });
 
   container.label = txt;

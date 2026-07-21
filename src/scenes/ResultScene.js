@@ -2,7 +2,7 @@
 import Phaser from 'phaser';
 import { THEME, WEAPONS, EVOLUTIONS, AD_REWARDS } from '../config.js';
 import { t, fmtTime } from '../i18n.js';
-import { Poki } from '../poki.js';
+import { CrazyGames } from '../crazygames.js';
 import { touchSave } from '../save.js';
 import { makeButton, makePanel } from '../ui/widgets.js';
 import { UI_FONT, UI_FONT_BOLD, mobileSafeArea } from '../ui/layout.js';
@@ -102,10 +102,17 @@ export class ResultScene extends Phaser.Scene {
     const actionGap = 14;
     const actionOffset = (buttonW + actionGap) / 2;
 
-    const retryButton = makeButton(this, portrait ? w / 2 : w / 2 - actionOffset, actionY, buttonW, portrait ? 56 : 76, stripLeadingIcon(t('result.retry')), () => {
+    const retryButton = makeButton(this, portrait ? w / 2 : w / 2 - actionOffset, actionY, buttonW, portrait ? 56 : 76, stripLeadingIcon(t('result.retry')), async () => {
       if (adBusy) return;
       adBusy = true;
       retryButton.disableInteractive().setAlpha(0.6);
+      try {
+        // A completed run is CrazyGames' natural midgame boundary. Errors and
+        // unavailable ads fail open so replay is never blocked.
+        await CrazyGames.midgameAd();
+      } finally {
+        this.input.enabled = true;
+      }
       this.scene.start('Game', { difficulty: r.difficulty, character: r.character });
     }, {
       fontSize: portrait ? '20px' : '28px', fill: 0x31452c, line: THEME.gold,
@@ -123,7 +130,7 @@ export class ResultScene extends Phaser.Scene {
 
         let rewarded = false;
         try {
-          rewarded = await Poki.rewardedBreak({ size: 'large' });
+          rewarded = await CrazyGames.rewardedAd();
         } finally {
           adBusy = false;
           this.input.enabled = true;

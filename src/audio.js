@@ -26,7 +26,6 @@ const SFX_ASSETS = Object.freeze([
   'weapon-fire-cast', 'weapon-fire-impact',
   'weapon-ice-cast', 'weapon-ice-impact',
   'weapon-lightning-cast', 'weapon-lightning-impact',
-  'weapon-poison-cast', 'weapon-poison-impact',
   'weapon-holy-cast', 'weapon-holy-impact',
   'boss-entry', 'boss-charge-warn', 'boss-charge-start', 'boss-charge-impact',
   'boss-fireball-warn', 'boss-fireball-cast', 'boss-fireball-impact',
@@ -529,6 +528,8 @@ export const Sfx = {
   },
   weaponCast(key) {
     const family = weaponFamilyOf(key);
+    // 毒瓶、瘟疫、腐蚀暂不播放武器音效，等待质量达标的新素材。
+    if (family === 'poison') return;
     const castGap = WEAPON_CAST_GAP_MS[key] || 150;
     if (throttled(`weapon-cast-${key}`, castGap)) return;
     if (throttled('weapon-cast-global', 60)) return;
@@ -572,6 +573,7 @@ export const Sfx = {
   },
   weaponImpact(key, weight = 'light') {
     const family = weaponFamilyOf(key);
+    if (family === 'poison') return;
     const heavy = weight === 'heavy';
     if (throttled(`weapon-impact-${family}`, heavy ? 135 : 115)) return;
     if (throttled('weapon-impact-global', heavy ? 82 : 92)) return;

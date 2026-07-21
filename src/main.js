@@ -7,14 +7,21 @@ import { UiScene } from './scenes/UiScene.js';
 import { ResultScene } from './scenes/ResultScene.js';
 import { TalentScene } from './scenes/TalentScene.js';
 import { VfxLabScene } from './scenes/VfxLabScene.js';
-import { touchSave } from './save.js';
+import { configureSaveStorage, touchSave } from './save.js';
 import { isMuted } from './audio.js';
+import { CrazyGames } from './crazygames.js';
 
 const versionBadge = document.createElement('div');
 versionBadge.id = 'game-version';
 versionBadge.textContent = `v${__GAME_VERSION__}`;
 versionBadge.setAttribute('aria-label', `Version ${__GAME_VERSION__}`);
 document.body.appendChild(versionBadge);
+
+// CrazyGames SDK v3 要求在游戏开始前完成初始化，并在资源加载前上报 loadingStart。
+// SDK 缺失、被禁用或超时均 fail-open，不阻断本地/离线玩法。
+await CrazyGames.init();
+configureSaveStorage(CrazyGames.dataStorage());
+CrazyGames.loadingStart();
 
 // dev 环境装载无头验证钩子（生产构建自动剔除）
 const game = window.__game = new Phaser.Game({
@@ -37,7 +44,7 @@ const game = window.__game = new Phaser.Game({
 function recoverGameSurface(reason = 'unknown') {
   const root = document.getElementById('game');
   const canvas = game.canvas;
-  document.body?.classList.remove('poki-ad-active');
+  document.body?.classList.remove('crazygames-ad-active');
   if (root) {
     root.style.zIndex = '2147483000';
     root.style.visibility = 'visible';
@@ -66,7 +73,7 @@ function recoverGameSurface(reason = 'unknown') {
   if (import.meta.env.DEV) console.info(`[surface] recovered after ${reason}`);
 }
 
-window.addEventListener('poki-ad-state', (event) => {
+window.addEventListener('crazygames-ad-state', (event) => {
   if (!event.detail?.active) recoverGameSurface('ad');
 });
 window.addEventListener('pageshow', () => recoverGameSurface('pageshow'));
@@ -80,6 +87,9 @@ game.canvas?.addEventListener?.('webglcontextrestored', () => recoverGameSurface
 // 开发环境装载自动化试玩钩子；生产构建会剔除该分支。
 if (import.meta.env.DEV) {
   import('./dev/testHooks.js').then(({ installTestHooks }) => installTestHooks(game));
+  if (new URLSearchParams(window.location.search).has('captureVideo')) {
+    import('./dev/videoCapture.js').then(({ installVideoCapture }) => installVideoCapture(game));
+  }
 }
 
 // 离页写档兜底（沿用 Merge Towers 方案）

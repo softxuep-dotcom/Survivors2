@@ -3,7 +3,7 @@ import Phaser from 'phaser';
 import { generateTextures, createEnemyAnimations, enemyAtlasKey, enemyAtlasImage, enemyAtlasJson } from '../textures.js';
 import { loadSave, touchSave } from '../save.js';
 import { registerPreloadedSfxAsset, setMuted, sfxAssetEntries } from '../audio.js';
-import { Poki } from '../poki.js';
+import { CrazyGames } from '../crazygames.js';
 import { STRESS_QUERY } from '../config.js';
 import { preloadVfxAssets, warmupVfxShaders } from '../game/vfx/VfxRuntime.js';
 
@@ -106,15 +106,13 @@ export class BootScene extends Phaser.Scene {
     }
     setMuted(save.muted);
     this.registry.set('save', save);
-    // SDK 初始化失败/超时仍继续游戏；loadingFinished 只在游戏与平台边界都就绪后触发一次。
-    Poki.init().finally(() => {
-      Poki.gameLoadingFinished();
-      // 开发构建可直达压测/VFX Lab；生产包始终从正式菜单进入。
-      const params = import.meta.env.DEV ? new URLSearchParams(window.location.search) : null;
-      const stress = !!params && params.has(STRESS_QUERY);
-      const vfxLab = !!params && params.has('vfxlab');
-      this.scene.start(vfxLab ? 'VfxLab' : stress ? 'Game' : 'Menu');
-      window.finishLoading?.();
-    });
+    CrazyGames.loadingStop();
+    // 开发构建可直达压测/VFX Lab；生产包始终从正式菜单进入。
+    const params = import.meta.env.DEV ? new URLSearchParams(window.location.search) : null;
+    const stress = !!params && params.has(STRESS_QUERY);
+    const vfxLab = !!params && params.has('vfxlab');
+    const captureVideo = !!params && params.has('captureVideo');
+    this.scene.start(vfxLab ? 'VfxLab' : stress || captureVideo ? 'Game' : 'Menu');
+    window.finishLoading?.();
   }
 }

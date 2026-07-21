@@ -4,7 +4,7 @@ import {
   ENEMY_TYPES, ENEMY_VARIANTS, PERF, SPAWN_TIMELINE, SPAWN_EVENTS, SPAWN_RING,
   BOSS_HP_MULT, ELITE_HP_MULT, BOSS_SKILL, FINAL_BOSS, PLAYER, WEAPONS, EVOLUTIONS, SKILLS,
   ELEMENT_SYNERGY, ENEMY_BEHAVIOR, ENEMY_HIT_FX,
-  hpGrowth, specialHpGrowth,
+  hpGrowth, specialHpGrowth, armoredVariantChance,
 } from '../config.js';
 import { Pool } from '../core/Pool.js';
 import { SpatialGrid } from '../core/SpatialGrid.js';
@@ -207,6 +207,7 @@ export class EnemyManager {
     // 时间线持续生成
     const phase = this.currentPhase(timeSec);
     const cap = Math.min(phase.maxAlive, this.maxAlive);
+    const armoredChance = armoredVariantChance(timeSec);
     this.spawnAcc += phase.rate * dt;
     while (this.spawnAcc >= 1) {
       this.spawnAcc -= 1;
@@ -218,9 +219,9 @@ export class EnemyManager {
       const treasureRoll = treasureEligible
         && (timeSec >= treasureCfg.pityAt || Math.random() < treasureCfg.chancePerSpawn);
       if (treasureRoll) options = TREASURE_OPTIONS;
-      else if (phase.armoredChance) {
+      else if (armoredChance) {
         const typeChanceMult = ENEMY_VARIANTS.armored.chanceMultByType?.[typeKey] || 1;
-        if (Math.random() < Math.min(1, phase.armoredChance * typeChanceMult)) options = ARMORED_OPTIONS;
+        if (Math.random() < Math.min(1, armoredChance * typeChanceMult)) options = ARMORED_OPTIONS;
       }
 
       const spawned = this.spawnAround(player, typeKey, timeSec, undefined, undefined, options);
