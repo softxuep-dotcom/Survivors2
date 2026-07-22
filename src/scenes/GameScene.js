@@ -53,6 +53,9 @@ export class GameScene extends Phaser.Scene {
       this.godMode = !!params && (this.stressMode || this.captureVideo || params.has('god'));
       this.autoplay = !!params && (this.captureVideo || params.has('autoplay'));
       this.devStart = params ? Math.max(0, Number(params.get('start')) || 0) : 0;
+      this.captureEnemyMin = this.captureVideo
+        ? Phaser.Math.Clamp(Number(params.get('captureEnemyMin')) || 0, 0, 180)
+        : 0;
       this.devRunEvent = params?.get('event') || '';
       if (this.autoplay) this.godMode = true;
     }
@@ -304,6 +307,16 @@ export class GameScene extends Phaser.Scene {
     } else {
       this.runEvents.update(dt, time);
       this.enemies.updateSpawner(dt, time, this.player);
+      // 宣传片录制时保持可读的敌群密度。敌人照常受击和死亡，只从屏幕外补充，
+      // 避免高等级展示技能把画面瞬间清空；仅开发构建的 captureVideo 参数可启用。
+      if (import.meta.env.DEV && this.captureVideo && this.captureEnemyMin > 0) {
+        const phase = this.enemies.currentPhase(time);
+        const target = Math.min(this.captureEnemyMin, phase.maxAlive, this.enemies.maxAlive);
+        for (let attempt = 0; this.enemies.aliveCount < target && attempt < target * 2; attempt++) {
+          const typeKey = this.enemies.pickType(phase.types);
+          if (!this.enemies.spawnAround(this.player, typeKey, time)) break;
+        }
+      }
       // 道具先于敌人更新：新刷的道具当帧进网格，可被本帧武器命中
       this.props.update(dt, this.player, time);
     }
