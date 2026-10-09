@@ -10,6 +10,7 @@ import { makeButton, makePanel } from '../ui/widgets.js';
 import { StartBoostOverlay } from '../ui/StartBoostOverlay.js';
 import { UI_FONT, UI_FONT_BOLD, mobileSafeArea, uiFontSize, isCjkLocale } from '../ui/layout.js';
 import { stripLeadingIcon } from '../ui/labelText.js';
+import { controlHint } from '../ui/controlHints.js';
 
 // 单行文字超宽时逐级缩小（不低于 minPx），用于长语言（de/ru）兜底，正常情况下不触发。
 function shrinkToWidth(text, maxWidth, minPx) {
@@ -436,7 +437,7 @@ export class MenuScene extends Phaser.Scene {
       () => this.showStartBoost(), secondaryStyle('ui_enhance_badge'));
     makeButton(this, w / 2 + (secondaryW + secondaryGap) / 2, secondaryY, secondaryW, secondaryH, t('menu.talents'),
       () => this.scene.start('Talents'), secondaryStyle('icon_rune'));
-    this.add.text(w / 2, h * 0.888, t('menu.howto'), {
+    this.add.text(w / 2, h * 0.888, controlHint('menu.howto'), {
       fontFamily: UI_FONT, fontSize: uiFontSize(16, 20), color: '#93ab97', align: 'center',
       wordWrap: { width: contentW, useAdvancedWrap: true },
     }).setOrigin(0.5);
@@ -490,7 +491,7 @@ export class MenuScene extends Phaser.Scene {
       () => this.showStartBoost(), secondaryStyle('ui_enhance_badge'));
     makeButton(this, rightX, h * 0.8, btnW, btnH, t('menu.talents'),
       () => this.scene.start('Talents'), secondaryStyle('icon_rune'));
-    this.add.text(rightX, h * 0.885, t('menu.howto'), {
+    this.add.text(rightX, h * 0.885, controlHint('menu.howto'), {
       fontFamily: UI_FONT, fontSize: uiFontSize(19, 24), color: '#93ab97', align: 'center',
       wordWrap: { width: rightW, useAdvancedWrap: true },
     }).setOrigin(0.5);

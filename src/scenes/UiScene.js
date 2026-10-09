@@ -2,7 +2,7 @@
 // HUD / 升级四选一 / 摇杆可视件 / 暗角 / 教学提示都在这里。
 import Phaser from 'phaser';
 import { THEME } from '../config.js';
-import { t } from '../i18n.js';
+import { controlHint } from '../ui/controlHints.js';
 import { Hud } from '../ui/Hud.js';
 import { LevelUpOverlay } from '../ui/LevelUpOverlay.js';
 import { MainSkillOverlay } from '../ui/MainSkillOverlay.js';
@@ -101,7 +101,7 @@ export class UiScene extends Phaser.Scene {
     if (this.moveHint) return;
     this.moveHint = makeNotice(
       this,
-      t('tutorial.move'),
+      controlHint('tutorial.move'),
       noticeFontSize(this),
       this.scale.width - 48,
     ).setPosition(this.scale.width / 2, this.scale.height * 0.68).setDepth(110);

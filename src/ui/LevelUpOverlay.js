@@ -6,6 +6,7 @@ import { t } from '../i18n.js';
 import { Sfx } from '../audio.js';
 import { makeButton } from './widgets.js';
 import { UI_FONT, UI_FONT_BOLD, isCjkLocale, mobileSafeArea, uiFontSize } from './layout.js';
+import { TOUCH_ONLY_HINTS } from './controlHints.js';
 
 const DESKTOP_CARD_W = 390;
 const DESKTOP_CARD_H = 490;
@@ -314,7 +315,7 @@ export class LevelUpOverlay {
     }
     const hotkey = scene.add.text(-cardW / 2 + 15, -cardH / 2 + 10, `${index + 1}`, {
       fontFamily: UI_FONT_BOLD, fontSize: this.portrait ? '19px' : '21px', color: '#8fa58f',
-    });
+    }).setVisible(!TOUCH_ONLY_HINTS);
 
     card.parts = {
       frame, iconFrame, badgeFrame, separator, arrow, icon, badge, name, desc, hotkey, geo,
