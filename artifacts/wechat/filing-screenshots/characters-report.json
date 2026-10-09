@@ -1,0 +1,18 @@
+{
+  "source": "Local server running unchanged WeChat package with simulated wx APIs",
+  "shots": [
+    {
+      "name": "01-铁壁骑士选择.png",
+      "bytes": 452449
+    },
+    {
+      "name": "02-铁壁骑士战斗.png",
+      "bytes": 523794
+    },
+    {
+      "name": "03-余烬女巫战斗.png",
+      "bytes": 525309
+    }
+  ],
+  "errors": []
+}

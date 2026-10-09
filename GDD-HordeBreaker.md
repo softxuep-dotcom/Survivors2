@@ -385,6 +385,14 @@
 
 本地契约和 390×844 模拟宿主的 WebGL/Canvas 菜单→选技能→移动战斗→后台保存暂停均通过；已配置「元素破潮」AppID `ttca1abca7546376da02`（`config/douyin.json`）。Android 的 `Extended_Pictographic` 属性正则错误和全局 `screen` 缺失已修复；屏蔽浏览器自带 screen 后，回归测试先复现旧包异常，再验证新包 WebGL/Canvas 均无启动弹窗。**用户随后确认 Android 真机能运行；iOS、真实广告、完整战斗闭环及启动性能仍未完成真机验收，广告位尚未配置**。2026-10-09 保存当前版本作为微信适配前基线，明亮紫帽女巫上传图标及源图保留在 `artifacts/douyin/`；微信端尚未实施。导入、待办与后续双端验收说明见 [`design/douyin-release.md`](design/douyin-release.md)。
 
+### 9.2 微信小游戏适配（2026-10-09）
+
+新增独立 `dist/wechat` 工程，AppID `wxbdb4c3af4927af83`（`config/wechat.json`），使用 `npm run prepare:wechat` 构建。保持 Phaser 4 + Vite 与现有玩法；微信构建独立选择 `wx` 平台接口、宿主 adapter、WebAudio 和原生音效降级，不修改抖音 adapter/平台实现。主包约 1.71 MiB，`assets/` 资源分包加载成功后启动 Phaser，总资源约 4.10 MiB；分包下载失败可重试。微信使用本地存档，无广告位时隐藏广告入口，激励视频配置使用独立 `WECHAT_REWARDED_AD_UNIT_ID`。
+
+微信契约测试及 390×844 WebGL/Canvas 模拟宿主通过：真实打包入口与分包顺序、菜单、主技能选择、移动、后台暂停/写档、升级选择、局外复活、结算、Boot 重新读档；缺失贴图显示资源失败与重试界面。测试结算时间为注入值，不代表真实完整局压测。抖音契约、两档模拟宿主回归通过，重新构建的 63 个文件 SHA-256 与适配前基线全部一致。**微信 IDE、Android/iOS 真机、完整局性能与真实广告尚未验收；本次未上传或发布。** 导入说明及证据见 `design/wechat-release.md`、`artifacts/wechat/`。
+
+微信 IDE 首次验收发现原生 `window` 只读导致启动失败（2026-10-09）。已在模拟宿主加入只读 Window 属性并复现旧包异常；修复为 adapter 导出私有宿主对象、游戏包静态绑定兼容全局变量，不再覆盖 IDE 原生 Window。新包重建到 `dist/wechat`，抖音产物保持不变；微信 IDE/真机修复后待复测。
+
 ## 10. 红线与风险
 
 1. **法律红线**：玩法公式可学，**名字/美术/音乐/角色形象必须原创**。正式名使用 Horde Spark，不用 "Vampire" 字样、不模仿 VS 的像素风与角色。

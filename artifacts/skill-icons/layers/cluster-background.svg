@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 256 256"><defs><radialGradient id="rg0" gradientUnits="userSpaceOnUse" cx="128" cy="128" r="104" fx="128" fy="128"><stop offset="0" stop-color="#442b0c" stop-opacity="1"/><stop offset="0.42" stop-color="#1f1508" stop-opacity="1"/><stop offset="0.78" stop-color="#050807" stop-opacity="1"/><stop offset="1" stop-color="#020303" stop-opacity="1"/></radialGradient><filter id="smoke14" filterUnits="userSpaceOnUse" x="-256" y="-256" width="768" height="768"><feTurbulence type="fractalNoise" baseFrequency="0.021" numOctaves="4" seed="14"/><feColorMatrix type="matrix" values="0 0 0 0 0.753 0 0 0 0 0.447 0 0 0 0 0.102 1.9 0 0 0 -0.78"/></filter><radialGradient id="rg2" gradientUnits="userSpaceOnUse" cx="128" cy="128" r="98" fx="128" fy="128"><stop offset="0" stop-color="#fff" stop-opacity="0.55"/><stop offset="0.6" stop-color="#fff" stop-opacity="0.4"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient><mask id="fade1"><circle cx="128" cy="128" r="98" fill="url(#rg2)"/></mask><filter id="blur1_6" filterUnits="userSpaceOnUse" x="-256" y="-256" width="768" height="768"><feGaussianBlur stdDeviation="1.6"/></filter></defs><rect width="256" height="256" fill="#020403"/>
+<circle cx="128" cy="128" r="100" fill="url(#rg0)"/>
+<g mask="url(#fade1)"><rect width="256" height="256" filter="url(#smoke14)"/></g>
+<circle cx="210.49" cy="110.01" r="0.83" fill="#e3c098" opacity="0.26"/>
+<circle cx="180.1" cy="110.97" r="1.33" fill="#e3c098" opacity="0.74"/>
+<circle cx="210.14" cy="93.64" r="1.24" fill="#e3c098" opacity="0.5"/>
+<circle cx="127.28" cy="201.6" r="1.18" fill="#e3c098" opacity="0.61"/>
+<circle cx="75.23" cy="200.44" r="0.76" fill="#e3c098" opacity="0.25"/>
+<circle cx="166.53" cy="79.34" r="1.4" fill="#e3c098" opacity="0.82"/>
+<circle cx="97.44" cy="61.33" r="1.15" fill="#e3c098" opacity="0.37"/>
+<circle cx="195.83" cy="166.87" r="2.51" fill="#c0721a" opacity="0.23" filter="url(#blur1_6)"/>
+<circle cx="195.83" cy="166.87" r="1.05" fill="#e3c098" opacity="0.47"/>
+<circle cx="195.12" cy="151.31" r="1.13" fill="#e3c098" opacity="0.68"/>
+<circle cx="192.3" cy="160.29" r="1.66" fill="#c0721a" opacity="0.4" filter="url(#blur1_6)"/>
+<circle cx="192.3" cy="160.29" r="0.69" fill="#e3c098" opacity="0.79"/>
+<circle cx="172.62" cy="173.22" r="1.12" fill="#e3c098" opacity="0.36"/>
+<circle cx="215.81" cy="132.9" r="1.61" fill="#c0721a" opacity="0.17" filter="url(#blur1_6)"/>
+<circle cx="215.81" cy="132.9" r="0.67" fill="#e3c098" opacity="0.34"/>
+<circle cx="44.52" cy="128.64" r="1.45" fill="#e3c098" opacity="0.67"/>
+<circle cx="133.15" cy="195.08" r="0.94" fill="#e3c098" opacity="0.77"/>
+<circle cx="210.21" cy="121.86" r="0.49" fill="#e3c098" opacity="0.4"/>
+<circle cx="158.72" cy="183.14" r="0.72" fill="#e3c098" opacity="0.29"/>
+<circle cx="199.47" cy="116.67" r="1.33" fill="#e3c098" opacity="0.72"/>
+<circle cx="135.45" cy="77.77" r="0.9" fill="#e3c098" opacity="0.76"/>
+<circle cx="185.92" cy="90.65" r="1.24" fill="#c0721a" opacity="0.33" filter="url(#blur1_6)"/>
+<circle cx="185.92" cy="90.65" r="0.52" fill="#e3c098" opacity="0.65"/>
+<circle cx="70.93" cy="70.33" r="0.94" fill="#e3c098" opacity="0.56"/>
+<circle cx="88.79" cy="109.07" r="1.53" fill="#e3c098" opacity="0.77"/>
+<circle cx="149.45" cy="49.72" r="2.97" fill="#c0721a" opacity="0.25" filter="url(#blur1_6)"/>
+<circle cx="149.45" cy="49.72" r="1.24" fill="#e3c098" opacity="0.5"/>
+<circle cx="83.44" cy="130.72" r="0.87" fill="#e3c098" opacity="0.55"/>
+<circle cx="95.67" cy="120.1" r="1.55" fill="#c0721a" opacity="0.37" filter="url(#blur1_6)"/>
+<circle cx="95.67" cy="120.1" r="0.64" fill="#e3c098" opacity="0.73"/>
+<circle cx="132.17" cy="65.85" r="2.55" fill="#c0721a" opacity="0.19" filter="url(#blur1_6)"/>
+<circle cx="132.17" cy="65.85" r="1.06" fill="#e3c098" opacity="0.37"/>
+<circle cx="165.47" cy="100.65" r="1.41" fill="#e3c098" opacity="0.52"/></svg>

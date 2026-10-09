@@ -5,7 +5,7 @@ import { generateTextures, createEnemyAnimations, enemyAtlasKey, enemyAtlasImage
 import { loadSave, touchSave } from '../save.js';
 import { registerPreloadedSfxAsset, setMuted, sfxAssetEntries } from '../audio.js';
 import { Platform } from '../platform.js';
-import { STRESS_QUERY } from '../config.js';
+import { ACTIVE_SKILL_KEYS, STRESS_QUERY } from '../config.js';
 import { preloadVfxAssets, warmupVfxShaders } from '../game/vfx/VfxRuntime.js';
 
 const BOOT_ENEMIES = ['slime', 'mini', 'runner', 'tank', 'flyer', 'splitter', 'boss', 'boss2'];
@@ -15,6 +15,8 @@ const SKILL_ICON_FRAMES = [
   'icon_gears', 'icon_battle_emblem', 'icon_core', 'icon_rune',
   'icon_heal', 'ui_upgrade_arrow', 'ui_reroll', 'ui_enhance_badge',
 ];
+// 12 个主动技能各自独立的图标（tools/build-skill-icons.mjs 按 ACTIVE_SKILL_KEYS 顺序生成 4×3 图集）
+const ACTIVE_SKILL_ICON_FRAMES = ACTIVE_SKILL_KEYS.map(key => `icon_skill_${key}`);
 const PLAYER_WALK_ANIMATIONS = [
   {
     texture: 'player_knight_walk', animation: 'player_knight_walk_right',
@@ -26,12 +28,12 @@ const PLAYER_WALK_ANIMATIONS = [
   },
 ];
 
-function installSkillIconTextures(scene) {
-  const source = scene.textures.get('skill_icon_atlas').getSourceImage();
+function installSkillIconTextures(scene, atlasKey = 'skill_icon_atlas', frames = SKILL_ICON_FRAMES) {
+  const source = scene.textures.get(atlasKey).getSourceImage();
   if (!source) return;
   const frameSize = source.width / 4;
-  for (let index = 0; index < SKILL_ICON_FRAMES.length; index++) {
-    const key = SKILL_ICON_FRAMES[index];
+  for (let index = 0; index < frames.length; index++) {
+    const key = frames[index];
     if (scene.textures.exists(key)) continue;
     const texture = scene.textures.createCanvas(key, 256, 256);
     const context = texture.getContext();
@@ -75,6 +77,7 @@ export class BootScene extends Phaser.Scene {
     this.load.image('pickup_heal_art', assetPath('assets/props/pickup-heal.webp'));
     this.load.image('pickup_magnet_art', assetPath('assets/props/pickup-magnet.webp'));
     this.load.image('skill_icon_atlas', assetPath('assets/ui/skill-icons-atlas-v2.webp'));
+    this.load.image('skill_icon_active_atlas', assetPath('assets/ui/skill-icons-active-v1.webp'));
     for (const key of BOOT_ENEMIES) {
       this.load.atlas(enemyAtlasKey(key), enemyAtlasImage(key), enemyAtlasJson(key));
     }
@@ -100,6 +103,7 @@ export class BootScene extends Phaser.Scene {
       return;
     }
     installSkillIconTextures(this);
+    installSkillIconTextures(this, 'skill_icon_active_atlas', ACTIVE_SKILL_ICON_FRAMES);
     for (const asset of sfxAssetEntries()) {
       registerPreloadedSfxAsset(asset.key, this.cache.binary.get(asset.cacheKey));
       this.cache.binary.remove(asset.cacheKey);

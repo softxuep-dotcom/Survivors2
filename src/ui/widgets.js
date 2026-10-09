@@ -71,13 +71,9 @@ export function makeButton(scene, x, y, w, h, label, onClick, opts = {}) {
   // Localized labels can be substantially wider than English. Keep every line
   // inside the button without requiring per-language font-size exceptions.
   const baseFontSize = Number.parseFloat(opts.fontSize ?? '24px');
-  let fontSize = baseFontSize;
   const minFontSize = opts.minFontSize ?? 11;
   const textWidth = w - 16 - (icon ? (opts.iconSpace ?? Math.min(52, h * 0.85)) : 0);
-  while (txt.width > textWidth && fontSize > minFontSize) {
-    fontSize -= 1;
-    txt.setFontSize(fontSize);
-  }
+  fitButtonLabel(txt, baseFontSize, minFontSize, textWidth, h - 8);
   container.add(icon ? [bg, icon, txt] : [bg, txt]);
   container.setSize(w, h);
   container.setInteractive({ useHandCursor: true });
@@ -102,13 +98,27 @@ export function makeButton(scene, x, y, w, h, label, onClick, opts = {}) {
   container.background = bg;
   container.icon = icon;
   container.setLabel = (nextLabel) => {
-    txt.setFontSize(baseFontSize).setText(nextLabel);
-    let nextSize = baseFontSize;
-    while (txt.width > textWidth && nextSize > minFontSize) {
-      nextSize -= 1;
-      txt.setFontSize(nextSize);
-    }
+    txt.setText(nextLabel);
+    fitButtonLabel(txt, baseFontSize, minFontSize, textWidth, h - 8);
     return container;
   };
   return container;
+}
+
+// 按钮文字适配：先单行缩到 minFontSize；仍放不下且按钮够高时折成两行
+// （中文没有空格，必须 advancedWrap 才能按字断行）；最后兜底继续缩小，保证不溢出按钮。
+const BUTTON_FONT_FLOOR = 9;
+export function fitButtonLabel(txt, baseFontSize, minFontSize, maxWidth, maxHeight) {
+  let size = baseFontSize;
+  txt.setWordWrapWidth(null).setFontSize(size);
+  while (txt.width > maxWidth && size > minFontSize) txt.setFontSize(--size);
+  if (txt.width <= maxWidth) return size;
+  txt.setWordWrapWidth(maxWidth, true);
+  size = baseFontSize;
+  txt.setFontSize(size);
+  while ((txt.width > maxWidth || txt.height > maxHeight) && size > minFontSize) txt.setFontSize(--size);
+  if (txt.width <= maxWidth && txt.height <= maxHeight) return size;
+  txt.setWordWrapWidth(null);
+  while (txt.width > maxWidth && size > BUTTON_FONT_FLOOR) txt.setFontSize(--size);
+  return size;
 }

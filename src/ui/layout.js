@@ -1,5 +1,14 @@
+import { isCjkLocale } from './textDefaults.js';
+
+export { isCjkLocale };
 export const UI_FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif';
 export const UI_FONT_BOLD = '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial Black, sans-serif';
+
+// 中日韩字形笔画密，同字号下比拉丁字母难辨认；CJK 语言传入单独的逻辑字号。
+// 逻辑像素到屏幕：竖屏 390 宽手机约 ×0.54，1366×768 横屏约 ×0.6，CJK 正文应 ≥22 逻辑像素。
+export function uiFontSize(px, cjkPx = px) {
+  return `${isCjkLocale() ? cjkPx : px}px`;
+}
 
 export function isPortrait(scene) {
   return scene.scale.height > scene.scale.width * 1.12;

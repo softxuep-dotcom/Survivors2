@@ -1,29 +1,152 @@
 // 升级四选一覆盖层：竖屏使用全宽横向技能卡，横屏四卡并排。
+// 横屏逻辑高度固定 1280，卡片按此设计尺寸排版（原 224×310 只占屏幕一小块，中文仅约 9 CSS 像素）。
 import Phaser from 'phaser';
 import { WEAPONS, EVOLUTIONS, SKILLS, PASSIVES, THEME, MAXED_BONUS } from '../config.js';
 import { t } from '../i18n.js';
 import { Sfx } from '../audio.js';
 import { makeButton } from './widgets.js';
-import { UI_FONT, UI_FONT_BOLD, mobileSafeArea } from './layout.js';
+import { UI_FONT, UI_FONT_BOLD, isCjkLocale, mobileSafeArea, uiFontSize } from './layout.js';
 
-const DESKTOP_CARD_W = 224;
-const DESKTOP_CARD_H = 310;
-const DESKTOP_GAP = 18;
+const DESKTOP_CARD_W = 390;
+const DESKTOP_CARD_H = 490;
+const DESKTOP_GAP = 28;
+const DESKTOP_ICON_BOX = 160;
 const CARD_FILL = 0x111a13;
 const CARD_LINE = 0x49633e;
 const CARD_SUB = '#c9d8c4';
 const BADGE_FILL = 0x26351d;
+const BADGE_H = 42;
 
-function fitTextToBox(text, {
+// ---- 中文换行 ----
+// Phaser 的 advancedWordWrap 只在空格处断行：中文里夹一个“Boss”或“+5.1”就会整段甩到下一行。
+// CJK 语言改用自定义回调：汉字/假名之间可断，拉丁单词与数字保持整体，并做简单避头尾。
+// 韩文按空格分词断行（符合韩文排版习惯），因此谚文不计入可任意断行的字符。
+// 注意：抖音 Android VM 不支持 Unicode 属性转义，这里只用显式码段。
+const CJK_BREAKABLE = /[\u2E80-\u2FFF\u3000-\u30FF\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF\uFE30-\uFE4F\uFF00-\uFFEF]/;
+const NO_LINE_START = '，。、：；！？）」』》〉】〕…·・ーぁぃぅぇぉっゃゅょゎァィゥェォッャュョヮヵヶ%％,.:;!?)]}';
+const NO_LINE_END = '（「『《〈【〔([{“‘';
+
+function wrapTokens(paragraph) {
+  const tokens = [];
+  let word = '';
+  for (const ch of paragraph) {
+    const space = ch === ' ' || ch === '\t';
+    if (space || CJK_BREAKABLE.test(ch)) {
+      if (word) tokens.push(word);
+      word = '';
+      tokens.push(space ? ' ' : ch);
+    } else {
+      word += ch;
+    }
+  }
+  if (word) tokens.push(word);
+  return tokens;
+}
+
+export function wrapCjkLines(text, context, width) {
+  const lines = [];
+  const measure = parts => context.measureText(parts.join('')).width;
+  for (const paragraph of String(text).split('\n')) {
+    const rows = [];
+    let line = [];
+    const flush = () => {
+      while (line.length && line[line.length - 1] === ' ') line.pop();
+      rows.push(line);
+      line = [];
+    };
+    for (const token of wrapTokens(paragraph)) {
+      if (token === ' ' && !line.length) continue;
+      if (!line.length || measure([...line, token]) <= width) {
+        // 单个拉丁长词比整行还宽时按字符硬拆，保证不溢出。
+        if (!line.length && token.length > 1 && measure([token]) > width) {
+          let chunk = '';
+          for (const ch of token) {
+            if (chunk && measure([chunk + ch]) > width) {
+              rows.push([chunk]);
+              chunk = '';
+            }
+            chunk += ch;
+          }
+          line = [chunk];
+        } else {
+          line.push(token);
+        }
+        continue;
+      }
+      if (token === ' ') {
+        flush();
+        continue;
+      }
+      // 避头：标点不能出现在行首，把上一行末字一起带下来；避尾：开括号不留在行尾。
+      const carry = [];
+      while (carry.length < 3 && line.length > 1 && line[line.length - 1] !== ' ' && NO_LINE_START.includes((carry[0] ?? token)[0])) {
+        carry.unshift(line.pop());
+      }
+      while (line.length > 1 && NO_LINE_END.includes(line[line.length - 1])) carry.unshift(line.pop());
+      flush();
+      line = [...carry, token];
+    }
+    flush();
+    // 末行只剩一个汉字（孤字）时，从上一行借一个字下来，如“传染毒/素”→“传染/毒素”。
+    const last = rows[rows.length - 1];
+    const prev = rows[rows.length - 2];
+    const lonely = last && last.every(tok => tok.length === 1 && CJK_BREAKABLE.test(tok))
+      && last.filter(tok => !NO_LINE_START.includes(tok)).length === 1;
+    if (lonely && prev && prev.length > 3) {
+      let moved = 0;
+      while (moved < 2 && prev.length > 3 && prev[prev.length - 1] !== ' ') {
+        last.unshift(prev.pop());
+        moved++;
+        if (!NO_LINE_START.includes(last[0][0])) break;
+      }
+    }
+    for (const row of rows) lines.push(row.join(''));
+  }
+  return lines;
+}
+
+// 统一设置换行宽度：CJK 语言走自定义回调，其他语言沿用 Phaser 高级换行。
+export function setTextWrap(text, width) {
+  if (isCjkLocale() && width > 0) {
+    text.setWordWrapWidth(width, true);
+    text.setWordWrapCallback((value, textObject) => wrapCjkLines(value, textObject.context, width));
+  } else {
+    text.setWordWrapCallback(null);
+    text.setWordWrapWidth(width > 0 ? width : null, width > 0);
+  }
+  return text;
+}
+
+// 换行时单词被硬拆（如德语“FLAMMENSPU/R”）也算放不下：最长的不可断词必须整体放进一行。
+function wordsFit(text, width) {
+  const context = text.context;
+  for (const paragraph of String(text.text).split('\n')) {
+    for (const token of wrapTokens(paragraph)) {
+      if (token.length > 1 && context.measureText(token).width > width + 1) return false;
+    }
+  }
+  return true;
+}
+
+// 字号逐级缩小直到放进文本框；最小字号仍放不下时才截断行数。供其他覆盖层复用。
+// preferSingleLine：名称类短文本先尝试在 singleLineMin 以上缩字号放进一行（避免“ブレードス/トーム”词中折行），放不下再换行。
+export function fitTextToBox(text, {
   width, height, fontSize, minFontSize, maxLines = 0, wrap = true, lineSpacing = 2,
+  preferSingleLine = false, singleLineMin = minFontSize,
 }) {
   text.setMaxLines(0).setLineSpacing(lineSpacing);
-  if (wrap) text.setWordWrapWidth(width, true);
-  else text.setWordWrapWidth(0, false);
-
+  const fits = () => text.width <= width + 1 && text.height <= height + 1;
+  if (wrap && preferSingleLine) {
+    setTextWrap(text, 0);
+    for (let size = fontSize; size >= singleLineMin; size--) {
+      text.setFontSize(size);
+      if (fits()) return;
+    }
+  }
+  setTextWrap(text, wrap ? width : 0);
   for (let size = fontSize; size >= minFontSize; size--) {
     text.setFontSize(size);
-    if (text.width <= width + 1 && text.height <= height + 1) return;
+    if (fits() && (!wrap || wordsFit(text, width))) return;
   }
   if (maxLines > 0) text.setMaxLines(maxLines);
 }
@@ -56,48 +179,61 @@ export class LevelUpOverlay {
     this.safe = mobileSafeArea(scene);
     this.portrait = this.safe.portrait;
     this.touchUi = this.portrait || !!scene.sys.game.device.input.touch;
-    this.cardW = this.portrait ? Math.min(scene.scale.width - 44, 620) : DESKTOP_CARD_W;
+    this.cjk = isCjkLocale();
+    this.cardW = this.portrait ? Math.min(scene.scale.width - 36, 680) : DESKTOP_CARD_W;
     this.cardH = this.portrait
-      ? Math.min(230, Math.max(196, scene.scale.height * 0.16))
+      ? Math.min(250, Math.max(212, scene.scale.height * 0.16))
       : DESKTOP_CARD_H;
 
     this.root = scene.add.container(0, 0).setDepth(200).setScrollFactor(0).setVisible(false);
-    this.dim = scene.add.rectangle(0, 0, 10, 10, 0x050806, this.portrait ? 0.68 : 0.72)
+    this.dim = scene.add.rectangle(0, 0, 10, 10, 0x050806, this.portrait ? 0.74 : 0.8)
       .setOrigin(0).setInteractive();
     this.rays = scene.add.graphics().setBlendMode(Phaser.BlendModes.ADD);
     this.title = scene.add.text(0, 0, '', {
       fontFamily: UI_FONT_BOLD,
-      fontSize: this.portrait ? '51px' : '36px',
+      fontSize: this.portrait ? uiFontSize(51, 54) : uiFontSize(48, 54),
       color: THEME.goldCss,
       stroke: '#160f05',
-      strokeThickness: this.portrait ? 8 : 6,
+      strokeThickness: 8,
       shadow: { offsetY: 5, color: '#000000', blur: 8, fill: true },
       align: 'center',
     }).setOrigin(0.5);
     this.subtitle = scene.add.text(0, 0, '', {
       fontFamily: UI_FONT_BOLD,
-      fontSize: this.portrait ? '18px' : '17px',
+      fontSize: this.portrait ? uiFontSize(21, 24) : uiFontSize(24, 28),
       color: '#f1eee4',
       stroke: '#0b0f0c',
-      strokeThickness: 4,
+      strokeThickness: 5,
       align: 'center',
     }).setOrigin(0.5);
     this.root.add([this.dim, this.rays, this.title, this.subtitle]);
 
-    this.reroll = makeButton(scene, 0, 0, this.portrait ? 300 : 280, this.portrait ? 58 : 52, '', () => {
+    // 重摇按钮：图标单独放在左侧，文字在剩余宽度内居中并自动缩小。
+    const rerollW = this.portrait ? 400 : 440;
+    const rerollH = this.portrait ? 72 : 74;
+    this.rerollH = rerollH;
+    this.rerollFont = this.portrait ? (this.cjk ? 25 : 22) : (this.cjk ? 28 : 24);
+    this.rerollMinFont = this.cjk ? 19 : 14;
+    this.reroll = makeButton(scene, 0, 0, rerollW, rerollH, '', () => {
       if (!this.busy) this.rerollAction?.();
     }, {
-      fontSize: this.portrait ? '18px' : '17px',
-      minFontSize: 12,
+      fontSize: `${this.rerollFont}px`,
+      minFontSize: this.rerollMinFont,
       fill: 0x151c16,
       line: 0xa67a28,
+      lineWidth: 2,
       color: '#eadab4',
-      radius: this.portrait ? 22 : 16,
+      radius: 24,
       shadow: true,
     }).setVisible(false);
-    this.rerollIcon = scene.add.image(-116, 0, 'ui_reroll').setDisplaySize(30, 30);
+    const rerollIconSize = 40;
+    const rerollIconX = -rerollW / 2 + 22 + rerollIconSize / 2;
+    this.rerollIcon = scene.add.image(rerollIconX, 0, 'ui_reroll').setDisplaySize(rerollIconSize, rerollIconSize);
     this.reroll.add(this.rerollIcon);
-    this.reroll.label.setX(12);
+    const labelLeft = rerollIconX + rerollIconSize / 2 + 10;
+    this.rerollLabelX = (labelLeft + rerollW / 2 - 18) / 2;
+    this.rerollLabelW = rerollW / 2 - 18 - labelLeft;
+    this.reroll.label.setX(this.rerollLabelX);
     this.root.add(this.reroll);
 
     this.cards = [];
@@ -121,53 +257,69 @@ export class LevelUpOverlay {
     const badgeFrame = scene.add.graphics();
     const separator = scene.add.graphics();
     const arrow = scene.add.image(0, 0, 'ui_upgrade_arrow')
-      .setDisplaySize(this.portrait ? 48 : 40, this.portrait ? 48 : 40)
+      .setDisplaySize(this.portrait ? 50 : 46, this.portrait ? 50 : 46)
       .setAlpha(0);
 
-    let icon;
+    let geo;
+    if (this.portrait) {
+      // 竖屏横卡：左图标；右侧上排名称 + 等级徽章，分隔线下为效果描述（在剩余区域垂直居中）。
+      const iconSize = Math.min(150, cardH - 52);
+      const iconX = -cardW / 2 + iconSize / 2 + 22;
+      const copyX = -cardW / 2 + iconSize + 46;
+      const headY = -cardH / 2 + 46;
+      const sepY = -cardH / 2 + 84;
+      geo = {
+        iconSize, iconBox: iconSize, iconX, iconY: 0, copyX, headY, sepY,
+        right: cardW / 2 - 28, descTop: sepY + 12, descBottom: cardH / 2 - 20,
+      };
+    } else {
+      // 横屏竖卡：图标框在上，徽章压在图标框下沿，名称、分隔线、描述依次向下。
+      const iconBox = DESKTOP_ICON_BOX;
+      const iconY = -cardH / 2 + 22 + iconBox / 2;
+      const iconBottom = iconY + iconBox / 2;
+      geo = {
+        iconSize: iconBox - 14, iconBox, iconX: 0, iconY, copyX: 0,
+        badgeY: iconBottom + 6, nameY: iconBottom + 70, sepY: iconBottom + 120,
+        descTop: iconBottom + 136, descBottom: cardH / 2 - 22,
+      };
+    }
+    const icon = scene.add.image(geo.iconX, geo.iconY, 'icon_blade').setDisplaySize(geo.iconSize - 10, geo.iconSize - 10);
     let badge;
     let name;
     let desc;
-    let hotkey;
     if (this.portrait) {
-      const iconSize = Math.min(142, cardH - 46);
-      const iconX = -cardW / 2 + iconSize / 2 + 22;
-      const copyX = -cardW / 2 + iconSize + 46;
-      icon = scene.add.image(iconX, 0, 'icon_blade').setDisplaySize(iconSize - 10, iconSize - 10);
-      name = scene.add.text(copyX, -cardH / 2 + 41, '', {
-        fontFamily: UI_FONT_BOLD, fontSize: '27px', color: THEME.text, align: 'left',
+      name = scene.add.text(geo.copyX, geo.headY, '', {
+        fontFamily: UI_FONT_BOLD, color: THEME.text, align: 'left',
         stroke: '#0a0d0b', strokeThickness: 3,
       }).setOrigin(0, 0.5);
-      badge = scene.add.text(cardW / 2 - 34, -cardH / 2 + 41, '', {
-        fontFamily: UI_FONT_BOLD, fontSize: '17px', color: '#d7e99d', align: 'center',
-      }).setOrigin(1, 0.5);
-      desc = scene.add.text(copyX, 19, '', {
-        fontFamily: UI_FONT, fontSize: '19px', color: CARD_SUB, align: 'left',
-      }).setOrigin(0, 0);
-      hotkey = scene.add.text(-cardW / 2 + 12, -cardH / 2 + 10, `${index + 1}`, {
-        fontFamily: UI_FONT_BOLD, fontSize: '12px', color: '#7f957f',
-      });
-      arrow.setPosition(cardW / 2 - 22, cardH / 2 - 28);
-      card.parts = { frame, iconFrame, badgeFrame, separator, arrow, icon, badge, name, desc, hotkey, iconSize, iconX, copyX };
+      badge = scene.add.text(geo.right - 60, geo.headY, '', {
+        fontFamily: UI_FONT_BOLD, color: '#d7e99d', align: 'center',
+      }).setOrigin(0.5);
+      desc = scene.add.text(geo.copyX, (geo.descTop + geo.descBottom) / 2, '', {
+        fontFamily: UI_FONT, color: CARD_SUB, align: 'left',
+      }).setOrigin(0, 0.5);
+      arrow.setPosition(cardW / 2 - 24, cardH / 2 - 28);
     } else {
-      icon = scene.add.image(0, -cardH / 2 + 72, 'icon_blade').setDisplaySize(98, 98);
-      badge = scene.add.text(0, -cardH / 2 + 127, '', {
-        fontFamily: UI_FONT_BOLD, fontSize: '16px', color: '#d7e99d', align: 'center',
+      badge = scene.add.text(0, geo.badgeY, '', {
+        fontFamily: UI_FONT_BOLD, color: '#d7e99d', align: 'center',
       }).setOrigin(0.5);
-      name = scene.add.text(0, -cardH / 2 + 165, '', {
-        fontFamily: UI_FONT_BOLD, fontSize: '23px', color: THEME.text, align: 'center',
+      name = scene.add.text(0, geo.nameY, '', {
+        fontFamily: UI_FONT_BOLD, color: THEME.text, align: 'center',
+        stroke: '#0a0d0b', strokeThickness: 3,
       }).setOrigin(0.5);
-      desc = scene.add.text(0, -cardH / 2 + 212, '', {
-        fontFamily: UI_FONT, fontSize: '16px', color: CARD_SUB, align: 'center',
+      desc = scene.add.text(0, geo.descTop, '', {
+        fontFamily: UI_FONT, color: CARD_SUB, align: 'center',
       }).setOrigin(0.5, 0);
-      hotkey = scene.add.text(-cardW / 2 + 13, -cardH / 2 + 10, `${index + 1}`, {
-        fontFamily: UI_FONT_BOLD, fontSize: '13px', color: '#7f957f',
-      });
-      arrow.setPosition(cardW / 2 - 21, cardH / 2 - 25);
-      card.parts = { frame, iconFrame, badgeFrame, separator, arrow, icon, badge, name, desc, hotkey, iconSize: 108, iconX: 0, copyX: 0 };
+      arrow.setPosition(cardW / 2 - 26, cardH / 2 - 28);
     }
+    const hotkey = scene.add.text(-cardW / 2 + 15, -cardH / 2 + 10, `${index + 1}`, {
+      fontFamily: UI_FONT_BOLD, fontSize: this.portrait ? '19px' : '21px', color: '#8fa58f',
+    });
 
-    card.parts.accent = THEME.green;
+    card.parts = {
+      frame, iconFrame, badgeFrame, separator, arrow, icon, badge, name, desc, hotkey, geo,
+      badgeW: 120, accent: THEME.green,
+    };
     card.add([frame, iconFrame, badgeFrame, separator, icon, badge, name, desc, hotkey, arrow]);
     this.drawCard(card, false);
     card.setSize(cardW, cardH).setInteractive({ useHandCursor: true });
@@ -190,11 +342,11 @@ export class LevelUpOverlay {
   }
 
   drawCard(card, active) {
-    const { frame, iconFrame, badgeFrame, separator, arrow, accent, iconSize, iconX, copyX } = card.parts;
+    const { frame, iconFrame, badgeFrame, separator, arrow, accent, geo, badgeW } = card.parts;
     const cardW = this.cardW;
     const cardH = this.cardH;
     const line = active ? THEME.gold : CARD_LINE;
-    const radius = this.portrait ? 22 : 17;
+    const radius = this.portrait ? 22 : 20;
     frame.clear();
     frame.fillStyle(0x000000, active ? 0.48 : 0.34);
     frame.fillRoundedRect(-cardW / 2, -cardH / 2 + 7, cardW, cardH, radius);
@@ -206,65 +358,63 @@ export class LevelUpOverlay {
     frame.strokeRoundedRect(-cardW / 2 + 6, -cardH / 2 + 6, cardW - 12, cardH - 12, radius - 5);
 
     iconFrame.clear();
-    const iconBox = this.portrait ? iconSize : 108;
-    const iconY = this.portrait ? 0 : -cardH / 2 + 72;
+    const { iconBox, iconX, iconY } = geo;
     iconFrame.fillStyle(0x090d0a, 0.94);
     iconFrame.fillRoundedRect(iconX - iconBox / 2, iconY - iconBox / 2, iconBox, iconBox, 18);
-    iconFrame.fillStyle(accent, active ? 0.12 : 0.07);
-    iconFrame.fillCircle(iconX, iconY, iconBox * 0.37);
+    iconFrame.fillStyle(accent, active ? 0.14 : 0.08);
+    iconFrame.fillCircle(iconX, iconY, iconBox * 0.4);
     iconFrame.lineStyle(2, active ? THEME.gold : accent, active ? 0.9 : 0.72);
     iconFrame.strokeRoundedRect(iconX - iconBox / 2, iconY - iconBox / 2, iconBox, iconBox, 18);
 
     badgeFrame.clear();
-    if (this.portrait) {
-      const badgeW = 122;
-      const badgeH = 38;
-      const badgeX = cardW / 2 - 28 - badgeW;
-      const badgeY = -cardH / 2 + 22;
-      badgeFrame.fillStyle(BADGE_FILL, 0.98);
-      badgeFrame.fillRoundedRect(badgeX, badgeY, badgeW, badgeH, 16);
-      badgeFrame.lineStyle(1, active ? THEME.gold : accent, active ? 0.75 : 0.5);
-      badgeFrame.strokeRoundedRect(badgeX, badgeY, badgeW, badgeH, 16);
-    } else {
-      badgeFrame.fillStyle(BADGE_FILL, 0.95);
-      badgeFrame.fillRoundedRect(-64, -cardH / 2 + 108, 128, 38, 16);
-      badgeFrame.lineStyle(1, active ? THEME.gold : accent, active ? 0.75 : 0.5);
-      badgeFrame.strokeRoundedRect(-64, -cardH / 2 + 108, 128, 38, 16);
-    }
+    const badgeX = this.portrait ? geo.right - badgeW : -badgeW / 2;
+    const badgeY = (this.portrait ? geo.headY : geo.badgeY) - BADGE_H / 2;
+    badgeFrame.fillStyle(BADGE_FILL, 0.98);
+    badgeFrame.fillRoundedRect(badgeX, badgeY, badgeW, BADGE_H, BADGE_H / 2);
+    badgeFrame.lineStyle(1, active ? THEME.gold : accent, active ? 0.75 : 0.55);
+    badgeFrame.strokeRoundedRect(badgeX, badgeY, badgeW, BADGE_H, BADGE_H / 2);
 
     separator.clear();
-    separator.lineStyle(1, active ? THEME.gold : accent, active ? 0.4 : 0.22);
-    if (this.portrait) separator.lineBetween(copyX, -3, cardW / 2 - 30, -3);
-    else separator.lineBetween(-cardW / 2 + 28, -cardH / 2 + 190, cardW / 2 - 28, -cardH / 2 + 190);
+    separator.lineStyle(1, active ? THEME.gold : accent, active ? 0.4 : 0.24);
+    if (this.portrait) separator.lineBetween(geo.copyX, geo.sepY, geo.right, geo.sepY);
+    else separator.lineBetween(-cardW / 2 + 28, geo.sepY, cardW / 2 - 28, geo.sepY);
     arrow.setAlpha(active ? 1 : 0);
   }
 
+  // CJK 字号下限：正文 ≥20、徽章 ≥18、名称 ≥22（逻辑像素），手机上约 11 CSS 像素以上。
+  // 徽章宽度随文字伸缩（“∞ 可无限叠加”比“Lv 2”长得多），名称占用剩余宽度。
   fitCardCopy(card) {
-    const { badge, name, desc, copyX } = card.parts;
+    const { badge, name, desc, geo } = card.parts;
+    const cjk = this.cjk;
     if (this.portrait) {
-      const right = this.cardW / 2 - 28;
-      const badgeW = 118;
       fitTextToBox(badge, {
-        width: badgeW - 12, height: 30, fontSize: 17, minFontSize: 11, maxLines: 1, wrap: false, lineSpacing: 0,
+        width: 200, height: BADGE_H - 6, fontSize: cjk ? 22 : 19, minFontSize: cjk ? 18 : 13,
+        maxLines: 1, wrap: false, lineSpacing: 0,
       });
+      card.parts.badgeW = Math.max(108, Math.ceil(badge.width) + 30);
+      badge.setX(geo.right - card.parts.badgeW / 2);
       fitTextToBox(name, {
-        width: right - badgeW - 16 - copyX, height: 43,
-        fontSize: 27, minFontSize: 16, maxLines: 2, lineSpacing: 0,
+        width: geo.right - card.parts.badgeW - 14 - geo.copyX, height: 60,
+        fontSize: cjk ? 33 : 28, minFontSize: cjk ? 22 : 16, maxLines: 2, lineSpacing: 0, preferSingleLine: cjk,
       });
       fitTextToBox(desc, {
-        width: right - copyX, height: this.cardH / 2 - 34,
-        fontSize: 19, minFontSize: 13, maxLines: 4, lineSpacing: 3,
+        width: geo.right - geo.copyX, height: geo.descBottom - geo.descTop,
+        fontSize: cjk ? 24 : 21, minFontSize: cjk ? 20 : 14, maxLines: 4, lineSpacing: 4,
       });
       return;
     }
     fitTextToBox(badge, {
-      width: this.cardW - 42, height: 29, fontSize: 16, minFontSize: 11, maxLines: 1, wrap: false, lineSpacing: 0,
+      width: this.cardW - 70, height: BADGE_H - 6, fontSize: cjk ? 24 : 21, minFontSize: cjk ? 18 : 13,
+      maxLines: 1, wrap: false, lineSpacing: 0,
     });
+    card.parts.badgeW = Math.min(this.cardW - 40, Math.max(132, Math.ceil(badge.width) + 34));
     fitTextToBox(name, {
-      width: this.cardW - 28, height: 42, fontSize: 23, minFontSize: 14, maxLines: 2, lineSpacing: 0,
+      width: this.cardW - 36, height: 84, fontSize: cjk ? 36 : 31, minFontSize: cjk ? 24 : 17,
+      maxLines: 2, lineSpacing: 0, preferSingleLine: cjk,
     });
     fitTextToBox(desc, {
-      width: this.cardW - 34, height: 76, fontSize: 16, minFontSize: 11, maxLines: 5, lineSpacing: 3,
+      width: this.cardW - 40, height: geo.descBottom - geo.descTop,
+      fontSize: cjk ? 28 : 24, minFontSize: cjk ? 22 : 15, maxLines: 5, lineSpacing: 4,
     });
   }
 
@@ -326,8 +476,8 @@ export class LevelUpOverlay {
       accent = THEME.red;
     }
     card.parts.accent = accent;
-    this.drawCard(card, false);
     this.fitCardCopy(card);
+    this.drawCard(card, false);
   }
 
   show(choices, onPick, {
@@ -351,6 +501,11 @@ export class LevelUpOverlay {
       .setLabel(rerolls > 0 ? t('levelup.reroll', { value: rerolls }) : t('ad.reroll'))
       .setAlpha(1);
     this.reroll.label.setColor(rerolls > 0 ? '#eadab4' : THEME.goldCss);
+    // 文字限定在重摇图标右侧；长语言（俄/德）先缩字号，仍太长则折成两行，不再缩到难以辨认。
+    fitTextToBox(this.reroll.label, {
+      width: this.rerollLabelW, height: this.rerollH - 12, fontSize: this.rerollFont, minFontSize: this.rerollMinFont,
+      maxLines: 2, lineSpacing: 0, preferSingleLine: true, singleLineMin: this.rerollFont - 5,
+    });
 
     for (let i = 0; i < this.cards.length; i++) {
       const card = this.cards[i];
@@ -379,38 +534,50 @@ export class LevelUpOverlay {
     const h = this.scene.scale.height;
     this.dim.setSize(w, h);
     const count = Math.max(1, Math.min(this.cards.length, this.choices.length || this.cards.length));
+    // 标题/副标题按实际高度排版：CJK 字号更大、长语言副标题可能折行，都不会压到卡片。
+    setTextWrap(this.title, w - (this.portrait ? 42 : 80));
+    setTextWrap(this.subtitle, w - (this.portrait ? 56 : 120));
+    const titleH = this.title.height;
+    const subtitleH = this.subtitle.height;
     if (this.portrait) {
       const gap = count > 3 ? 10 : 16;
-      const availableH = h - this.safe.top - this.safe.bottom - 220;
+      const headerH = titleH + subtitleH + 30;
+      const availableH = h - this.safe.top - this.safe.bottom - headerH - 112;
       const scale = Math.min(1, availableH / (this.cardH * count + gap * (count - 1)));
       const scaledGap = gap * scale;
       const totalH = this.cardH * scale * count + scaledGap * (count - 1);
-      const top = Math.max(this.safe.top + 138, (h - totalH) / 2 - 12);
-      const titleY = top - 116;
-      this.title.setPosition(w / 2, titleY).setWordWrapWidth(w - 42, true);
-      const subtitleY = titleY + this.title.height / 2 + 36;
-      this.subtitle.setPosition(w / 2, subtitleY).setWordWrapWidth(w - 56, true);
+      const top = Math.max(this.safe.top + headerH, (h - totalH) / 2 - 12);
+      const titleY = top - headerH + titleH / 2;
+      this.title.setPosition(w / 2, titleY);
+      this.subtitle.setPosition(w / 2, titleY + titleH / 2 + 6 + subtitleH / 2);
       drawRays(this.rays, w / 2, titleY, Math.min(w, 590));
       this._layoutScale = scale;
       for (let i = 0; i < this.cards.length; i++) {
         this.cards[i].setPosition(w / 2, top + this.cardH * scale / 2 + i * (this.cardH * scale + scaledGap)).setScale(scale);
       }
-      this.reroll.setPosition(w / 2, Math.min(h - this.safe.bottom - 36, top + totalH + 54));
+      this.reroll.setPosition(w / 2, Math.min(h - this.safe.bottom - 40, top + totalH + 60));
       return;
     }
 
-    const titleY = h / 2 - DESKTOP_CARD_H / 2 - 74;
-    this.title.setPosition(w / 2, titleY);
-    this.subtitle.setPosition(w / 2, titleY + 46);
-    drawRays(this.rays, w / 2, titleY, Math.min(w * 0.55, 620));
+    // 横屏：标题、四张卡、重摇按钮作为一个整体垂直居中；只在窄屏/矮屏时整体缩小卡片。
+    const headerH = titleH + subtitleH + 36;
+    const rerollSpace = 124;
     const totalW = DESKTOP_CARD_W * count + DESKTOP_GAP * (count - 1);
-    const scale = Math.min(1, (w - 24) / totalW, (h - 170) / DESKTOP_CARD_H);
+    const scale = Math.min(1, (w - 40) / totalW,
+      (h - this.safe.top - this.safe.bottom - headerH - rerollSpace) / DESKTOP_CARD_H);
     this._layoutScale = scale;
+    const cardsH = DESKTOP_CARD_H * scale;
+    const blockTop = Math.max(this.safe.top, (h - headerH - cardsH - rerollSpace) / 2);
+    const titleY = blockTop + titleH / 2;
+    this.title.setPosition(w / 2, titleY);
+    this.subtitle.setPosition(w / 2, titleY + titleH / 2 + 8 + subtitleH / 2);
+    drawRays(this.rays, w / 2, titleY, Math.min(w * 0.55, 820));
+    const cardsY = blockTop + headerH + cardsH / 2;
     for (let i = 0; i < this.cards.length; i++) {
       const x = w / 2 + (i - (count - 1) / 2) * (DESKTOP_CARD_W + DESKTOP_GAP) * scale;
-      this.cards[i].setPosition(x, h / 2 + 25).setScale(scale);
+      this.cards[i].setPosition(x, cardsY).setScale(scale);
     }
-    this.reroll.setPosition(w / 2, Math.min(h - 34, h / 2 + DESKTOP_CARD_H * scale / 2 + 76));
+    this.reroll.setPosition(w / 2, Math.min(h - this.safe.bottom - 40, cardsY + cardsH / 2 + 66));
   }
 
   pick(index) {

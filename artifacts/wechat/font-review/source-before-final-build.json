@@ -1,0 +1,466 @@
+[
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\assetPath.js",
+    "Hash": "E5B336C713125977291683D5C06EE86CD6ABB2CC2F8FC24CEDD09F89479D951B"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\audio.js",
+    "Hash": "253A282B37FC8EEEA31464253BB70F36793FCE7115E522FF3B074F151B31DFE7"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\config.js",
+    "Hash": "A27523C1800C176DE9D25528BA19ED992E17543A8BBC1BF9974D85C1EF8BB367"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\crazygames.js",
+    "Hash": "813A3991524F31E9EFE4CED51F5B0F325B2CDA0B9E81755C13E7F3BFAD4EEEA0"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\displayResolution.js",
+    "Hash": "6911DFB71AAF0201D464BF68BB469EE0BE2E2352B457C66F949FADBAC76A6D1F"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\gamedistribution.js",
+    "Hash": "150AB6E86DC30BFB4884D5BC3110581896C04B384D848DB6136C510CCAD3CD66"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\i18n.js",
+    "Hash": "CA9FDBF318DA24EC7442D6DF9528D3B2CAB36A67EE0520A951A7BBDD9A5D33CD"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\locales.generated.js",
+    "Hash": "554FA203D4FAD502B94F0A34395D52EC1C3AA091E96740A26458823841D20BE6"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\main.js",
+    "Hash": "38110913EF0287D9D9DE5FB5286BB085601B30BB6EB46444C18E4429725027A1"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\platform.js",
+    "Hash": "264A4C2BDFBDCEFBA11B8F99EB417871CDDFFA683CC2AF53071CDBF8F03614C5"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\save.js",
+    "Hash": "63DAA8882DDD63209BF38BBD061BFA2D4544FDAA36FC1609B0CE76A68356E31C"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\textures.js",
+    "Hash": "556BF2A99A285C663BE91CA8D1B707B7718EB620F1223354209B9EF91E932CCE"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\core\\Pool.js",
+    "Hash": "833D9E80E31F4E5B78E281F64EFAEEEC3E227CF61FAD069A115913B51058D49B"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\core\\SpatialGrid.js",
+    "Hash": "780815EBA24A8CFA1ADD54A44276E16412CD93A57EEFA8A912251D034FB2E87F"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\dev\\enemyDirectionPreview.js",
+    "Hash": "685A1A94018CDCED46BBE85B1F6257BF29BA90FCA385A04A3060D38C5CF6F6B7"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\dev\\testHooks.js",
+    "Hash": "799F10BD27CC21A54D4D8E55D0F0FF95D29D21042A610F537547434701D6BBFC"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\dev\\videoCapture.js",
+    "Hash": "C7423DD99EAC7B8C9AD521B2EAEF5C0DC52C905D01B4A1A441F214C3DE78DA16"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\game\\EnemyManager.js",
+    "Hash": "540AE796D38D04D537AED2EB7B16955B674E9BBD3BA944112FD80870A3EF6D12"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\game\\InputController.js",
+    "Hash": "CA8E2FCE15E5A72586781C7145979C4565B566C5CC5272E55AEE008EE17DE68A"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\game\\LevelSystem.js",
+    "Hash": "5F4022810C7E905D1C8E5428BA8BFF544BE8E28B25181DE2F6F40E4A111A7E40"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\game\\MetaProgression.js",
+    "Hash": "748B9DF6E2DF1D19252BECA1CB30D850F98DF39BECA9E669FE6055B196ADA300"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\game\\PickupManager.js",
+    "Hash": "C7B40DF9F1C8AF25DEB4BDAFAA201C2BD07C48827C17C5033423B64EAE6976D7"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\game\\Player.js",
+    "Hash": "A92723CE6826DF5EE1880542C1090AB825E319E26C43A1EFFE72F775F67785CC"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\game\\PropManager.js",
+    "Hash": "E0F6EA8F2451BAD6505799F84198B5F8074FFB2131FDAAD2A7533EE1EBA71CFD"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\game\\RunAnalytics.js",
+    "Hash": "1ECDAE310F51F7B5BB204731C15513EC4BC404B203E38312E1645C9326669972"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\game\\RunEventManager.js",
+    "Hash": "76D757325038D7F8B30B70F011B8EF6DF4F72A7D9D1B38F946511A8772D67ECF"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\game\\Vfx.js",
+    "Hash": "192EE9D886DC8BCDEEFAFBE054EFF1F12E152C7594A54A2F1318FBD6F83F16E5"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\game\\WeaponManager.js",
+    "Hash": "9C4CF05FD7FF71E601D330274065F4F326FB8978FB438D8FA3DB32EB5E102447"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\game\\vfx\\BeamSystem.js",
+    "Hash": "9D230741273F4EB45B844CE97D9321126E9479B0DF3290D1825A9649CDB718F8"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\game\\vfx\\VfxRuntime.js",
+    "Hash": "CCC50B90535653B3EFA3FCDFC7D54FA8A3EC4BBA22E1E237A6F719656C93A58F"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\minigame\\douyin-adapter.js",
+    "Hash": "7EC0A9E4A379093E9E0446890E4ABC410EB60D3A4EC73F0AE0D60EA259FC2149"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\minigame\\install-douyin.js",
+    "Hash": "8B2B5DBBD0F1BA5B1398323F6FB549107D1C66F5B2F8BC0E45E20B289AB229CB"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\minigame\\install-wechat.js",
+    "Hash": "8BB822D481535D1BADFD9C51250AF21B41DDB7022BA7F4AD505C34A2BCBDEC80"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\minigame\\wechat-adapter.js",
+    "Hash": "EE98AFCEA2B898E33F4FD676CB319CBC03C24AE4FAFEDC2B44D3C77E935FD264"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\minigame\\wechat-bootstrap.js",
+    "Hash": "86DDB374632C02D79D0EE12E1E29AA7F236C6580658C8DB590F527DF8FA8044E"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\platforms\\douyin.js",
+    "Hash": "2C1947022114A2C770A3B1DA7FB864BC8935CBEA8394C61D2D54E110C920BA8F"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\platforms\\wechat-entry.js",
+    "Hash": "0F77A59F303F87EC925F7E20211DC9533D66BB5D3E92BCE120D9509301882BFE"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\platforms\\wechat.js",
+    "Hash": "EDAC02ED4483B7DB621DAAFECFAD074A17F0EC2F372D6693327A2AF49CADDD9E"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\scenes\\BootScene.js",
+    "Hash": "387F4EE1327DA80913B738E60A226B68DC050DDAF4D0155297DF0E0C38B34367"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\scenes\\GameScene.js",
+    "Hash": "DF6182018A8F7F1C132C01C532174B4C1F5D96BE2FE6C0A30C9FF79B5837A93F"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\scenes\\MenuScene.js",
+    "Hash": "216189083511AEB0C406B0A686F0A3FF9A0E26D21DDF0570B57293584509D5DE"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\scenes\\ResultScene.js",
+    "Hash": "0306383C38EB081962E555B0F8027A57131363A9EEC631D90EE3CBC4FA9386DA"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\scenes\\TalentScene.js",
+    "Hash": "CFA08E5B2BB7470B65D23F2AEB8AFCBD3A662ECCD4096ADE148F561706B0F7C2"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\scenes\\UiScene.js",
+    "Hash": "175BBD80B8D86882C70782F85005DE09798F60675AD4BDC45084657B910A5E33"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\scenes\\VfxLabScene.js",
+    "Hash": "F69082BED294362E4175D78412C6385C285783C773739177E2C155AF738018B1"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\ui\\ActionModal.js",
+    "Hash": "EB8DB024A61C95614A9BFE0551EA4B6BEC32FED38F40551C43C5409075101CDB"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\ui\\Hud.js",
+    "Hash": "93CF034C48ED2061FE8681278BBF8F8CDBF4983E5490DC75197DF3F7724437F9"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\ui\\labelText.js",
+    "Hash": "CB315F6685145D1E992303B23C50DF0AD7A5AAEA5175570E9A6B154FD38461BB"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\ui\\layout.js",
+    "Hash": "934B7BEF6979CA06105A12FE7AC889610F72610028DD8F17DD8A9CD10B87F3ED"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\ui\\LevelUpOverlay.js",
+    "Hash": "0F575098D8B310DA158789ABACC6B25FD86E7714476A211B7E407F8997ABAF70"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\ui\\MainSkillOverlay.js",
+    "Hash": "27F24D043F52DA32152472C5BDF715C8414251F92A0223D569C871FF68AF9875"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\ui\\StartBoostOverlay.js",
+    "Hash": "E51F2FF25A7704764CC493CE36CF077B78884F5BDA229F29B1CF301F55FF6EEB"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\ui\\textDefaults.js",
+    "Hash": "B58735C6234D6BEC81E398F403491C083FCAE2834672F5A886AC3C5D50E312E1"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\src\\ui\\widgets.js",
+    "Hash": "2666A0F50E829FB88B30A274A516755AE43452827119139FB3961DB8442A76A4"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\audio\\sfx\\boss-charge-impact.wav",
+    "Hash": "B58EE917CEFFDC061509BB41063D7600C4ED85AB416D042EC4DE758D68BFC08E"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\audio\\sfx\\boss-charge-start.wav",
+    "Hash": "0A578783D1DF79D5AA21C5723BE0AAD628F756216232F4169148C08C9BABC0B9"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\audio\\sfx\\boss-charge-warn.wav",
+    "Hash": "91A931941AA3059B9CD6DE48E7215F27DB5AC2CEEE579DC1F1F6A6D5A375C982"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\audio\\sfx\\boss-entry.wav",
+    "Hash": "38C57962BEA6C9610BA02E2E4030683B1D4359A8C51B262EA0F76F1364850ABF"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\audio\\sfx\\boss-fireball-cast.wav",
+    "Hash": "39BFF53272BDD7113A8407D23E01171739705B26F9D6908727EB257BCD159D67"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\audio\\sfx\\boss-fireball-impact.wav",
+    "Hash": "2BB3A836D50D5CEA330259EC786754162750A723D15270C7098E7D4607EE70E2"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\audio\\sfx\\boss-fireball-warn.wav",
+    "Hash": "E98D4643BA5D3B64E40CFFF8DC4B76170C4C916ED65A6D025B2A3CD7DF84B919"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\audio\\sfx\\boss-mirror-warn.wav",
+    "Hash": "A522CCE80594734966DACB99D647CD3A96531ACA4F68C4BF553E81643EF055D8"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\audio\\sfx\\boss-roar.wav",
+    "Hash": "A4D740BAEF9BA45BDC27CE83D3F914430DD3B1EE55207457015848C18FB63A55"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\audio\\sfx\\boss-summon.wav",
+    "Hash": "3FA875DDCCAEB96B8D297D3C8B67FF9A51EEFDDFAE8F06B8C52862679EE67E1F"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\audio\\sfx\\weapon-blade-cast.wav",
+    "Hash": "FBCE443EE9B7443DD04DD77AE54744B446C8C94828F4D88F76DD6D1997FBD9D6"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\audio\\sfx\\weapon-blade-impact.wav",
+    "Hash": "82AEC21897F714F53447055648D86EE41A35C19F362AC7E07EA4FB65DE2F4C50"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\audio\\sfx\\weapon-fire-cast.wav",
+    "Hash": "7386FB41197D53C0B657372C3DE15DCD831AADED3F317EEE77764D903469630D"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\audio\\sfx\\weapon-fire-impact.wav",
+    "Hash": "501FC9A016F931EDC5C5DEAE0C8A7EAE8216C63B4B9010AED20811ECC5C5A111"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\audio\\sfx\\weapon-holy-cast.wav",
+    "Hash": "7101A400A9708F126BA324811A8E43EF9D69853DAD13C58ED6E8470828A30693"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\audio\\sfx\\weapon-holy-impact.wav",
+    "Hash": "30B4322B8CBE7A1CBE807A093DEE5F70688F432E91D4770D91A3D38E16A5D561"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\audio\\sfx\\weapon-ice-cast.wav",
+    "Hash": "484F9CDC3DC450B9A8EAF15CBEE2ADB9EB61595A241862B1AF76D867667489F1"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\audio\\sfx\\weapon-ice-impact.wav",
+    "Hash": "20A2AD5507485D19D7EEB8DF7614E6A4C6E4F79DBF8D4540B595318E035E4F8E"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\audio\\sfx\\weapon-lightning-cast.wav",
+    "Hash": "4EAB0F907DD54AE1218B860DF109FC5A479A42E3F060DE5D9A18ECDF3906B15D"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\audio\\sfx\\weapon-lightning-impact.wav",
+    "Hash": "802F74855D961D7C2C78DB050E0011CA4B66D0974299E5794CD64F177C9C08F4"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\audio\\sfx\\weapon-poison-cast.wav",
+    "Hash": "C0683210C011CA8931864E7ABDC51AC949ED93890096A46ECB5E11592E545AB4"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\audio\\sfx\\weapon-poison-impact.wav",
+    "Hash": "6BD1812AB5F6D5A10D152A9A01098D26F05F0E19354DA5B9C0FEBFB467C9B977"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\enemies\\enemy-boss-smooth-v6.json",
+    "Hash": "3418C9C12BB18A56927C7D2289544499A14F3BCDFF7289BCB7D518491B082995"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\enemies\\enemy-boss-smooth-v6.webp",
+    "Hash": "EDD8F53CD2FADE1AA62C91B11751BA507C57A6BF62F0B11D03B1903B52BE7014"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\enemies\\enemy-boss2-smooth-v1.json",
+    "Hash": "5763ACF668109FBE6371B2805DADEA61807BD96CE4387E076394AE94909935EF"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\enemies\\enemy-boss2-smooth-v1.png",
+    "Hash": "849DAE54D1459A208725DAFF049E1AF24BC862FF227FDAF9570D52A893749E59"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\enemies\\enemy-flyer-smooth-v2.json",
+    "Hash": "AB0C270FA93243FBE5B9F73FAC7C3300DC16368869D718A3EFF4C16B10F08D1D"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\enemies\\enemy-flyer-smooth-v2.webp",
+    "Hash": "39F2BF07DF209E95125D7F23627BCCC237E2E81F55268B370420B0AEDD87F870"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\enemies\\enemy-mini-smooth-v2.json",
+    "Hash": "D182E9E7ADF6329333CD573F19962FD47563DC78907DB6EDC84D1A0D01EA526D"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\enemies\\enemy-mini-smooth-v2.webp",
+    "Hash": "EFC8D12B16F1F804CA8DE45CFDE184FA6A1FCF430045FF48764F0AFCABD66A7C"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\enemies\\enemy-runner-smooth-v2.json",
+    "Hash": "31FD7E59E9B70C25352C3467D141783431126F7AC67172CF22510A392B9C53D6"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\enemies\\enemy-runner-smooth-v2.webp",
+    "Hash": "32B24DA30410D1BB8883A2B977FA1B522389658FA1965A060B6A312AA858218F"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\enemies\\enemy-slime-smooth-v2.json",
+    "Hash": "2CD0235FC4B943BF3DF84BE5F359FD1C6073594F89210C8344542834B4441106"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\enemies\\enemy-slime-smooth-v2.webp",
+    "Hash": "FBB3874BA69565B886FF3DAF0F5EDB5C9C5F991307862E1BDE9DDBDC784E2DE1"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\enemies\\enemy-splitter-smooth-v2.json",
+    "Hash": "21290FA8B7E46459FB77939FDC212BC8869A31E27FA5B9ACA23DBBEFDB1649BE"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\enemies\\enemy-splitter-smooth-v2.webp",
+    "Hash": "D521D49A9A42042E32CD7A6D072345F33CC5E8008D6AEBF1EBF5596A6C6209D5"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\enemies\\enemy-tank-smooth-v2.json",
+    "Hash": "E94E15450F277746AAD81B51880896403D53FC6EA291266FA0209A43650A00DC"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\enemies\\enemy-tank-smooth-v2.webp",
+    "Hash": "E00F6744235B3548ECD40A41E54195D68C25B4B2CDF9002B2656C568701565AB"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\players\\player-knight-smooth-v2.webp",
+    "Hash": "E667B88C66A87F16FB051F9B62D162E1E0AA0AFD8928328D283634BAE4FFA7C3"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\players\\player-knight-smooth-v3.webp",
+    "Hash": "0580E97DE51B6483B7B15F16ACFD0A91D3E34F64F27A7EBC195E2AD4D79180DA"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\players\\player-witch-smooth-v2.webp",
+    "Hash": "68094DAFE361B60F74247442F68B783C70428E66007AFE7C6E1E7527634FF4D8"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\props\\pickup-heal.webp",
+    "Hash": "2C5069EC15533FC4DF0246A890E8959052D988D288464CA57FD13D5671FA3FAF"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\props\\pickup-magnet.webp",
+    "Hash": "F4F834F18AEBB391322438A1CC18726B516E499261FEA19C007A41112AAE4463"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\props\\prop-brazier.webp",
+    "Hash": "9C74C526575C9205A3094EFF940E5DEB7A644314DEB87CEF5DB67A80891DAD5F"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\props\\prop-crate.webp",
+    "Hash": "69EC9056C6E5FCC4BA3C17B310A60BBB6A85493DB3CF7CC26BDA30E64E5169DA"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\props\\prop-gravestone.webp",
+    "Hash": "5841D3CC54AEB30D839F60BA3BA14A09EB0C53DA4B4121AC935E606C524A119F"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\shaders\\vfx-combat-polish.frag",
+    "Hash": "6197E1133FA5D7A5A365275CD616500A0D89B0C7453F073B3AC189F77751C87F"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\shaders\\vfx-electric-beam.frag",
+    "Hash": "FB2B97C5354E18B0456E138209A1EAEF01B84086C3B089B18EFA365BB8CB6687"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\shaders\\vfx-element-field.frag",
+    "Hash": "13705E57494F5141D62ED86E47DEBF0AAF7B4CF6DBEBDC41DA5A9705B27E336C"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\shaders\\vfx-foundation.frag",
+    "Hash": "6F5D8BFC0AC197A6813A86E139226C1FC8FB087FF3CE30EC91E729A390DC8792"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\shaders\\vfx-poison-pool.frag",
+    "Hash": "ACEDC010AAFF5C3C78BC12A9C755CFF2E27D47CA6B80DECE95362BD7569C2942"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\ui\\chest-jackpot.webp",
+    "Hash": "4599656145A6C53A9872DD5D000C053B9CD47B14C4B1A52FDA8CB091902D8732"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\ui\\skill-icons-active-v1.webp",
+    "Hash": "192191956CA1B571969E1133E532F287004E5FD9D17BEB2FD7F511496C43E1D4"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\ui\\skill-icons-atlas-v2.webp",
+    "Hash": "EA30121F2D6EE02A7BD7CC793E95EF3659A924CC25C41A3F53DAB7EF4F10E92D"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\vfx\\blade-slash.png",
+    "Hash": "F7FAAE81174CA93F83581463A6AAE9A4A1F7C72D2A1131953E9DDFDC361D42EC"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\vfx\\holy-star.png",
+    "Hash": "D187D41C96DCE60035E6B424F30C4611950F14686683FAB4C14C5D1224EC83FF"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\vfx\\ice-shard.png",
+    "Hash": "CE3172DB9D7CBC5158080BCAC4B79E1AA5A53D4B01F29A8D3AF81AC8E9BBAB49"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\vfx\\snowflake.png",
+    "Hash": "0D4153B9DB1ED41748970DCC9FFF73F88394907B91A34AFBAA5DD536849D62BF"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\public\\assets\\weapons\\flying-blade-v2.png",
+    "Hash": "780F018C62BBE710B38D51C7602A89F78B7A90DC96DDA08D071AE79AD0B8A24B"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\package.json",
+    "Hash": "99F55692E97886A585EB6EE037BFD2EDFA3CF4959AFF1868431B66DBE4312CD3"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\config\\wechat.json",
+    "Hash": "1B60E22A7C6037BED1F197DACAC76B2C388DC751BD4902FD4CE4C8EDA42B3066"
+  },
+  {
+    "Path": "E:\\game\\Vampire Survivors-like2\\survios2\\tools\\build-wechat.mjs",
+    "Hash": "024F4A2D533DD07E225241F2671049F565E70663DBB0D0AEA6081A1F5368D782"
+  }
+]

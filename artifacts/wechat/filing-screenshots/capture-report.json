@@ -1,0 +1,28 @@
+{
+  "source": "Unmodified dist/wechat build, local HTTP preview, simulated wx APIs, Chromium",
+  "viewport": {
+    "width": 390,
+    "height": 844,
+    "scale": 2
+  },
+  "gameplay": "Natural elapsed time, touch movement and actual pickups; no gameplay-state injection",
+  "shots": [
+    {
+      "name": "01-main-menu.png",
+      "bytes": 451647
+    },
+    {
+      "name": "02-main-skill.png",
+      "bytes": 395773
+    },
+    {
+      "name": "04-upgrade.png",
+      "bytes": 427891
+    },
+    {
+      "name": "03-combat.png",
+      "bytes": 565595
+    }
+  ],
+  "errors": []
+}

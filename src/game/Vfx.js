@@ -3,6 +3,13 @@
 import { PERF, COMBO } from '../config.js';
 import { VFX_SHADER_KEYS, VfxRuntime } from './vfx/VfxRuntime.js';
 import { BeamSystem } from './vfx/BeamSystem.js';
+import { getRenderScale } from '../displayResolution.js';
+
+// 伤害数字挂在世界相机下，会被 zoom（竖屏≈1.1、横屏≈1.78）再放大一次：
+// 纹理分辨率取 画布倍率 × zoom，屏幕上 1:1 栅格化，横屏不再被拉伸发虚。
+// 字号固定为一档（标签的不同字号用 setScale 表达），池化复用时不触发 MeasureText。
+const DAMAGE_TEXT_PX = 17;
+const DAMAGE_TEXT_MAX_RES = 3;
 
 const POISON_STYLE = Object.freeze({
   poison: Object.freeze({
@@ -74,13 +81,17 @@ export class Vfx {
     // 伤害数字池（Text 复用，round-robin 抢占最旧的）
     this.texts = [];
     this.textCursor = 0;
+    this._textKey = 0;
+    this.refreshDamageTextMetrics();
     for (let i = 0; i < PERF.maxDamageTexts; i++) {
+      // 显式 resolution：全局文字倍率监听只管 autoResolution 文字，这里由 refreshDamageTextMetrics 自管。
       const txt = scene.add.text(0, 0, '', {
         fontFamily: 'Arial Black, Arial, sans-serif',
-        fontSize: '17px',
+        fontSize: this.textFontSize,
         color: '#ffffff',
         stroke: '#10160f',
         strokeThickness: 4,
+        resolution: this.textRes,
       }).setDepth(5).setOrigin(0.5).setVisible(false);
       this.texts.push({ txt, life: 0 });
     }
@@ -100,15 +111,36 @@ export class Vfx {
     this.beams = new BeamSystem(scene, this.runtime, () => this.particles.length);
   }
 
+  // 相机 zoom / 画布倍率变化（旋转、缩放窗口）后才重算；平时只是一次乘法比较。
+  // 竖屏 zoom≈1.1 时字号略放大（17→19，390 宽手机上约 11 CSS px）；横屏 zoom≈1.78 已够大，保持 17。
+  refreshDamageTextMetrics() {
+    const zoom = this.scene.cameras.main.zoom || 1;
+    const key = getRenderScale() * zoom;
+    if (key === this._textKey) return;
+    this._textKey = key;
+    this.textRes = Math.min(DAMAGE_TEXT_MAX_RES, Math.max(0.5, key));
+    this.textFontSize = `${Math.round(DAMAGE_TEXT_PX * Math.min(1.2, Math.max(1, 1.25 / zoom)))}px`;
+  }
+
   damageText(x, y, amount, options = {}) {
+    this.refreshDamageTextMetrics();
     const slot = this.texts[this.textCursor];
     this.textCursor = (this.textCursor + 1) % this.texts.length;
-    slot.txt
-      .setText(String(amount))
+    const txt = slot.txt;
+    const style = txt.style;
+    const text = String(amount);
+    const color = options.color || '#ffffff';
+    // 原先 setText/setColor/setFontSize 各重绘一次画布；现在先改样式字段，最后只重绘一次。
+    let dirty = false;
+    if (style.color !== color) { style.color = color; dirty = true; }
+    if (style.resolution !== this.textRes) { style.resolution = this.textRes; dirty = true; }
+    if (style.fontSize !== this.textFontSize) { style.setFontSize(this.textFontSize); dirty = false; }
+    if (txt.text !== text) txt.setText(text);
+    else if (dirty) txt.updateText();
+    const scale = (parseFloat(options.fontSize) || DAMAGE_TEXT_PX) / DAMAGE_TEXT_PX;
+    txt.setScale(scale)
       .setPosition(x + (Math.random() * 12 - 6), y)
       .setAlpha(1)
-      .setColor(options.color || '#ffffff')
-      .setFontSize(options.fontSize || '17px')
       .setVisible(true);
     slot.life = options.life || 0.45;
   }

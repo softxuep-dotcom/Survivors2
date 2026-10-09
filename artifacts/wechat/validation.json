@@ -1,0 +1,32 @@
+{
+  "simulatedHostOnly": true,
+  "checks": [
+    "wechat contracts",
+    "wechat WebGL and Canvas smoke: startup, touch, upgrade, revive, settlement, save hydration",
+    "wechat missing texture retry UI",
+    "douyin contracts and WebGL/Canvas smoke",
+    "skills",
+    "i18n",
+    "synergy",
+    "crazygames",
+    "web build",
+    "build output isolation"
+  ],
+  "outputs": {
+    "douyin": {
+      "files": 63,
+      "changed": []
+    },
+    "wechat": {
+      "files": 65,
+      "changed": []
+    }
+  },
+  "readonlyWindowFix": {
+    "reproducedBefore": true,
+    "webgl": true,
+    "canvas": true,
+    "missingAssetRetry": true,
+    "ideRetestPending": true
+  }
+}

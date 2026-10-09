@@ -8,15 +8,26 @@ import { LevelUpOverlay } from '../ui/LevelUpOverlay.js';
 import { MainSkillOverlay } from '../ui/MainSkillOverlay.js';
 import { ActionModal } from '../ui/ActionModal.js';
 import { makeButton, makePanel } from '../ui/widgets.js';
-import { UI_FONT, mobileSafeArea } from '../ui/layout.js';
+import { UI_FONT, isCjkLocale, mobileSafeArea } from '../ui/layout.js';
+
+// 提示条字号：[竖屏, 横屏]。中日韩单独一档（竖屏 390 宽 ×0.54 ≈ 13 CSS px，横屏 1280×720 ×0.56 ≈ 16 CSS px）。
+const NOTICE_SIZES = Object.freeze({ base: [18, 22], cjk: [24, 28] });
+function noticeFontSize(scene) {
+  const portrait = mobileSafeArea(scene).portrait;
+  return (isCjkLocale() ? NOTICE_SIZES.cjk : NOTICE_SIZES.base)[portrait ? 0 : 1];
+}
 
 function makeNotice(scene, text, fontSize, maxWidth) {
-  const label = scene.add.text(0, 0, text, {
+  const cjk = isCjkLocale();
+  // 中文没有空格，必须用 advancedWrap 才能按字换行；行首“ℹ ”用不换行空格粘住，避免图标单独占一行。
+  const label = scene.add.text(0, 0, String(text).replace(/^ℹ /, 'ℹ '), {
     fontFamily: UI_FONT, fontSize: `${fontSize}px`, color: '#f2e8c8',
-    align: 'center', wordWrap: { width: maxWidth - 32 },
+    align: 'center', lineSpacing: cjk ? 4 : 0,
+    wordWrap: { width: maxWidth - 40, useAdvancedWrap: true },
   }).setOrigin(0.5);
-  const width = Math.min(maxWidth, Math.max(190, label.width + 34));
-  const height = label.height + 22;
+  const padX = Math.round(fontSize * 0.8), padY = Math.round(fontSize * 0.5);
+  const width = Math.min(maxWidth, Math.max(190, label.width + padX * 2));
+  const height = label.height + padY * 2;
   const root = scene.add.container(0, 0);
   root.add(makePanel(scene, width, height, {
     fill: 0x0d1410, line: 0x8c681f, lineWidth: 1, chamfer: 8,
@@ -67,7 +78,8 @@ export class UiScene extends Phaser.Scene {
     this.overlay.layout();
     this.mainSkillOverlay.layout();
     this.actionModal.layout();
-    this.pauseBtn.setPosition(w - (safe.portrait ? 37 : 42), safe.portrait ? safe.top + 105 : 92);
+    // 竖屏在顶栏下方、Boss 条右侧；横屏让开右上角击杀数（行中心 46、34px 字）。
+    this.pauseBtn.setPosition(w - (safe.portrait ? 37 : 44), safe.portrait ? safe.top + 105 : 108);
     this.layoutToasts();
   }
 
@@ -90,7 +102,7 @@ export class UiScene extends Phaser.Scene {
     this.moveHint = makeNotice(
       this,
       t('tutorial.move'),
-      mobileSafeArea(this).portrait ? 16 : 20,
+      noticeFontSize(this),
       this.scale.width - 48,
     ).setPosition(this.scale.width / 2, this.scale.height * 0.68).setDepth(110);
     this.tweens.add({ targets: this.moveHint, alpha: 0.55, duration: 700, yoyo: true, repeat: -1 });
@@ -108,7 +120,8 @@ export class UiScene extends Phaser.Scene {
   layoutToasts() {
     const gap = 10;
     const safe = mobileSafeArea(this);
-    let top = Math.max(safe.top + (safe.portrait ? 150 : 96), this.scale.height * 0.18);
+    // 从 HUD 事件横幅下沿开始排（竖屏 top+154 起约 46 高，横屏 162 起约 60 高），小游戏胶囊下移时同样不重叠。
+    let top = Math.max(safe.top + (safe.portrait ? 212 : 236), this.scale.height * 0.18);
     for (const toast of this.toasts) {
       toast.setPosition(this.scale.width / 2, top + toast.height / 2);
       top += toast.height + gap;
@@ -119,8 +132,8 @@ export class UiScene extends Phaser.Scene {
     const toast = makeNotice(
       this,
       text,
-      mobileSafeArea(this).portrait ? 16 : 20,
-      this.scale.width - 44,
+      noticeFontSize(this),
+      Math.min(this.scale.width - 44, 1200),
     ).setPosition(this.scale.width / 2, 0).setDepth(110).setAlpha(0);
     this.toasts.push(toast);
     this.layoutToasts();

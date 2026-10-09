@@ -25,7 +25,11 @@
     "build:douyin": "node tools/build-douyin.mjs",
     "prepare:douyin": "npm run check:douyin && npm run build:douyin",
     "check:douyin": "node tools/douyin-contract.mjs",
-    "check:build-output": "node tools/build-output-contract.mjs"
+    "check:build-output": "node tools/build-output-contract.mjs",
+    "build:wechat": "node tools/build-wechat.mjs",
+    "check:wechat": "node tools/wechat-contract.mjs",
+    "prepare:wechat": "npm run check:wechat && npm run build:wechat",
+    "smoke:wechat": "node tools/wechat-smoke.mjs"
   },
   "dependencies": {
     "phaser": "^4.2.0"

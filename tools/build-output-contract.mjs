@@ -9,7 +9,7 @@ const tempRoot = resolve(tmpdir());
 const fixture = await mkdtemp(resolve(tempRoot, 'horde-build-output-'));
 try {
   const preserved = [
-    'client/index.html', 'douyin/project.config.json', 'douyin/horde.js',
+    'wechat/project.config.json', 'wechat/game.js', 'wechat/assets/game.js', 'client/index.html', 'douyin/project.config.json', 'douyin/horde.js',
     'douyin/assets/players/player.png', 'gamedistribution/index.html',
     'itch/index.html', 'other-output/data.bin', 'server/extra.txt',
   ];

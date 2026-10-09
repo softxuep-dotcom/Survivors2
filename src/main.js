@@ -7,17 +7,23 @@ import { UiScene } from './scenes/UiScene.js';
 import { ResultScene } from './scenes/ResultScene.js';
 import { TalentScene } from './scenes/TalentScene.js';
 import { VfxLabScene } from './scenes/VfxLabScene.js';
+import { VersionBadgeScene } from './scenes/VersionBadgeScene.js';
 import { configureSaveStorage, touchSave } from './save.js';
 import { isMuted } from './audio.js';
 import { Platform } from './platform.js';
+import { installDisplayResolution } from './displayResolution.js';
+import { installTextDefaults } from './ui/textDefaults.js';
 
 async function startGame() {
 const mini = globalThis.__HORDE_MINIGAME__;
-const versionBadge = document.createElement('div');
-versionBadge.id = 'game-version';
-versionBadge.textContent = `v${__GAME_VERSION__}`;
-versionBadge.setAttribute('aria-label', `Version ${__GAME_VERSION__}`);
-document.body.appendChild(versionBadge);
+const wechat = typeof __GAME_PORTAL__ === 'string' && __GAME_PORTAL__ === 'wechat';
+if (!wechat) {
+  const versionBadge = document.createElement('div');
+  versionBadge.id = 'game-version';
+  versionBadge.textContent = `v${__GAME_VERSION__}`;
+  versionBadge.setAttribute('aria-label', `Version ${__GAME_VERSION__}`);
+  document.body.appendChild(versionBadge);
+}
 
 // 平台构建在资源加载前初始化对应 SDK；独立构建不加载外部 SDK。
 // SDK 缺失、被拦截或初始化超时均 fail-open，不阻断本地玩法。
@@ -39,8 +45,16 @@ const game = window.__game = new Phaser.Game({
     mode: Phaser.Scale.EXPAND,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
-  scene: [BootScene, MenuScene, TalentScene, GameScene, UiScene, ResultScene, VfxLabScene],
+  scene: [BootScene, MenuScene, TalentScene, GameScene, UiScene, ResultScene, VfxLabScene,
+    ...(wechat ? [VersionBadgeScene] : [])],
 });
+// 高清画布与文字默认值必须在首个场景创建文字前装好；DOM 就绪时 Phaser 在构造函数内同步 boot。
+const installRenderQuality = () => {
+  installDisplayResolution(game);
+  installTextDefaults(game);
+};
+if (game.renderer) installRenderQuality();
+else game.events.once(Phaser.Core.Events.BOOT, installRenderQuality);
 
 // 移动端 WebView 看完广告后偶发两类问题：
 // 1) 广告 DOM/iframe 黑色遮罩没有及时退场，仍盖在 canvas 上；
@@ -113,5 +127,5 @@ window.addEventListener('beforeunload', persistSessionExit);
 
 startGame().catch(error => {
   console.error('[boot]', error);
-  globalThis.tt?.showModal?.({ title: '启动失败', content: '请关闭小游戏后重试。', showCancel: false });
+  (typeof __GAME_PORTAL__ === 'string' && __GAME_PORTAL__ === 'wechat' ? globalThis.wx : globalThis.tt)?.showModal?.({ title: '启动失败', content: '请关闭小游戏后重试。', showCancel: false });
 });

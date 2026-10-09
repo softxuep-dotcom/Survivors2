@@ -25,7 +25,7 @@ let miniVoices = null;
 
 function playMiniSample(key, volume) {
   if (!globalThis.__HORDE_MINIGAME__ || !unlocked || muted || audioPaused()) return false;
-  const api = globalThis.tt;
+  const api = (typeof __GAME_PORTAL__ === 'string' && __GAME_PORTAL__ === 'wechat' ? globalThis.wx : globalThis.tt);
   if (!api?.createInnerAudioContext) return false;
   if (!miniVoices) {
     miniVoices = [];

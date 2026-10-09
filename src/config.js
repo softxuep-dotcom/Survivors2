@@ -593,7 +593,7 @@ function evolutionLevels(lv6, lv7) {
 export const EVOLUTIONS = {
   bladestorm: {
     key: 'bladestorm', baseKey: 'blade', nameKey: 'evo.bladestorm', descKey: 'evo.bladestormDesc',
-    icon: 'icon_blade', color: 0x9ddcff, behavior: 'orbit', levelStart: EVOLUTION_LEVEL_START, maxLv: 7,
+    icon: 'icon_skill_bladestorm', color: 0x9ddcff, behavior: 'orbit', levelStart: EVOLUTION_LEVEL_START, maxLv: 7,
     levels: evolutionLevels(
       { dmg: 34, count: 6, cd: 0.36, orbitRadius: 116, speed: 2.8 },
       { dmg: 38, count: 7, cd: 0.34, orbitRadius: 128, speed: 3.0 },
@@ -601,7 +601,7 @@ export const EVOLUTIONS = {
   },
   headhunter: {
     key: 'headhunter', baseKey: 'blade', nameKey: 'evo.headhunter', descKey: 'evo.headhunterDesc',
-    icon: 'icon_blade', color: 0xffd36d, behavior: 'homing', projTexture: 'blade', projRadius: 18, levelStart: EVOLUTION_LEVEL_START, maxLv: 7,
+    icon: 'icon_skill_headhunter', color: 0xffd36d, behavior: 'homing', projTexture: 'blade', projRadius: 18, levelStart: EVOLUTION_LEVEL_START, maxLv: 7,
     levels: evolutionLevels(
       { dmg: 58, count: 2, cd: 0.72, speed: 610, range: 1150, pierce: 1, homing: 5.0, crit: 0.30, execute: 0.18 },
       { dmg: 68, count: 2, cd: 0.64, speed: 640, range: 1220, pierce: 1, homing: 5.6, crit: 0.34, execute: 0.20 },
@@ -610,7 +610,7 @@ export const EVOLUTIONS = {
   lavatrail: {
     key: 'lavatrail', baseKey: 'fireball', nameKey: 'evo.lavatrail', descKey: 'evo.lavatrailDesc',
     // 内部 key 保留以兼容旧存档；玩家可见名称已改为“烈焰路径”。
-    icon: 'icon_fireball', color: 0xff5d2e, behavior: 'lava', projTexture: 'fireball_blazing', projRadius: 16, levelStart: EVOLUTION_LEVEL_START, maxLv: 7,
+    icon: 'icon_skill_lavatrail', color: 0xff5d2e, behavior: 'lava', projTexture: 'fireball_blazing', projRadius: 16, levelStart: EVOLUTION_LEVEL_START, maxLv: 7,
     levels: evolutionLevels(
       { dmg: 44, count: 2, cd: 1.12, speed: 500, range: 840, pierce: 0, aoe: 128, aoeMult: 0.65, trailRadius: 62, trailDmg: 7, trailLife: 2.6 },
       { dmg: 38, count: 3, cd: 1.05, speed: 530, range: 900, pierce: 0, aoe: 140, aoeMult: 0.65, trailRadius: 70, trailDmg: 9, trailLife: 3.0 },
@@ -618,7 +618,7 @@ export const EVOLUTIONS = {
   },
   cluster: {
     key: 'cluster', baseKey: 'fireball', nameKey: 'evo.cluster', descKey: 'evo.clusterDesc',
-    icon: 'icon_fireball', color: 0xffb23f, behavior: 'cluster', projTexture: 'fireball_cluster', projRadius: 17, levelStart: EVOLUTION_LEVEL_START, maxLv: 7,
+    icon: 'icon_skill_cluster', color: 0xffb23f, behavior: 'cluster', projTexture: 'fireball_cluster', projRadius: 17, levelStart: EVOLUTION_LEVEL_START, maxLv: 7,
     levels: evolutionLevels(
       { dmg: 60, count: 1, cd: 1.05, speed: 500, range: 820, pierce: 0, aoe: 124, aoeMult: 0.68, fragments: 5, fragmentDmg: 20 },
       { dmg: 44, count: 2, cd: 1.02, speed: 520, range: 880, pierce: 0, aoe: 132, aoeMult: 0.70, fragments: 7, fragmentDmg: 20 },
@@ -626,7 +626,7 @@ export const EVOLUTIONS = {
   },
   blizzard: {
     key: 'blizzard', baseKey: 'frostpulse', nameKey: 'evo.blizzard', descKey: 'evo.blizzardDesc',
-    icon: 'icon_frostpulse', color: 0x7adfff, behavior: 'field', levelStart: EVOLUTION_LEVEL_START, maxLv: 7,
+    icon: 'icon_skill_blizzard', color: 0x7adfff, behavior: 'field', levelStart: EVOLUTION_LEVEL_START, maxLv: 7,
     levels: evolutionLevels(
       { dmg: 15, cd: 0.65, radius: 330, slow: 0.48, slowDur: 1.2 },
       { dmg: 18, cd: 0.58, radius: 365, slow: 0.52, slowDur: 1.4 },
@@ -634,7 +634,7 @@ export const EVOLUTIONS = {
   },
   icecage: {
     key: 'icecage', baseKey: 'frostpulse', nameKey: 'evo.icecage', descKey: 'evo.icecageDesc',
-    icon: 'icon_frostpulse', color: 0xb9f1ff, behavior: 'pulse', levelStart: EVOLUTION_LEVEL_START, maxLv: 7,
+    icon: 'icon_skill_icecage', color: 0xb9f1ff, behavior: 'pulse', levelStart: EVOLUTION_LEVEL_START, maxLv: 7,
     levels: evolutionLevels(
       { dmg: 34, cd: 1.35, radius: 295, slow: 0.45, slowDur: 2.0, freezeChance: 0.20, freezeDur: 1.2 },
       { dmg: 42, cd: 1.18, radius: 325, slow: 0.48, slowDur: 2.2, freezeChance: 0.28, freezeDur: 1.3 },
@@ -642,7 +642,7 @@ export const EVOLUTIONS = {
   },
   stormeye: {
     key: 'stormeye', baseKey: 'chainlightning', nameKey: 'evo.stormeye', descKey: 'evo.stormeyeDesc',
-    icon: 'icon_chainlightning', color: 0xa897ff, behavior: 'storm', levelStart: EVOLUTION_LEVEL_START, maxLv: 7,
+    icon: 'icon_skill_stormeye', color: 0xa897ff, behavior: 'storm', levelStart: EVOLUTION_LEVEL_START, maxLv: 7,
     levels: evolutionLevels(
       { dmg: 36, cd: 0.72, bolts: 2, radius: 520, splash: 68 },
       { dmg: 36, cd: 0.72, bolts: 3, radius: 600, splash: 76 },
@@ -650,7 +650,7 @@ export const EVOLUTIONS = {
   },
   thunderjudgment: {
     key: 'thunderjudgment', baseKey: 'chainlightning', nameKey: 'evo.thunderjudgment', descKey: 'evo.thunderjudgmentDesc',
-    icon: 'icon_chainlightning', color: 0xe2d7ff, behavior: 'chain', levelStart: EVOLUTION_LEVEL_START, maxLv: 7,
+    icon: 'icon_skill_thunderjudgment', color: 0xe2d7ff, behavior: 'chain', levelStart: EVOLUTION_LEVEL_START, maxLv: 7,
     levels: evolutionLevels(
       { dmg: 104, cd: 0.96, chains: 2, jump: 280, stunChance: 0.36, stunDur: 0.65 },
       { dmg: 106, cd: 0.92, chains: 3, jump: 320, stunChance: 0.46, stunDur: 0.80 },
@@ -658,7 +658,7 @@ export const EVOLUTIONS = {
   },
   plague: {
     key: 'plague', baseKey: 'venomflask', nameKey: 'evo.plague', descKey: 'evo.plagueDesc',
-    icon: 'icon_venomflask', color: 0x7f6aa8, behavior: 'pool', projTexture: 'venom_flask_plague', levelStart: EVOLUTION_LEVEL_START, maxLv: 7,
+    icon: 'icon_skill_plague', color: 0x7f6aa8, behavior: 'pool', projTexture: 'venom_flask_plague', levelStart: EVOLUTION_LEVEL_START, maxLv: 7,
     levels: evolutionLevels(
       { dmg: 16, cd: 1.25, radius: 150, duration: 4.8, tick: 0.40, poisonDps: 20, speed: 480, plague: true, plagueChainDepth: 1 },
       { dmg: 18, cd: 1.10, radius: 168, duration: 5.2, tick: 0.36, poisonDps: 24, speed: 500, plague: true, plagueChainDepth: 1 },
@@ -666,7 +666,7 @@ export const EVOLUTIONS = {
   },
   corrosion: {
     key: 'corrosion', baseKey: 'venomflask', nameKey: 'evo.corrosion', descKey: 'evo.corrosionDesc',
-    icon: 'icon_venomflask', color: 0xc9f24b, behavior: 'pool', projTexture: 'venom_flask_corrosion', levelStart: EVOLUTION_LEVEL_START, maxLv: 7,
+    icon: 'icon_skill_corrosion', color: 0xc9f24b, behavior: 'pool', projTexture: 'venom_flask_corrosion', levelStart: EVOLUTION_LEVEL_START, maxLv: 7,
     levels: evolutionLevels(
       { dmg: 16, cd: 1.25, radius: 152, duration: 4.8, tick: 0.40, poisonDps: 18, speed: 480, vuln: 0.14, vulnDur: 1.8 },
       { dmg: 18, cd: 1.10, radius: 170, duration: 5.2, tick: 0.36, poisonDps: 22, speed: 510, vuln: 0.20, vulnDur: 2.2 },
@@ -674,7 +674,7 @@ export const EVOLUTIONS = {
   },
   holyhalo: {
     key: 'holyhalo', baseKey: 'holyorb', nameKey: 'evo.holyhalo', descKey: 'evo.holyhaloDesc',
-    icon: 'icon_holyorb', color: 0xffef9a, behavior: 'aura', levelStart: EVOLUTION_LEVEL_START, maxLv: 7,
+    icon: 'icon_skill_holyhalo', color: 0xffef9a, behavior: 'aura', levelStart: EVOLUTION_LEVEL_START, maxLv: 7,
     levels: evolutionLevels(
       { dmg: 22, cd: 0.72, radius: 168, heal: 0.50 },
       { dmg: 26, cd: 0.62, radius: 190, heal: 0.75 },
@@ -682,7 +682,7 @@ export const EVOLUTIONS = {
   },
   prism: {
     key: 'prism', baseKey: 'holyorb', nameKey: 'evo.prism', descKey: 'evo.prismDesc',
-    icon: 'icon_holyorb', color: 0xfff4c2, behavior: 'bounce', projTexture: 'holy_orb', projRadius: 16, levelStart: EVOLUTION_LEVEL_START, maxLv: 7,
+    icon: 'icon_skill_prism', color: 0xfff4c2, behavior: 'bounce', projTexture: 'holy_orb', projRadius: 16, levelStart: EVOLUTION_LEVEL_START, maxLv: 7,
     levels: evolutionLevels(
       { dmg: 26, count: 2, cd: 1.45, speed: 410, duration: 5.1, rehit: 1.2, splitRays: 2, rayDmg: 8 },
       { dmg: 29, count: 2, cd: 1.32, speed: 435, duration: 5.5, rehit: 1.15, splitRays: 3, rayDmg: 8 },
@@ -706,7 +706,7 @@ export const SKILL_MODULE_MAX_RANK = 4;
 export const SKILLS = Object.freeze({
   bladestorm: {
     key: 'bladestorm', nameKey: 'evo.bladestorm', descKey: 'evo.bladestormDesc',
-    element: 'physical', icon: 'icon_blade', color: 0x9ddcff,
+    element: 'physical', icon: 'icon_skill_bladestorm', color: 0x9ddcff,
     behavior: 'orbit', projTexture: 'blade', projRadius: 18, maxLv: 8,
     baseParams: {
       dmg: 14, count: 3, cd: 0.70, orbitRadius: 105, speed: 2.4,
@@ -728,7 +728,7 @@ export const SKILLS = Object.freeze({
   },
   headhunter: {
     key: 'headhunter', nameKey: 'evo.headhunter', descKey: 'evo.headhunterDesc',
-    element: 'physical', icon: 'icon_blade', color: 0xffd36d,
+    element: 'physical', icon: 'icon_skill_headhunter', color: 0xffd36d,
     behavior: 'headhunter', projTexture: 'blade', projRadius: 18, maxLv: 8,
     volleyStaggerMs: 55,
     baseParams: {
@@ -752,7 +752,7 @@ export const SKILLS = Object.freeze({
   },
   lavatrail: {
     key: 'lavatrail', nameKey: 'evo.lavatrail', descKey: 'evo.lavatrailDesc',
-    element: 'fire', icon: 'icon_fireball', color: 0xff5d2e,
+    element: 'fire', icon: 'icon_skill_lavatrail', color: 0xff5d2e,
     behavior: 'lava', projTexture: 'fireball_blazing', projRadius: 16, maxLv: 8,
     volleySpreadDeg: 14, volleyStaggerMs: 90,
     baseParams: {
@@ -777,7 +777,7 @@ export const SKILLS = Object.freeze({
   },
   cluster: {
     key: 'cluster', nameKey: 'evo.cluster', descKey: 'evo.clusterDesc',
-    element: 'fire', icon: 'icon_fireball', color: 0xffb23f,
+    element: 'fire', icon: 'icon_skill_cluster', color: 0xffb23f,
     behavior: 'cluster', projTexture: 'fireball_cluster', projRadius: 17, maxLv: 8,
     fragmentsPerProjectile: true,
     volleySpreadDeg: 14, volleyStaggerMs: 90,
@@ -803,7 +803,7 @@ export const SKILLS = Object.freeze({
   },
   blizzard: {
     key: 'blizzard', nameKey: 'evo.blizzard', descKey: 'evo.blizzardDesc',
-    element: 'ice', icon: 'icon_frostpulse', color: 0x7adfff,
+    element: 'ice', icon: 'icon_skill_blizzard', color: 0x7adfff,
     behavior: 'field', maxLv: 8,
     baseParams: {
       dmg: 6, cd: 0.8, radius: 220, slow: 0.25, slowDur: 1,
@@ -825,7 +825,7 @@ export const SKILLS = Object.freeze({
   },
   icecage: {
     key: 'icecage', nameKey: 'evo.icecage', descKey: 'evo.icecageDesc',
-    element: 'ice', icon: 'icon_frostpulse', color: 0xb9f1ff,
+    element: 'ice', icon: 'icon_skill_icecage', color: 0xb9f1ff,
     behavior: 'pulse', maxLv: 8,
     baseParams: {
       dmg: 29, cd: 3.0, radius: 180,
@@ -848,7 +848,7 @@ export const SKILLS = Object.freeze({
   },
   stormeye: {
     key: 'stormeye', nameKey: 'evo.stormeye', descKey: 'evo.stormeyeDesc',
-    element: 'lightning', icon: 'icon_chainlightning', color: 0xa897ff,
+    element: 'lightning', icon: 'icon_skill_stormeye', color: 0xa897ff,
     behavior: 'storm', maxLv: 8,
     baseParams: {
       dmg: 15.5, cd: 1.1, bolts: 2, radius: 450,
@@ -871,7 +871,7 @@ export const SKILLS = Object.freeze({
   },
   thunderjudgment: {
     key: 'thunderjudgment', nameKey: 'evo.thunderjudgment', descKey: 'evo.thunderjudgmentDesc',
-    element: 'lightning', icon: 'icon_chainlightning', color: 0xe2d7ff,
+    element: 'lightning', icon: 'icon_skill_thunderjudgment', color: 0xe2d7ff,
     behavior: 'judgment', maxLv: 8,
     baseParams: {
       dmg: 27, cd: 1.8, radius: 900,
@@ -895,7 +895,7 @@ export const SKILLS = Object.freeze({
   },
   plague: {
     key: 'plague', nameKey: 'evo.plague', descKey: 'evo.plagueDesc',
-    element: 'poison', icon: 'icon_venomflask', color: 0x7f6aa8,
+    element: 'poison', icon: 'icon_skill_plague', color: 0x7f6aa8,
     behavior: 'pool', projTexture: 'venom_flask_plague', projRadius: 12, maxLv: 8,
     baseParams: {
       dmg: 11, cd: 1.75, radius: 110, duration: 3.5, tick: 0.5,
@@ -918,7 +918,7 @@ export const SKILLS = Object.freeze({
   },
   corrosion: {
     key: 'corrosion', nameKey: 'evo.corrosion', descKey: 'evo.corrosionDesc',
-    element: 'poison', icon: 'icon_venomflask', color: 0xc9f24b,
+    element: 'poison', icon: 'icon_skill_corrosion', color: 0xc9f24b,
     behavior: 'pool', projTexture: 'venom_flask_corrosion', projRadius: 12, maxLv: 8,
     baseParams: {
       dmg: 11, cd: 1.75, radius: 110, duration: 3.5, tick: 0.5,
@@ -941,7 +941,7 @@ export const SKILLS = Object.freeze({
   },
   holyhalo: {
     key: 'holyhalo', nameKey: 'evo.holyhalo', descKey: 'evo.holyhaloDesc',
-    element: 'light', icon: 'icon_holyorb', color: 0xffef9a,
+    element: 'light', icon: 'icon_skill_holyhalo', color: 0xffef9a,
     behavior: 'aura', maxLv: 8,
     baseParams: { dmg: 12, cd: 1.0, radius: 120, heal: 0.25 },
     modules: {
@@ -961,7 +961,7 @@ export const SKILLS = Object.freeze({
   },
   prism: {
     key: 'prism', nameKey: 'evo.prism', descKey: 'evo.prismDesc',
-    element: 'light', icon: 'icon_holyorb', color: 0xfff4c2,
+    element: 'light', icon: 'icon_skill_prism', color: 0xfff4c2,
     behavior: 'bounce', projTexture: 'holy_orb', projRadius: 16, maxLv: 8,
     baseParams: {
       dmg: 17, count: 1, cd: 2.0, speed: 360, duration: 4.5,
