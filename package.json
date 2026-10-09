@@ -1,26 +1,37 @@
 {
   "name": "horde-breaker",
   "version": "0.3.2",
-  "description": "Horde Spark - elemental survivors-like for CrazyGames",
+  "description": "Horde Spark - elemental browser survival roguelite",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 8081",
     "start": "vite --host 0.0.0.0 --port 8081",
     "build": "vite build && node tools/prepare-sites.mjs",
+    "build:gamedistribution": "vite build --mode gamedistribution",
+    "build:itch": "vite build --mode itch",
     "check:i18n": "node tools/check-locales.mjs",
     "check:synergy": "node tools/element-synergy-contract.mjs",
     "check:props": "node tools/prop-system-contract.mjs",
     "check:skills": "node tools/skill-system-contract.mjs",
     "balance": "node tools/balance-sim.mjs",
     "check:crazygames": "node tools/crazygames-contract.mjs",
+    "check:gamedistribution": "node tools/gamedistribution-contract.mjs",
+    "check:itch": "node tools/itch-upload.mjs --check-only",
     "prepare:crazygames": "npm run build && node tools/crazygames-upload.mjs",
-    "preview": "vite preview --host 0.0.0.0 --port 8081"
+    "prepare:gamedistribution": "npm run build:gamedistribution && node tools/gamedistribution-upload.mjs",
+    "prepare:itch": "npm run build:itch && node tools/itch-upload.mjs",
+    "preview": "vite preview --host 0.0.0.0 --port 8081",
+    "build:douyin": "node tools/build-douyin.mjs",
+    "prepare:douyin": "npm run check:douyin && npm run build:douyin",
+    "check:douyin": "node tools/douyin-contract.mjs",
+    "check:build-output": "node tools/build-output-contract.mjs"
   },
   "dependencies": {
     "phaser": "^4.2.0"
   },
   "devDependencies": {
+    "sharp": "^0.35.5",
     "vite": "^7.0.0"
   }
 }

@@ -2,13 +2,14 @@
 import Phaser from 'phaser';
 import { THEME, WEAPONS, EVOLUTIONS, AD_REWARDS } from '../config.js';
 import { t, fmtTime } from '../i18n.js';
-import { CrazyGames } from '../crazygames.js';
+import { Platform } from '../platform.js';
 import { touchSave } from '../save.js';
 import { makeButton, makePanel } from '../ui/widgets.js';
 import { UI_FONT, UI_FONT_BOLD, mobileSafeArea } from '../ui/layout.js';
+import { stripLeadingIcon as stripLabelIcon } from '../ui/labelText.js';
 
 function stripLeadingIcon(label) {
-  return label.replace(/^\s*[\p{Extended_Pictographic}\uFE0F\u200D↻◆♦]+\s*/u, '');
+  return stripLabelIcon(label, '↻◆♦');
 }
 
 export class ResultScene extends Phaser.Scene {
@@ -97,19 +98,20 @@ export class ResultScene extends Phaser.Scene {
       }).setOrigin(0.5));
     });
 
-    const actionY = portrait ? h - 176 : h / 2 + 250;
+    const rewardedAds = Platform.supportsRewardedAds();
+    const actionY = portrait ? h - (rewardedAds ? 176 : 111) : h / 2 + 250;
     const buttonW = portrait ? w - safe.side * 2 : Math.min(260, (w - 54) / 2);
     const actionGap = 14;
     const actionOffset = (buttonW + actionGap) / 2;
 
-    const retryButton = makeButton(this, portrait ? w / 2 : w / 2 - actionOffset, actionY, buttonW, portrait ? 56 : 76, stripLeadingIcon(t('result.retry')), async () => {
+    const retryButton = makeButton(this, portrait || !rewardedAds ? w / 2 : w / 2 - actionOffset, actionY, buttonW, portrait ? 56 : 76, stripLeadingIcon(t('result.retry')), async () => {
       if (adBusy) return;
       adBusy = true;
       retryButton.disableInteractive().setAlpha(0.6);
       try {
-        // A completed run is CrazyGames' natural midgame boundary. Errors and
-        // unavailable ads fail open so replay is never blocked.
-        await CrazyGames.midgameAd();
+        // A completed run is a natural midgame boundary. Errors and unavailable
+        // ads fail open so replay is never blocked.
+        if (Platform.supportsMidgameAds()) await Platform.midgameAd();
       } finally {
         this.input.enabled = true;
       }
@@ -130,7 +132,7 @@ export class ResultScene extends Phaser.Scene {
 
         let rewarded = false;
         try {
-          rewarded = await CrazyGames.rewardedAd();
+          rewarded = await Platform.rewardedAd();
         } finally {
           adBusy = false;
           this.input.enabled = true;
@@ -153,7 +155,7 @@ export class ResultScene extends Phaser.Scene {
         color: THEME.goldCss, chamfer: portrait ? 10 : 12,
         shadow: true, icon: 'ui_enhance_badge', iconSize: portrait ? 34 : 42,
       });
-    if (bonusDiamonds <= 0) doubleButton.setVisible(false);
+    if (!rewardedAds || bonusDiamonds <= 0) doubleButton.setVisible(false);
 
     makeButton(this, w / 2, portrait ? h - 48 : h / 2 + 342, portrait ? buttonW : 340, portrait ? 48 : 60, t('result.menu'), () => {
       if (adBusy) return;

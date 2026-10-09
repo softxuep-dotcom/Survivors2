@@ -6,7 +6,7 @@ import {
   RUN, DIFFICULTIES, EVOLUTIONS, CHARACTERS, TALENTS, WORLD_SKINS, AD_REWARDS, PROPS, XP_REWARDS,
   SKILLS, ELEMENT_COMBO_TIPS, DEFAULT_MAIN_SKILL,
 } from '../config.js';
-import { CrazyGames } from '../crazygames.js';
+import { Platform } from '../platform.js';
 import { touchSave } from '../save.js';
 import { t } from '../i18n.js';
 import { startStageAudio, stopStageAudio, setAudioPhase, setAudioPaused, Sfx, unlockAudio } from '../audio.js';
@@ -222,7 +222,7 @@ export class GameScene extends Phaser.Scene {
     this._onVisibility = this.onVisibilityChange.bind(this);
     this._onAdState = this.onAdState.bind(this);
     window.addEventListener('keydown', this._onPauseKey);
-    window.addEventListener('crazygames-ad-state', this._onAdState);
+    window.addEventListener('platform-ad-state', this._onAdState);
     document.addEventListener('visibilitychange', this._onVisibility);
     this.events.once('shutdown', () => this.onShutdown());
   }
@@ -384,7 +384,7 @@ export class GameScene extends Phaser.Scene {
     this.pauseReason = reason;
     this.anims.pauseAll();
     if (reason !== 'level') setAudioPaused(true, 'game-pause');
-    CrazyGames.gameplayStop();
+    Platform.gameplayStop();
     this.ui?.setPauseVisible(false);
     this.inputCtl?.onUp();
     return true;
@@ -397,7 +397,7 @@ export class GameScene extends Phaser.Scene {
     this.anims.resumeAll();
     setAudioPaused(false, 'game-pause');
     this.ui?.setPauseVisible(true);
-    CrazyGames.gameplayStart();
+    Platform.gameplayStart();
   }
 
   pauseManually(reason = 'manual') {
@@ -419,14 +419,14 @@ export class GameScene extends Phaser.Scene {
 
   quitToMenu() {
     if (this.adBusy) return;
-    CrazyGames.gameplayStop();
+    Platform.gameplayStop();
     stopStageAudio();
     setAudioPaused(false, 'game-pause');
     this.scene.start('Menu');
   }
 
   onPauseKey(event) {
-    if (CrazyGames.isAdPlaying() || !['Escape', 'Space'].includes(event.code)) return;
+    if (Platform.isAdPlaying() || !['Escape', 'Space'].includes(event.code)) return;
     event.preventDefault();
     if (['manual', 'visibility'].includes(this.pauseReason)) this.resumeFromManualPause();
     else if (!this.paused) this.pauseManually('manual');
@@ -437,9 +437,12 @@ export class GameScene extends Phaser.Scene {
   }
 
   onAdState(event) {
-    const enabled = !event.detail?.active;
+    const active = !!event.detail?.active;
+    const enabled = !active;
     this.input.enabled = enabled;
     if (this.ui?.input) this.ui.input.enabled = enabled;
+    if (active && !this.paused && !this.over) this.pauseGameplay('ad');
+    else if (!active && this.pauseReason === 'ad' && !this.over) this.resumeGameplay();
   }
 
   applyWorldSkin(key, announce = true) {
@@ -522,7 +525,7 @@ export class GameScene extends Phaser.Scene {
     if (import.meta.env.DEV && this.captureVideo) this.applyCaptureLoadout();
     this.analytics.event('main_skill', this.state.time, { key });
     if (this.pauseReason === 'main-skill') this.resumeGameplay();
-    else CrazyGames.gameplayStart();
+    else Platform.gameplayStart();
     const save = this.registry.get('save');
     if (!save.tutorialDone && !(import.meta.env.DEV && this.stressMode)) this.ui?.showMoveHint();
     if (!save.tutorialGem && !(import.meta.env.DEV && this.stressMode)) {
@@ -647,7 +650,7 @@ export class GameScene extends Phaser.Scene {
         this.analytics.event('reroll', this.state.time, { remaining: this.rerolls });
         showChoices(this.buildPartialReroll(choices));
       },
-      adReroll: !this.adRerollUsed,
+      adReroll: Platform.supportsRewardedAds() && !this.adRerollUsed,
       onAdReroll: async () => {
         if (this.adBusy || this.adRerollUsed) return;
         this.adBusy = true;
@@ -655,7 +658,7 @@ export class GameScene extends Phaser.Scene {
         this.ui.overlay.setBusy(true);
         let rewarded = false;
         try {
-          rewarded = await CrazyGames.rewardedAd();
+          rewarded = await Platform.rewardedAd();
         } finally {
           this.adBusy = false;
           this.input.enabled = true;
@@ -694,7 +697,7 @@ export class GameScene extends Phaser.Scene {
       });
       return;
     }
-    if (!this.adReviveUsed) {
+    if (Platform.supportsRewardedAds() && !this.adReviveUsed) {
       this.ui?.showActionModal({
         title: t('ad.reviveTitle'), description: t('ad.reviveDesc'),
         primaryLabel: t('ad.endRun'), onPrimary: () => this.finishRun(false, 'death'),
@@ -712,7 +715,7 @@ export class GameScene extends Phaser.Scene {
     this.ui?.actionModal.setSecondaryBusy(t('ad.loading'));
     let rewarded = false;
     try {
-      rewarded = await CrazyGames.rewardedAd();
+      rewarded = await Platform.rewardedAd();
     } finally {
       this.adBusy = false;
       this.input.enabled = true;
@@ -734,21 +737,35 @@ export class GameScene extends Phaser.Scene {
     const cleared = this.enemies.clearAround(this.player.x, this.player.y, cfg.clearRadius);
     this.player.revive({ hpPct: cfg.hpPct, invulnerableSec: cfg.invulnerableSec });
     this.analytics.event('revive_ad', this.state.time, { cleared });
-    this.ui?.hideActionModal();
-    this.resumeGameplay();
-    if (this.pendingLevelUps > 0) this.time.delayedCall(60, () => this.tryShowLevelUp());
-    this.ui?.showToast(t('event.revive'), 2.5);
-    Sfx.revive();
-    this.cameras.main.flash(520, 210, 240, 170);
+    this.pauseReason = 'ad-revive-ready';
+    const continueAfterReward = () => {
+      if (this.over || this.pauseReason !== 'ad-revive-ready') return;
+      this.ui?.hideActionModal();
+      this.resumeGameplay();
+      if (this.pendingLevelUps > 0) this.time.delayedCall(60, () => this.tryShowLevelUp());
+      this.ui?.showToast(t('event.revive'), 2.5);
+      Sfx.revive();
+      this.cameras.main.flash(520, 210, 240, 170);
+    };
+    if (!this.ui) {
+      continueAfterReward();
+      return;
+    }
+    this.ui.showActionModal({
+      title: t('event.revive'),
+      description: t('pause.desc'),
+      primaryLabel: t('pause.resume'),
+      onPrimary: continueAfterReward,
+    });
   }
 
   finishRun(victory, reason) {
     if (this.over) return;
     this.over = true;
-    CrazyGames.gameplayStop();
+    Platform.gameplayStop();
     if (victory) {
-      CrazyGames.happytime();
-      CrazyGames.reportCompletion(100);
+      Platform.happytime();
+      Platform.reportCompletion(100);
     }
     setAudioPaused(false, 'game-pause');
     stopStageAudio();
@@ -793,7 +810,7 @@ export class GameScene extends Phaser.Scene {
   onShutdown() {
     this.scale.off('resize', this._onResize);
     window.removeEventListener('keydown', this._onPauseKey);
-    window.removeEventListener('crazygames-ad-state', this._onAdState);
+    window.removeEventListener('platform-ad-state', this._onAdState);
     document.removeEventListener('visibilitychange', this._onVisibility);
     this.inputCtl?.destroy();
     this.runEvents?.destroy();

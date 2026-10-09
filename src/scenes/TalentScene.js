@@ -6,6 +6,7 @@ import { nextTalentCost, purchaseTalent, talentLevel, talentValue } from '../gam
 import { Sfx } from '../audio.js';
 import { makeButton, makePanel } from '../ui/widgets.js';
 import { UI_FONT, UI_FONT_BOLD, mobileSafeArea } from '../ui/layout.js';
+import { stripLeadingIcon as stripLabelIcon } from '../ui/labelText.js';
 
 const TALENT_ICONS = {
   vitality: 'icon_core', might: 'icon_battle_emblem', haste: 'icon_gears', focus: 'icon_rune',
@@ -14,7 +15,7 @@ const TALENT_ICONS = {
 };
 
 function stripLeadingIcon(label) {
-  return label.replace(/^\s*[\p{Extended_Pictographic}\uFE0F\u200D◆♦]+\s*/u, '');
+  return stripLabelIcon(label, '◆♦');
 }
 
 export class TalentScene extends Phaser.Scene {

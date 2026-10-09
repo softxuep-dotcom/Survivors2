@@ -32,7 +32,7 @@ globalThis.document = {
 globalThis.window = {
   location: { search: '' },
   dispatchEvent(event) {
-    if (event.type === 'crazygames-ad-state') adStates.push(event.detail.active);
+    if (event.type === 'platform-ad-state') adStates.push(event.detail.active);
   },
   CrazyGames: {
     SDK: {
@@ -176,11 +176,11 @@ const [html, menu, game, result, boot, main, adapter, packageJson, vfxRuntime, u
 ]);
 
 assert.match(html, /https:\/\/sdk\.crazygames\.com\/crazygames-sdk-v3\.js/);
-assert.match(main, /await CrazyGames\.init\(\);[\s\S]*?CrazyGames\.loadingStart\(\);/,
+assert.match(main, /await Platform\.init\(\);[\s\S]*?Platform\.loadingStart\(\);/,
   'SDK init and loadingStart must happen before Phaser starts');
-assert.match(main, /configureSaveStorage\(CrazyGames\.dataStorage\(\)\)/,
+assert.match(main, /configureSaveStorage\(Platform\.dataStorage\(\)\)/,
   'the save backend must switch to CrazyGames Data after SDK initialization');
-assert.match(boot, /CrazyGames\.loadingStop\(\)/, 'Boot must report completed game loading');
+assert.match(boot, /Platform\.loadingStop\(\)/, 'Boot must report completed game loading');
 assert.doesNotMatch(menu, /rewardedAd\(/, 'start boost selection must not trigger a rewarded ad');
 assert.match(menu, /DEFAULT_START_BUFF = 'fury'/, 'a default start boost must be selected');
 assert.match(menu, /startBuff = this\.selectedStartBuff/, 'standard starts must carry the selected boost');
@@ -188,19 +188,19 @@ assert.doesNotMatch(menu, /midgameAd\(/, 'menu navigation must not contain a hid
 assert.equal((game.match(/rewardedAd\(\)/g) || []).length, 2,
   'gameplay must retain reroll and revive rewarded placements');
 assert.doesNotMatch(game, /midgameAd\(/, 'midgame ads must not run when resuming a manual pause');
-assert.doesNotMatch(game, /unlockAudio\(\);\s*CrazyGames\.gameplayStart\(\)/,
+assert.doesNotMatch(game, /unlockAudio\(\);\s*Platform\.gameplayStart\(\)/,
   'initial gameplayStart must wait for the player to choose a main skill');
-assert.match(game, /onMainSkillSelected\(key\)[\s\S]*?resumeGameplay\(\);\s*else CrazyGames\.gameplayStart\(\)/,
+assert.match(game, /onMainSkillSelected\(key\)[\s\S]*?resumeGameplay\(\);\s*else Platform\.gameplayStart\(\)/,
   'initial gameplayStart must fire when main-skill selection enters active gameplay');
 assert.match(game, /setSecondaryBusy\(t\('ad\.loading'\)\)/,
   'rewarded revive must show an immediate loading state after the click');
 assert.match(game, /t\('ad\.unavailable'\)/,
   'rewarded revive failures must be visible instead of looking unresponsive');
-assert.match(game, /CrazyGames\.happytime\(\)[\s\S]*?CrazyGames\.reportCompletion\(100\)/,
+assert.match(game, /Platform\.happytime\(\)[\s\S]*?Platform\.reportCompletion\(100\)/,
   'a completed run must report the sparse victory milestone');
 assert.equal((result.match(/rewardedAd\(\)/g) || []).length, 1,
   'result must retain its rewarded diamond placement');
-assert.match(result, /retryButton[\s\S]*?await CrazyGames\.midgameAd\(\)[\s\S]*?this\.scene\.start\('Game'/,
+assert.match(result, /retryButton[\s\S]*?await Platform\.midgameAd\(\)[\s\S]*?this\.scene\.start\('Game'/,
   'replay must request a midgame ad at the completed-run boundary and always continue');
 assert.match(adapter, /game\.settings[\s\S]*?addSettingsChangeListener/,
   'CrazyGames muteAudio settings must be applied and observed');

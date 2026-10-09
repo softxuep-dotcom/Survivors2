@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { assetPath } from '../../assetPath.js';
 
 export const VFX_SHADER_KEYS = Object.freeze({
   foundation: 'vfx-foundation',
@@ -237,7 +238,7 @@ function searchParams() {
 
 export function preloadVfxAssets(scene) {
   for (const [key, url] of Object.entries(VFX_SHADER_ASSETS)) {
-    if (!scene.cache.shader.exists(key)) scene.load.glsl(key, url);
+    if (!scene.cache.shader.exists(key)) scene.load.glsl(key, assetPath(url));
   }
 }
 

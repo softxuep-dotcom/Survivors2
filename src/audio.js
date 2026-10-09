@@ -20,6 +20,35 @@ let activeCombatVoices = 0;
 const pauseReasons = new Set();
 const rawSfxAssets = new Map();
 const decodedSfxAssets = new Map();
+let miniWebAudioUnavailable = false;
+let miniVoices = null;
+
+function playMiniSample(key, volume) {
+  if (!globalThis.__HORDE_MINIGAME__ || !unlocked || muted || audioPaused()) return false;
+  const api = globalThis.tt;
+  if (!api?.createInnerAudioContext) return false;
+  if (!miniVoices) {
+    miniVoices = [];
+    for (let i = 0; i < 6; i++) {
+      try {
+        const audio = api.createInnerAudioContext();
+        const voice = { audio, busy: false };
+        audio.onEnded(() => { voice.busy = false; });
+        audio.onError(() => { voice.busy = false; });
+        miniVoices.push(voice);
+      } catch (_) { break; }
+    }
+  }
+  const voice = miniVoices.find(item => !item.busy);
+  if (!voice) return true; // Fixed budget: drop excess effects.
+  try {
+    voice.busy = true;
+    voice.audio.src = `assets/audio/sfx/${key}.wav`;
+    voice.audio.volume = Math.min(1, Math.max(0, volume));
+    voice.audio.play();
+  } catch (_) { voice.busy = false; }
+  return true;
+}
 
 const SFX_ASSETS = Object.freeze([
   'weapon-blade-cast', 'weapon-blade-impact',
@@ -143,6 +172,7 @@ function playSample(key, {
   vol = 0.65, rate = 1, delay = 0, combat = false, importance = 'normal', maxDur = 0,
 } = {}) {
   const c = ac(false);
+  if (!c && globalThis.__HORDE_MINIGAME__) return playMiniSample(key, vol);
   const buffer = decodedSfxAssets.get(key);
   if (!c || !buffer || muted || audioPaused()) return false;
   if (combat && activeCombatVoices >= (importance === 'heavy' ? 7 : 5)) return true;
@@ -187,6 +217,10 @@ function audioPaused() {
 }
 
 function updateMasterGain() {
+  if (muted || audioPaused()) for (const voice of miniVoices || []) {
+    try { voice.audio.stop(); } catch (_) {}
+    voice.busy = false;
+  }
   if (!masterGain || !ctx) return;
   ramp(masterGain.gain, muted || audioPaused() ? 0 : 1, 0.12);
 }
@@ -217,12 +251,19 @@ function setupBuses(c) {
 }
 
 function ac(create = unlocked) {
+  if (miniWebAudioUnavailable) return null;
   if (!ctx) {
     if (!create || muted || typeof window === 'undefined') return null;
     try {
       ctx = new (window.AudioContext || window.webkitAudioContext)();
+      if (globalThis.__HORDE_MINIGAME__ && ['createGain', 'createDynamicsCompressor', 'createOscillator',
+        'createBuffer', 'createBufferSource', 'createBiquadFilter', 'decodeAudioData'].some(key => typeof ctx[key] !== 'function')) {
+        throw new Error('Mini-game WebAudio synthesis unavailable');
+      }
       setupBuses(ctx);
     } catch (e) {
+      ctx = null;
+      if (globalThis.__HORDE_MINIGAME__) miniWebAudioUnavailable = true;
       return null;
     }
   }

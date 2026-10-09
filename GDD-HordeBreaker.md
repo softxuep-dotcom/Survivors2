@@ -1,6 +1,6 @@
 # Horde Spark 元素割草 — 游戏设计文档 (GDD)
 
-> 目标平台：CrazyGames（Web，手机优先）
+> 目标平台：CrazyGames（主平台）+ GameDistribution + itch.io（独立 HTML5 分发，Web，手机优先）；抖音小游戏适配中（微信小游戏后续）
 > 引擎：Phaser 4 + Vite ｜ 视角：俯视角 ｜ 包体红线：初始 <5MB，总计 <8MB ｜ 加载 <3s
 > 版本：v0.4 当前程序校正版（2026-07-17）
 > 校正规则：**当前仓库中的可运行程序与 `src/config.js` 是事实源；本文档不再保留与程序冲突的概念稿描述。**
@@ -22,7 +22,7 @@
 1. **品类成立**：自动攻击、短局成长和高密度清怪已经在网页、移动端与 PC 市场被反复验证；本项目以“主技能起手 + 单层模块卡”保持独立构筑辨识度。
 2. **平台目标明确**：CrazyGames Basic Launch 重点观察平均游玩时长和次日留存；官方给出的成功项目参考为 10 分钟以上平均游玩时长，与本项目 10 分钟主局 + 最终战结构一致。
 3. **技术余量充足**：CrazyGames 移动首页要求初始下载不超过 20MB、平台总上限 250MB/1500 文件；本项目继续执行更严格的初始 <5MB、总计 <8MB、加载 <3 秒内部红线。
-4. **变现断点匹配**：升级重摇、死亡复活、结算加钻适合 rewarded；完整一局后的重开适合 midgame。所有广告必须经 CrazyGames SDK 请求，进行中不插入广告。
+4. **变现断点匹配**：升级重摇、死亡复活、结算加钻适合 rewarded；完整一局后的重开适合 midgame。所有广告必须经当前发行平台 SDK 请求，进行中不插入广告。
 
 对比 Merge Towers 的教训：塔防前 3 分钟在"铺开"，成长爽点后置；割草的前 3 分钟正好是升 3 级、拿 2 件新武器的蜜月段，天然贴合 Fit Test。
 
@@ -286,10 +286,11 @@
 
 ---
 
-## 6. 广告与 CrazyGames 集成
+## 6. 广告与平台 SDK 集成
 
 | 时机 | 类型 | 内容 |
 |---|---|---|
+| 首页“开始游戏” | GameDistribution preroll | 仅 GD 构建从玩家的 Play 手势请求；失败/无填充立即进入游戏。CrazyGames/itch 不触发 |
 | 首页开局增益 | 无广告 | 默认战斗狂热；三项增益可自由切换，普通“开始游戏”携带当前选择 |
 | 常规升级四选一 | rewarded | 从首次升级开始，每个面板最多完整重抽 4 张一次 |
 | 死亡 | rewarded | 局外自动复活次数耗尽后，可原地 35% HP 复活、清除 360px 内非 Boss 敌人并获得 1 秒无敌；每局最多成功 1 次 |
@@ -298,9 +299,12 @@
 | 结算“再来一局” | midgame | 完整一局结束后的自然断点请求一次；失败/无填充立即继续，沿用上一局角色与难度进入 Game |
 | 结算“主菜单” | 无广告 | 直接返回首页 |
 
-- SDK：`src/crazygames.js` 封装 CrazyGames HTML5 SDK v3（init、loadingStart/Stop、gameplayStart/Stop、requestAd、Data module、muteAudio 设置、happytime 与完成度上报）。
-- 当前自动合约为 **3 个 rewarded 广告位 + 1 个 midgame 触发路径**；`tools/crazygames-contract.mjs` 明确断言 midgame 仅位于完整一局后的重开边界、暂停恢复无广告、开局增益不得调用 rewarded，并检查生产构建调试入口的开发环境门禁。
-- 广告请求阶段锁定对应 UI；只有 `adStarted` 后才静音，`adFinished` / `adError` 均恢复。rewarded 只有 `adFinished` 发奖；无填充、广告拦截、SDK 禁用和离线都不得卡死玩法。
+- 统一入口：`src/platform.js` 按构建模式选择 CrazyGames、GameDistribution 或独立站 no-op 适配器；场景层不再直接依赖任一平台全局对象。
+- CrazyGames：`src/crazygames.js` 封装 HTML5 SDK v3（init、loadingStart/Stop、gameplayStart/Stop、requestAd、Data module、muteAudio 设置、happytime 与完成度上报）。
+- GameDistribution：`src/gamedistribution.js` 处理 `SDK_READY`、`SDK_GAME_PAUSE/START`、rewarded 预载/播放与 `SDK_REWARDED_WATCH_COMPLETE`。GD 使用 `localStorage` 存档；`GD_OPTIONS.gameId` 由构建环境变量注入。上传和 iframe 验收见 `design/gamedistribution-release.md`。
+- itch.io：`npm run prepare:itch` 生成不加载 CrazyGames SDK 的独立 ZIP；广告重摇、广告复活和结算广告奖励在该构建中隐藏，存档使用浏览器 `localStorage`。上传与人工验收说明见 `design/itch-release.md`。
+- 当前跨平台自动合约为 **3 个 rewarded 广告位 + 1 个结算 midgame 触发路径**，GD 额外有 1 个 Play preroll；暂停恢复无广告、开局增益不得调用 rewarded。
+- 广告请求阶段锁定对应 UI。所有 rewarded 按钮在 11 种语言中明确写出“观看广告”，不只依赖视频图标。CrazyGames 只有 `adStarted` 后静音、`adFinished` / `adError` 均恢复且仅 `adFinished` 发奖；GD 由 `SDK_GAME_PAUSE/START` 控制静音和广告层恢复，只有 `SDK_REWARDED_WATCH_COMPLETE` 发奖。广告复活成功后继续停在确认弹窗，玩家再次点击“继续”才恢复战斗。无填充、广告拦截、SDK 禁用和离线都不得卡死玩法。
 - 硬要求复查清单：无外链、无登录墙、内容全龄向、断网可玩（SDK fail-safe 静默降级）。
 
 ---
@@ -334,11 +338,14 @@
 
 | 文件/工具 | 用途 |
 |---|---|
+| `src/platform.js` | 构建期选择平台适配器的统一场景入口 |
 | `src/crazygames.js` | CrazyGames SDK v3 封装 |
-| `src/save.js` | 存档（CrazyGames Data / localStorage 后端、旧档迁移、容错与兜底） |
+| `src/gamedistribution.js` | GameDistribution HTML5 SDK、preroll/interstitial/rewarded 与暂停恢复封装 |
+| `src/save.js` | 存档（CrazyGames Data / 其他平台 localStorage 后端、旧档迁移、容错与兜底） |
 | `src/i18n.js` + `src/locales.generated.js` | 11 种语言：英文、法文、意大利文、德文、西班牙文、土耳其文、简中、日文、韩文、巴西葡语、俄文；172 个键/语言，生成器人工覆盖关键游戏术语 |
 | `src/audio.js` | 四阶段程序化 BGM、本地 SFX 预载与播放、静音/暂停状态 |
 | `tools/crazygames-upload.mjs` | CrazyGames `dist/client` 直传目录与 1500 文件/内部 8MiB 门禁 |
+| `tools/gamedistribution-upload.mjs` | GD gameId/SDK/相对路径/8MiB 门禁与可上传 ZIP |
 | `tools/skill-system-contract.mjs` | 正式 12 技能四阶模块数值、Lv8 七次成长、无固定效果与受控卡池规则门禁 |
 | `tools/balance-sim.mjs` | 旧开发路径武器、敌潮 HP 通量、Boss TTK 与火球伤害门禁 |
 | 首页、四选一 UI、结算伤害面板、难度选择 | 已在本仓库按 Horde Spark 视觉重做 |
@@ -364,13 +371,19 @@
 |---|---|---|---|
 | M0 手感原型 | 已实现 | 单操作移动、自动攻击、经验升级、动态摇杆/鼠标/WASD、`?stress=1` 500 敌压测入口 | 代表性中端手机持续 60fps |
 | M1 核心循环 | 已实现 | 正式局当前 12 个直接技能、开局主技能十二选一、Lv1–8 单层模块卡、四技能上限、受控随机与保底、6 被动、7 类敌人、4 档 Boss 事件、短事件、10 分钟主局 + 120 秒最终战、结算页 | 完整局人工体验、十二技能体感平衡与前 3 分钟逐行走查 |
-| M2 CrazyGames 化 | 已实现，平台验收待测 | SDK v3 初始化与 loading/gameplay 生命周期、Data 云存档/旧档迁移、平台 muteAudio、3 个 rewarded 广告位、结算重开 midgame、广告黑屏恢复、横竖屏自适应、断 SDK fail-safe、生产调试入口隔离 | CrazyGames Preview、登录/游客跨设备存档、真机广告回前台、4G 加载 <3 秒、正式 QA |
+| M2 平台化 | 已实现，平台验收待测 | CrazyGames SDK v3 + GameDistribution SDK 适配、统一平台入口、Data 云存档/本地存档、3 个 rewarded 广告位、GD Play preroll、结算重开 midgame、广告黑屏恢复、横竖屏自适应、断 SDK fail-safe、生产调试入口隔离 | CrazyGames Preview、GD iframe SDK 激活、登录/游客跨设备存档、真机广告回前台、4G 加载 <3 秒、正式 QA |
 | M3 内容与平衡 | 已实现 | 9 节点天赋树、2 名角色、2 套环境皮肤、11 种语言、四阶段 BGM、本地 SFX、运行分析、元素协同、VFX 分层与 `VfxLab` 开发场景 | 内部盲测、真机性能、技能辨识度与数值体感 |
 | M4 Playtest 调优 | 未开始 | 本地最近 20 局分析结构已就绪 | CrazyGames 后台平均游玩时长/留存数据；按 30 秒流失峰值持续调优 |
 
 当前正式自动门禁：`npm run build`、`npm run check:skills`、`npm run check:i18n`、`npm run check:crazygames`、`npm run check:synergy`。`npm run balance` 是尚未迁移到直接技能制的旧模型诊断，不计入本批正式通过项。这些检查不能替代真机性能、十二技能体感与玩家留存测试。
 
 ---
+
+### 9.1 抖音小游戏适配（2026-10-09）
+
+独立 `dist/douyin` 工程已接入，保持 Phaser 4 + Vite；`npm run prepare:douyin` 生成 `game.js/game.json/project.config.json` 和本地资源，当前约 4.10 MiB。构建将 WebP 副本转换为 PNG、GLSL 改为 `.txt` 后缀，满足包内资源白名单，原始素材保留；启动时校验角色动画帧，资源缺失显示重试界面。运行环境桥接 Canvas、Image、本地文件、触摸、前后台、中文和安全区；平台层使用 tt 本地存档及严格完整观看发奖的激励视频。无广告位时隐藏奖励入口，首版不接插屏。WebAudio 不完整的宿主使用固定 6 槽原生音效降级。
+
+本地契约和 390×844 模拟宿主的 WebGL/Canvas 菜单→选技能→移动战斗→后台保存暂停均通过；已配置「元素破潮」AppID `ttca1abca7546376da02`（`config/douyin.json`）。Android 的 `Extended_Pictographic` 属性正则错误和全局 `screen` 缺失已修复；屏蔽浏览器自带 screen 后，回归测试先复现旧包异常，再验证新包 WebGL/Canvas 均无启动弹窗。**用户随后确认 Android 真机能运行；iOS、真实广告、完整战斗闭环及启动性能仍未完成真机验收，广告位尚未配置**。2026-10-09 保存当前版本作为微信适配前基线，明亮紫帽女巫上传图标及源图保留在 `artifacts/douyin/`；微信端尚未实施。导入、待办与后续双端验收说明见 [`design/douyin-release.md`](design/douyin-release.md)。
 
 ## 10. 红线与风险
 

@@ -1,0 +1,14 @@
+Tool: built-in image_gen (no CLI fallback).
+Purpose: 元素破潮 Douyin mini-game listing icon, bright fantasy style.
+Original: icon-bright-v1-source.png
+Upload export: icon-bright-600-v1.png — 600 × 600 PNG.
+The original generated image is preserved. Upload export uses size resampling only.
+
+Use case: stylized-concept.
+Asset type: finished square mobile game app icon for the original elemental survival game 元素破潮. One icon only, not a presentation or mockup. Intended final upload is 600 by 600 pixels.
+Primary request: make a BRIGHT, cheerful, colorful fantasy adventure icon, absolutely NOT dark fantasy, gothic, grim or horror.
+Subject: a charismatic chibi knight hero with swept red hair, a friendly confident determined expression, large expressive eyes, polished silver armor with small gold accents and a turquoise cape. Large close-up head and upper torso occupy most of the center. Use clean original character design, consistent with a playful elemental action game.
+Elemental identity: a bold orange flame swirl and a bright icy cyan magic swirl curve around the hero's shoulders as a simple dynamic composition, with one small golden lightning accent. Keep the face unobstructed and the silhouette readable at 48px.
+Style: high quality polished stylized 3D game illustration, sculpted forms, clean contours, attractive saturated colors, soft luminous highlights, charming adventurous energy. Bright daylight, sky blue and warm cream full-bleed backdrop, very simplified, restrained detail. No dark background or deep black shadows.
+Composition: square 1:1 full-bleed artwork to all four corners, large central subject, enough safe inset that the entire face and key elemental accents remain visible when a platform applies its own mask.
+Constraints: no text, no letters, no logos, no watermark, no QR code, no border, no rounded corners, no transparency, no badge, no screenshot, no multiple panels, no gore, no realistic violence. This is the actual upload image, not an app icon drawn on a card.

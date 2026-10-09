@@ -67,12 +67,12 @@ function setAdActive(active) {
   adActive = active;
   setAudioPaused(active, 'crazygames-ad');
   if (typeof document !== 'undefined') {
-    document.body?.classList.toggle('crazygames-ad-active', active);
+    document.body?.classList.toggle('platform-ad-active', active);
     const root = typeof document.getElementById === 'function' ? document.getElementById('game') : null;
     if (root) root.style.zIndex = active ? '0' : '2147483000';
   }
   if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function' && typeof CustomEvent !== 'undefined') {
-    window.dispatchEvent(new CustomEvent('crazygames-ad-state', { detail: { active } }));
+    window.dispatchEvent(new CustomEvent('platform-ad-state', { detail: { active } }));
   }
 }
 
@@ -189,6 +189,8 @@ export const CrazyGames = {
     return requestAd('midgame');
   },
 
+  async prerollAd() { return false; },
+
   async rewardedAd() {
     return requestAd('rewarded');
   },
@@ -208,6 +210,10 @@ export const CrazyGames = {
     return data && typeof data.getItem === 'function' && typeof data.setItem === 'function' ? data : null;
   },
 
+  portal() { return 'crazygames'; },
+  supportsRewardedAds() { return true; },
+  supportsMidgameAds() { return true; },
+  supportsPrerollAds() { return false; },
   isAdPlaying() { return adActive; },
   isGameplayActive() { return gameplayActive; },
   isReady() { return sdkReady; },

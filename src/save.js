@@ -1,5 +1,5 @@
-// 存档后端默认使用 localStorage；CrazyGames SDK v3 就绪后切换到同接口的
-// Data module，从而兼容游客本地档与登录用户跨设备同步。
+// 存档后端默认使用 localStorage；支持云存档的平台 SDK 就绪后切换到同接口
+// 的平台存储，从而兼容游客本地档与登录用户跨设备同步。
 const KEY = 'hb_save_v1';
 const SAVE_VERSION = 3;
 let activeStorage = null;

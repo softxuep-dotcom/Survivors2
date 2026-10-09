@@ -3,13 +3,16 @@ import { THEME, DIFFICULTIES, CHARACTERS, WEAPONS, AD_REWARDS } from '../config.
 import { t, fmtTime, getLocale, setLocale, LOCALES } from '../i18n.js';
 import { unlockAudio, setMuted, isMuted, Sfx } from '../audio.js';
 import { touchSave } from '../save.js';
+import { Platform } from '../platform.js';
 import { isCharacterUnlocked, unlockCharacter, selectedCharacter } from '../game/MetaProgression.js';
 import { enemyAtlasKey, enemyFrameKey } from '../textures.js';
 import { makeButton, makePanel } from '../ui/widgets.js';
 import { StartBoostOverlay } from '../ui/StartBoostOverlay.js';
 import { UI_FONT, UI_FONT_BOLD, mobileSafeArea } from '../ui/layout.js';
+import { stripLeadingIcon } from '../ui/labelText.js';
 
 const DEFAULT_START_BUFF = 'fury';
+const GAME_NAME = typeof __GAME_NAME__ === 'string' ? __GAME_NAME__ : 'Horde Spark';
 const GOLD_DARK = 0x8c681f;
 const CTA_FILL = 0xc99a28;
 const CTA_LINE = 0xffe29a;
@@ -29,10 +32,6 @@ function chamferedPoints(w, h, cut, offsetY = 0) {
     { x: x - cut, y: y + offsetY }, { x: -x + cut, y: y + offsetY },
     { x: -x, y: y - cut + offsetY }, { x: -x, y: -y + cut + offsetY },
   ];
-}
-
-function stripLeadingIcon(label) {
-  return label.replace(/^\s*[\p{Extended_Pictographic}\uFE0F\u200D]+\s*/u, '');
 }
 
 function makeChamferedPanel(scene, w, h, {
@@ -88,8 +87,9 @@ function addAtmosphere(scene, w, h, portrait) {
 }
 
 function addBrand(scene, x, y, width, portrait) {
+  const chineseBrand = /[\u3400-\u9fff]/u.test(GAME_NAME);
   const ornament = scene.add.graphics();
-  const lineY = y - (portrait ? 64 : 46);
+  const lineY = y - (portrait && !chineseBrand ? 64 : 46);
   ornament.lineStyle(1, THEME.gold, 0.55);
   ornament.lineBetween(x - width * 0.38, lineY, x - 20, lineY);
   ornament.lineBetween(x + 20, lineY, x + width * 0.38, lineY);
@@ -99,9 +99,11 @@ function addBrand(scene, x, y, width, portrait) {
   ornament.fillTriangle(x - 10, lineY - 16, x + 10, lineY - 16, x, lineY - 8);
   ornament.fillTriangle(x, lineY + 9, x - 5, lineY + 2, x + 5, lineY + 2);
 
-  const title = scene.add.text(x, y, portrait ? 'HORDE\nSPARK' : 'HORDE SPARK', {
+  const label = GAME_NAME === 'Horde Spark' ? (portrait ? 'HORDE\nSPARK' : 'HORDE SPARK') : GAME_NAME;
+  const title = scene.add.text(x, y, label, {
     fontFamily: UI_FONT_BOLD,
-    fontSize: portrait ? `${Math.min(66, width / 6.25)}px` : `${Math.min(61, width / 9.4)}px`,
+    fontSize: chineseBrand ? `${Math.min(72, width / (GAME_NAME.length + 1))}px`
+      : portrait ? `${Math.min(66, width / 6.25)}px` : `${Math.min(61, width / 9.4)}px`,
     color: '#ece8db',
     stroke: '#15160f',
     strokeThickness: portrait ? 7 : 8,
@@ -318,8 +320,16 @@ export class MenuScene extends Phaser.Scene {
     this.boostOverlay = new StartBoostOverlay(this);
     this.installFooterTools(w, h, safe, save, portrait);
 
-    const startRun = (startBuff = this.selectedStartBuff) => {
+    const startRun = async (startBuff = this.selectedStartBuff) => {
+      if (this.adBusy) return;
+      this.adBusy = true;
       unlockAudio();
+      try {
+        if (Platform.supportsPrerollAds()) await Platform.prerollAd();
+      } finally {
+        this.adBusy = false;
+        this.input.enabled = true;
+      }
       this.scene.start('Game', { difficulty: this.registry.get('difficulty') || difficulty, character: selectedCharacter(save), startBuff });
     };
     this.startRun = startRun;
@@ -329,6 +339,12 @@ export class MenuScene extends Phaser.Scene {
   }
 
   createPortraitLayout({ w, h, safe, save, difficulty, chosen, characters }) {
+    // Shift the entire menu below a native mini-game capsule, preserving the
+    // spacing between the logo, records and character cards.
+    const offsetY = Math.max(0, safe.top - 18);
+    const firstChild = this.children.list.length;
+    h -= offsetY;
+    safe = { ...safe, top: 18 };
     const contentW = Math.min(w - safe.side * 2 - 24, 620);
     addBrand(this, w / 2, safe.top + h * 0.075, Math.min(contentW, 500), true);
 
@@ -370,6 +386,9 @@ export class MenuScene extends Phaser.Scene {
     this.add.text(w / 2, h * 0.887, t('menu.howto'), {
       fontFamily: UI_FONT, fontSize: '12px', color: '#718876', align: 'center', wordWrap: { width: contentW },
     }).setOrigin(0.5);
+    if (offsetY) for (const child of this.children.list.slice(firstChild)) {
+      if (!child.parentContainer) child.y += offsetY;
+    }
   }
 
   createLandscapeLayout({ w, h, safe, save, difficulty, chosen, characters }) {

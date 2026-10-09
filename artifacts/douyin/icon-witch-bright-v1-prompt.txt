@@ -1,0 +1,16 @@
+Tool: built-in image_gen (no CLI fallback).
+Purpose: 元素破潮 Douyin listing icon, original purple witch identity in a bright setting.
+References: artifacts/crazygames-covers/source/horde-spark-square-source.png and public/assets/players/player-witch-smooth-v2.webp
+Original: icon-witch-bright-v1-source.png
+Upload export: icon-witch-bright-600-v1.png — 600 × 600 PNG.
+The original image is preserved. Upload export uses size resampling only.
+
+Use case: identity-preserve.
+Asset type: one finished square 1:1 mobile game icon for 元素破潮, to be exported at 600x600 pixels.
+Reference image 1 is the previously generated square game cover. Reference image 2 is the actual witch sprite strip. Use them ONLY to preserve the foreground WITCH character identity; do not reproduce the typography, boss, hordes, dark forest, poster layout or multiple animation frames.
+Primary request: make the EXISTING PURPLE WITCH the single unmistakable main character of a BRIGHT, colorful, inviting elemental adventure icon. The previous red-haired knight icon was rejected: absolutely no knight, no red-haired hero, no replacement with a generic human witch.
+Identity to preserve: very large floppy pointed purple witch hat with a broad sweeping brim and warm brown leather band / golden buckle, layered violet cloak and purple scarf/high collar, brown leather gloves and belt accents. Small mysterious face largely tucked under the hat and scarf, two warm luminous golden-amber eyes, as in the references. Keep the compact charming stylized body and recognizable hat silhouette. No new hairstyle or exposed human face. Friendly adventurous expression through the eyes and pose, not sinister.
+Composition: close-up three-quarter portrait of the witch, hat, face, shoulders, one raised gloved hand holding a bright orange-gold fireball. The witch fills 75-85% of the square. A simple luminous cyan ice magic curl and a small golden lightning accent provide the elemental theme, carefully subordinate to the face. Keep the entire main hat silhouette within a comfortable inset; big readable forms at tiny icon sizes. One character only.
+Lighting and background: airy sky blue, softly sunlit cream clouds and a hint of fresh mint color, simplified full-bleed backdrop. High-key daylight, vibrant purple fabric clearly lit, warm golden rim highlights. The shaded face is an identity detail only; the overall icon must be cheerful, luminous and colorful, NOT dark fantasy, Gothic, spooky or black.
+Style: polished stylized game illustration with dimensional forms and painterly 3D-like rendering consistent with the original purple witch, crisp silhouette, readable restrained details, saturated yet harmonious colors.
+Constraints: NO text or letters in any language, no HORDE SPARK title, no logo, no watermark, no QR code, no rounded corners, no frame, no border, no transparency, no fake app card, no multiple panels. Fill the entire square to all four edges. No skulls, horror, gore, looming boss, or dark forest.

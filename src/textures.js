@@ -2,6 +2,7 @@
 // 敌人图集（front/front_left/left/back_left/back 五方向 ×5 帧，其余方向水平镜像）。
 // 其余全部 Graphics 代码生成，包体零美术文件（GDD §8.2 包体红线）。
 import Phaser from 'phaser';
+import { assetPath } from './assetPath.js';
 
 // ---------------- 敌人图集（沿用 ssa/src/textures.js 的方案） ----------------
 export const ENEMY_ATLAS_KEYS = ['slime', 'mini', 'runner', 'tank', 'flyer', 'splitter', 'boss', 'boss2'];
@@ -27,7 +28,7 @@ export function enemyAtlasKey(typeKey) { return `enemy_atlas_${typeKey}`; }
 export function enemyAtlasImage(typeKey) {
   if (typeKey === 'boss2') return 'assets/enemies/enemy-boss2-smooth-v1.png';
   const version = typeKey === 'boss' ? 'v6' : 'v2';
-  return `assets/enemies/enemy-${typeKey}-smooth-${version}.webp`;
+  return assetPath(`assets/enemies/enemy-${typeKey}-smooth-${version}.webp`);
 }
 
 export function enemyAtlasJson(typeKey) {

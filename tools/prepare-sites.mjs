@@ -1,10 +1,6 @@
-import { mkdir, readdir, rm, writeFile } from 'node:fs/promises';
-
-const distUrl = new URL('../dist/', import.meta.url);
-const entries = await readdir(distUrl, { withFileTypes: true });
-await Promise.all(entries
-  .filter(entry => entry.name !== 'client' && entry.name !== 'server')
-  .map(entry => rm(new URL(entry.name, distUrl), { recursive: true, force: true })));
+import { mkdir, writeFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const worker = `export default {
   async fetch(request, env) {
@@ -18,6 +14,14 @@ const worker = `export default {
 };
 `;
 
-const serverUrl = new URL('server/', distUrl);
-await mkdir(serverUrl, { recursive: true });
-await writeFile(new URL('index.js', serverUrl), worker);
+export async function prepareSites(distUrl = new URL('../dist/', import.meta.url)) {
+  // Only own the Sites worker. Vite owns dist/client; other distribution
+  // directories can be open in an IDE and must never be removed here.
+  const serverUrl = new URL('server/', distUrl);
+  await mkdir(serverUrl, { recursive: true });
+  await writeFile(new URL('index.js', serverUrl), worker);
+}
+
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  await prepareSites();
+}

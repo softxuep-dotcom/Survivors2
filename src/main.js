@@ -9,23 +9,28 @@ import { TalentScene } from './scenes/TalentScene.js';
 import { VfxLabScene } from './scenes/VfxLabScene.js';
 import { configureSaveStorage, touchSave } from './save.js';
 import { isMuted } from './audio.js';
-import { CrazyGames } from './crazygames.js';
+import { Platform } from './platform.js';
 
+async function startGame() {
+const mini = globalThis.__HORDE_MINIGAME__;
 const versionBadge = document.createElement('div');
 versionBadge.id = 'game-version';
 versionBadge.textContent = `v${__GAME_VERSION__}`;
 versionBadge.setAttribute('aria-label', `Version ${__GAME_VERSION__}`);
 document.body.appendChild(versionBadge);
 
-// CrazyGames SDK v3 要求在游戏开始前完成初始化，并在资源加载前上报 loadingStart。
-// SDK 缺失、被禁用或超时均 fail-open，不阻断本地/离线玩法。
-await CrazyGames.init();
-configureSaveStorage(CrazyGames.dataStorage());
-CrazyGames.loadingStart();
+// 平台构建在资源加载前初始化对应 SDK；独立构建不加载外部 SDK。
+// SDK 缺失、被拦截或初始化超时均 fail-open，不阻断本地玩法。
+await Platform.init();
+configureSaveStorage(Platform.dataStorage());
+Platform.loadingStart();
 
 // dev 环境装载无头验证钩子（生产构建自动剔除）
 const game = window.__game = new Phaser.Game({
-  type: Phaser.AUTO,
+  type: mini ? (mini.webgl ? Phaser.WEBGL : Phaser.CANVAS) : Phaser.AUTO,
+  ...(mini ? { canvas: mini.canvas, context: mini.context, customEnvironment: true,
+    audio: { noAudio: true }, loader: { imageLoadType: 'HTMLImageElement' },
+    input: { touch: { capture: true }, mouse: false } } : {}),
   parent: 'game',
   width: W,
   height: H,
@@ -44,7 +49,7 @@ const game = window.__game = new Phaser.Game({
 function recoverGameSurface(reason = 'unknown') {
   const root = document.getElementById('game');
   const canvas = game.canvas;
-  document.body?.classList.remove('crazygames-ad-active');
+  document.body?.classList.remove('platform-ad-active');
   if (root) {
     root.style.zIndex = '2147483000';
     root.style.visibility = 'visible';
@@ -73,7 +78,7 @@ function recoverGameSurface(reason = 'unknown') {
   if (import.meta.env.DEV) console.info(`[surface] recovered after ${reason}`);
 }
 
-window.addEventListener('crazygames-ad-state', (event) => {
+window.addEventListener('platform-ad-state', (event) => {
   if (!event.detail?.active) recoverGameSurface('ad');
 });
 window.addEventListener('pageshow', () => recoverGameSurface('pageshow'));
@@ -104,3 +109,9 @@ document.addEventListener('visibilitychange', () => {
 });
 window.addEventListener('pagehide', persistSessionExit);
 window.addEventListener('beforeunload', persistSessionExit);
+}
+
+startGame().catch(error => {
+  console.error('[boot]', error);
+  globalThis.tt?.showModal?.({ title: '启动失败', content: '请关闭小游戏后重试。', showCancel: false });
+});

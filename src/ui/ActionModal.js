@@ -2,9 +2,10 @@
 import { THEME } from '../config.js';
 import { makeButton, makePanel } from './widgets.js';
 import { UI_FONT, UI_FONT_BOLD, mobileSafeArea } from './layout.js';
+import { stripLeadingIcon as stripLabelIcon } from './labelText.js';
 
 function stripLeadingIcon(label) {
-  return label.replace(/^\s*[\p{Extended_Pictographic}\uFE0F\u200D↻◆♦]+\s*/u, '');
+  return stripLabelIcon(label, '↻◆♦');
 }
 
 export class ActionModal {

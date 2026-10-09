@@ -1,0 +1,15 @@
+{
+  "simulatedHost": true,
+  "fallback": true,
+  "state": {
+    "before": {
+      "paused": false,
+      "mode": "joystick",
+      "x": 395.54916666666776
+    },
+    "hidden": true,
+    "after": true,
+    "saved": true
+  },
+  "errors": []
+}
